@@ -40,6 +40,7 @@ const Dashboard = () => {
   const [adminStatus, setAdminStatus] = useState("")
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [officeData, setOfficeData] = useState({});
+  const [officeName, setOfficeName] = useState("")
 
   // Function to update the window width state on window resize
   const handleWindowResize = () => {
@@ -77,6 +78,7 @@ const Dashboard = () => {
           const response = await axios.get(apiKey);
           const userDataResponse =await response.data;
           setUserData(userDataResponse);
+          setOfficeName(userDataResponse.officeName)
           if (userDataResponse.roleName === "CompanyAdmin") {
             setAdminStatus(6)
           }
@@ -155,7 +157,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-         <Statistics themeMode={themeMode} officeId={userData.officeId} adminStatus={adminStatus} userId={userId} />
+         <Statistics themeMode={themeMode} officeId={userData.officeId} adminStatus={adminStatus} userId={userId} userOfficeName={officeName}/>
 
       </div>
     </div>

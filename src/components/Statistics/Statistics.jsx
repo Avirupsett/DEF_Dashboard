@@ -87,7 +87,7 @@ const predefinedRanges = [
 ];
 
 
-const Statistics = ({ themeMode, officeId, adminStatus, userId }) => {
+const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) => {
 
   const [selectedRange, setSelectedRange] = useState([
     toDate(subDays(new Date(), 6)),
@@ -127,8 +127,9 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId }) => {
           const officeDataFromApi = await response.data;
 
           if (officeDataFromApi) {
+            
             if (officeDataFromApi.length === 1) {
-              setOfficeName(officeDataFromApi.OfficeName)
+              setOfficeName(userOfficeName)
             }
 
             setSelectedOffice(officeId)
