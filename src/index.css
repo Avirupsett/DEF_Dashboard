@@ -148,3 +148,6 @@ body {
 .MuiMenu-paper{
   background-color: var(--option-color) !important;
 }
+.MuiTablePagination-toolbar{
+  overflow: overlay;
+}

@@ -6,7 +6,7 @@ import { saveAs } from 'file-saver';
 import 'jspdf-autotable';
 import { CircularProgress } from "@mui/material";
 import css from './ProductQtyChart.module.css';
-import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable } from "react-icons/fa6";
+import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "react-icons/fa6";
 import logo from "../../logo.png";
 import MUIDataTable from 'mui-datatables';
 
@@ -23,6 +23,7 @@ const ProductQtyChart = ({
   const [showExportOptions, setShowExportOptions] = useState(false);
   const iconContainerRef = useRef(null);
   const exportOptionsRef = useRef(null);
+  const legendButtonRef = useRef(null);
 
   const [showLegend, setShowLegend] = useState(false);
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -43,7 +44,7 @@ const ProductQtyChart = ({
     selectableRows: "none",
     rowsPerPage: 10,
     rowsPerPageOptions: [10, 25, 50],
-    tableBodyHeight: "238px",
+    tableBodyHeight: "229px",
     elevation: 0,
     fixedHeader: false,
     textLabels: {
@@ -198,8 +199,8 @@ const ProductQtyChart = ({
       left: "center",
       top: "top",
       style: {
-        text: "Product Quantity",
-        fill: themeMode === "dark" ? "#ffffff" : "#000000",
+        // text: "Product Quantity",
+        // fill: themeMode === "dark" ? "#ffffff" : "#000000",
         fontSize: window.innerWidth <= 1496 ? 16 : 18,
         fontWeight: "bold",
 
@@ -213,18 +214,19 @@ const ProductQtyChart = ({
         center: ["50%", "50%"],
         roseType: "radius",
         selectedMode: "single",
-        avoidLabelOverlap: false,
-
+        
+        avoidLabelOverlap: true,
         label: {
-          show: false,
-          position: "center",
+          show: sellData.length<=5?true:false,
+          color:themeMode === "dark" ? "#ffffff" : "#111111"
+          // position: "center",
         },
+        
         emphasis: {
           label: {
             show: true,
             fontSize: 9,
             fontWeight: "bold",
-
           }
         },
         data: sellData.length > 0 ? sellData.map((item, index) => ({
@@ -236,10 +238,9 @@ const ProductQtyChart = ({
         })) : [],
 
 
-        labelLine: {
-          length: 30,
-          length2: 10,
-        },
+        // labelLine: {
+        //   length: 0,
+        // },
         itemStyle: {
           borderWidth: 2, // Set the border width
           borderColor: "#ffffff00", // Set the border color
@@ -452,26 +453,35 @@ const ProductQtyChart = ({
 
 
 
-  // useEffect(() => {
-  //   function handleClick(event) {
-  //     // Check if the click target or any of its parents match the iconContainer or iconRef
-  //     if (
-  //       (iconContainerRef.current &&
-  //         iconContainerRef.current.contains(event.target)) ||
-  //       (iconRef.current && iconRef.current.contains(event.target))
-  //     ) {
-  //       // setShowExportOptions(true);
-  //     } else {
-  //       setShowExportOptions(false);
-  //     }
-  //   }
+  useEffect(() => {
+    // Function to handle the click event outside the iconContainer
+    const handleClickOutsideIconContainer = (event) => {
+      // Check if the click event occurred outside the iconContainer and exportOptions
 
-  //   document.addEventListener("click", handleClick);
-
-  //   return () => {
-  //     document.removeEventListener("click", handleClick);
-  //   };
-  // }, []);
+      if (
+        iconContainerRef.current &&
+        !iconContainerRef.current.contains(event.target) &&
+        exportOptionsRef.current &&
+        !exportOptionsRef.current.contains(event.target) &&
+        event.target.tagName !== "svg" && event.target.tagName !== "path" // Check if the click occurred on an SVG element
+      ) {
+        setShowExportOptions(false);
+      }
+      if (legendButtonRef.current && !legendButtonRef.current.contains(event.target)) {
+        setShowLegend(false);
+      }
+  
+      
+    };
+  
+    // Add the click event listener to the document
+    document.addEventListener("click", handleClickOutsideIconContainer);
+  
+    // Clean up the event listener when the component unmounts
+    return () => {
+      document.removeEventListener("click", handleClickOutsideIconContainer);
+    };
+  }, []);
 
   const handleIconClick = () => {
     setShowLegend(false)
@@ -490,6 +500,7 @@ const ProductQtyChart = ({
             <button
               className={css.legendButton}
               onClick={toggleLegend} // Call the toggleLegend function when the button is clicked
+              ref={legendButtonRef}
             >
               <img
                 src="http://115.124.120.251:5007/images/code-block.png"
@@ -500,9 +511,11 @@ const ProductQtyChart = ({
               />{" "}
 
             </button>
+            <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
+            }`} >Product Quantity</div>
             <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
               {/* Data grid icon */}
-              {!tableStatus ?
+          
                 <div
                   className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
                     } px-2 py-1`}
@@ -510,26 +523,22 @@ const ProductQtyChart = ({
                   onClick={handleIconClick}
                 >
                   {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
-                </div> :
-                <div
-                  className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
-                    }`}
-
-                >
-                  <div><FaXmark style={{ fontSize: "1.1rem" }} onClick={() => { setTableStatus(!tableStatus) }} />
-                  </div>
-                </div>
-              }
+                </div> 
               {showExportOptions && (
                 <div
                   className={`${css.exportOptions} ${themeMode === "dark" ? css.darkMode : css.lightMode
                     }`}
                   ref={exportOptionsRef}
                 >
-                  <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                    <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
-                    <span>Export to Table</span>
-                  </div>
+                   {!tableStatus ?
+                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                  <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
+                  <span>Export to Table</span>
+                </div>:
+                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                  <FaChartPie style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
+                  <span>Export to Graph</span>
+                </div>}
                   <div className={css.exportOption} onClick={exportToExcel}>
                     <FaFileExcel style={{ fontSize: "1.1rem", color: "green" }} />
                     <span>Export to Excel</span>
@@ -564,7 +573,7 @@ const ProductQtyChart = ({
           className={css.piechart}
         // className={themeMode === "dark" ? css.darkMode : css.lightMode}
         /> :
-          <div className="container-fluid">
+          <div className="container-fluid pt-2">
             <MUIDataTable
               // title={"Employee List"}
               data={tableData}

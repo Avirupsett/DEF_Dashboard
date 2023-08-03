@@ -6,7 +6,7 @@ import "jspdf-autotable"
 
 import logo from "../../logo.png";
 import { differenceInDays } from 'date-fns';
-import { FaFileExcel,FaXmark,FaFilePdf,FaListUl,FaTable } from "react-icons/fa6";
+import { FaFileExcel,FaXmark,FaFilePdf,FaListUl,FaTable,FaChartColumn} from "react-icons/fa6";
 import { CircularProgress} from "@mui/material";
 import MUIDataTable from "mui-datatables";
 import ReactECharts from "echarts-for-react";
@@ -79,7 +79,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
         )
         .then((response) => {
           const { data } = response;
-          console.log("API response data:", data);
+          // console.log("API response data:", data);
   
           if (Array.isArray(data.graph1)) {
             const filteredData = data.graph1.map((item) => ({
@@ -544,25 +544,31 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
   
 
 
-  // useEffect(() => {
-  //   function handleClick(event) {
-      // Check if the click target or any of its parents match the iconContainer or iconRef
-      // if (!iconContainerRef.current || iconContainerRef.current.contains(event.target)) {
-        // (iconRef.current && iconRef.current.contains(event.target))
+  useEffect(() => {
+    // Function to handle the click event outside the iconContainer
+    const handleClickOutsideIconContainer = (event) => {
+      // Check if the click event occurred outside the iconContainer and exportOptions
+
+      if (
+        iconContainerRef.current &&
+        !iconContainerRef.current.contains(event.target) &&
+        exportOptionsRef.current &&
+        !exportOptionsRef.current.contains(event.target) &&
+        event.target.tagName !== "svg" && event.target.tagName !== "path" // Check if the click occurred on an SVG element
+      ) {
+        setShowExportOptions(false);
+      }
       
-        // setShowExportOptions(!showExportOptions);
-    //     setShowExportOptions(true);
-    //   } else {
-    //     setShowExportOptions(false);
-    //   }
-    // }
-
-    // document.addEventListener("click", handleClick);
-
-    // return () => {
-    //   document.removeEventListener("click", handleClick);
-    // };
-  // }, [iconContainerRef]);
+    };
+  
+    // Add the click event listener to the document
+    document.addEventListener("click", handleClickOutsideIconContainer);
+  
+    // Clean up the event listener when the component unmounts
+    return () => {
+      document.removeEventListener("click", handleClickOutsideIconContainer);
+    };
+  }, []);
 
   const handleIconClick = () => {
     setShowExportOptions(!showExportOptions);
@@ -589,10 +595,10 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
     >
       <div className="container-fluid" >
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
-          <div className="fw-bold fs-5 " >Sales-Expense</div>
+          <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
+            }`} >Sales-Expense</div>
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
-            {!tableStatus ?
               <div
                 className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
                   } px-2 py-1`}
@@ -600,26 +606,22 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
                   onClick={handleIconClick}
               >
                 {showExportOptions ? <FaXmark style={{fontSize:"1.1rem"}}/> : <FaListUl style={{fontSize:"1.1rem"}}/>}
-              </div> :
-              <div
-                className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
-                  }`}
-                
-              >
-                <div><FaXmark style={{fontSize:"1.1rem"}} onClick={() => { setTableStatus(!tableStatus) }}/>
-                </div>
               </div>
-            }
             {showExportOptions && (
               <div
                 className={`${css.exportOptions} ${themeMode === "dark" ? css.darkMode : css.lightMode
                   }`}
                 ref={exportOptionsRef}
               >
+                {!tableStatus ?
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                  <FaTable style={{fontSize:"1.1rem",color:"#0d6efd"}}/>
+                  <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
                   <span>Export to Table</span>
-                </div>
+                </div>:
+                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                  <FaChartColumn style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
+                  <span>Export to Graph</span>
+                </div>}
                 <div className={css.exportOption} onClick={exportToExcel}>
                   <FaFileExcel style={{fontSize:"1.1rem",color:"green"}}/>
                   <span>Export to Excel</span>

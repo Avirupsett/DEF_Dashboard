@@ -5,10 +5,11 @@ import css from "./StatisticsChart2.module.css";
 import { saveAs } from "file-saver";
 
 import "jspdf-autotable";
-import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable } from "react-icons/fa6";
+import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable,FaRegChartBar } from "react-icons/fa6";
 import logo from "../../logo.png";
 import { CircularProgress } from "@mui/material";
 import MUIDataTable from "mui-datatables";
+
 
 const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName }) => {
   const [chartData, setChartData] = useState([]);
@@ -49,21 +50,31 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       }
     }
   };
+  useEffect(() => {
+    // Function to handle the click event outside the iconContainer
+    const handleClickOutsideIconContainer = (event) => {
+      // Check if the click event occurred outside the iconContainer and exportOptions
 
-  // Function to update the window width state on window resize
-  // const handleWindowResize = () => {
-  //   setWindowWidth(window.innerWidth);
-  // };
-
-  // useEffect(() => {
-  //   // Add a window resize event listener
-  //   window.addEventListener('resize', handleWindowResize);
-
-  //   // Clean up the event listener when the component unmounts
-  //   return () => {
-  //     window.removeEventListener('resize', handleWindowResize);
-  //   };
-  // }, []);
+      if (
+        iconContainerRef.current &&
+        !iconContainerRef.current.contains(event.target) &&
+        exportOptionsRef.current &&
+        !exportOptionsRef.current.contains(event.target) &&
+        event.target.tagName !== "svg" && event.target.tagName !== "path" // Check if the click occurred on an SVG element
+      ) {
+        setShowExportOptions(false);
+      }
+      
+    };
+  
+    // Add the click event listener to the document
+    document.addEventListener("click", handleClickOutsideIconContainer);
+  
+    // Clean up the event listener when the component unmounts
+    return () => {
+      document.removeEventListener("click", handleClickOutsideIconContainer);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = () => {
@@ -77,7 +88,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
         )
         .then((response) => {
           const { data } = response;
-          console.log("API response data:", data);
+          // console.log("API response data:", data);
           let result = {}
   
           data.graph1.forEach((item) => {
@@ -112,7 +123,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
             for (let key in result) {
               temp.push({
                 "officeName": key,
-                "sales": result[key],
+                "sales": result[key].toFixed(0),
               });
               tabletemp.push({
                 "officeName": key,
@@ -191,7 +202,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     },
     grid: {
       left: window.innerWidth <= 768 ? 85 : 100, // Adjust the left margin to give space for the y-axis labels
-      right: 45,
+      right: 15,
       bottom: 50,
       top: 15,
     },
@@ -236,12 +247,15 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     series: [
       {
         type: "bar",
-        barWidth: "25%",
+        barWidth: "30%",
         data: chartData.map((item) => item.sales),
         label: {
-          show: chartData.length<=5?true:false,
-          position: 'right'
+          show: chartData.length<=5 && window.innerWidth > 768 ?true:false,
+          position: 'inside',
+          color:'#fff',
+          
         }
+      
       },
 
     ],
@@ -492,10 +506,11 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     >
       <div className="container-fluid">
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
-          <div className="fw-bold fs-5 " >Total Sales by Pump </div>
+          <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
+            }`} >Total Sales by Office</div>
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
-            {!tableStatus ?
+            
               <div
                 className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
                   } px-2 py-1`}
@@ -503,26 +518,21 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
                 onClick={handleIconClick}
               >
                 {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
-              </div> :
-              <div
-                className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
-                  }`}
-
-              >
-                <div><FaXmark style={{ fontSize: "1.1rem" }} onClick={() => { setTableStatus(!tableStatus) }} />
-                </div>
-              </div>
-            }
+              </div> 
             {showExportOptions && (
               <div
                 className={`${css.exportOptions} ${themeMode === "dark" ? css.darkMode : css.lightMode
                   }`}
                 ref={exportOptionsRef}
-              >
+              >{!tableStatus ?
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
                   <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
                   <span>Export to Table</span>
-                </div>
+                </div>:
+                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                  <FaRegChartBar style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
+                  <span>Export to Graph</span>
+                </div>}
                 <div className={css.exportOption} onClick={exportToExcel}>
                   <FaFileExcel style={{ fontSize: "1.1rem", color: "green" }} />
                   <span>Export to Excel</span>

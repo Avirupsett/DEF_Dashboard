@@ -570,6 +570,14 @@ font-weight: 800;
 font-style: italic;
 }
 
+/* Light mode styles */
+.lightMode {
+  color: #282829d4;
+}
 
+/* Dark mode styles */
+.darkMode {
+  color: #fff;
+}
 
 
