@@ -82,68 +82,96 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       const startDate = formatDate(selectedRange[0]);
       const endDate = formatDate(selectedRange[1]);
   
-      axios
-        .get(
-          `http://115.124.120.251:5064/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
-        )
-        .then((response) => {
-          const { data } = response;
-          // console.log("API response data:", data);
-          let result = {}
+      // axios
+      //   .get(
+      //     `http://115.124.120.251:5064/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
+      //   )
+      //   .then((response) => {
+      //     const { data } = response;
+      //     // console.log("API response data:", data);
+      //     let result = {}
   
-          data.graph1.forEach((item) => {
-            const { lstOffice } = item;
+      //     data.graph1.forEach((item) => {
+      //       const { lstOffice } = item;
   
-            lstOffice.forEach((office) => {
-              let { officeName, totalIncome } = office;
-              if (totalIncome !== 0) {
-                if (result[officeName]) {
-                  result[officeName] += totalIncome;
-                } else {
-                  result[officeName] = totalIncome;
-                }
-              }
-            }
-            )
+      //       lstOffice.forEach((office) => {
+      //         let { officeName, totalIncome } = office;
+      //         if (totalIncome !== 0) {
+      //           if (result[officeName]) {
+      //             result[officeName] += totalIncome;
+      //           } else {
+      //             result[officeName] = totalIncome;
+      //           }
+      //         }
+      //       }
+      //       )
   
-            if (item.totalIncome > 0 && lstOffice.length == 0) {
-              if (result[SelectedOfficeName]) {
-                result[SelectedOfficeName] += item.totalIncome;
-              }
-              else {
-                result[SelectedOfficeName] = item.totalIncome
-              }
-            }
+      //       if (item.totalIncome > 0 && lstOffice.length == 0) {
+      //         if (result[SelectedOfficeName]) {
+      //           result[SelectedOfficeName] += item.totalIncome;
+      //         }
+      //         else {
+      //           result[SelectedOfficeName] = item.totalIncome
+      //         }
+      //       }
   
   
-          })
-          if (result) {
-            let temp = []
-            let tabletemp = []
-            for (let key in result) {
-              temp.push({
-                "officeName": key,
-                "sales": result[key].toFixed(0),
-              });
-              tabletemp.push({
-                "officeName": key,
-                "sales": result[key].toFixed(2),
-              });
-            }
-            tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) })
+      //     })
+      //     if (result) {
+      //       let temp = []
+      //       let tabletemp = []
+      //       for (let key in result) {
+      //         temp.push({
+      //           "officeName": key,
+      //           "sales": result[key].toFixed(0),
+      //         });
+      //         tabletemp.push({
+      //           "officeName": key,
+      //           "sales": result[key].toFixed(2),
+      //         });
+      //       }
+      //       tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) })
   
-            setTableData(tabletemp)
-            setChartData(temp)
+      //       setTableData(tabletemp)
+      //       setChartData(temp)
   
+      //     }
+  
+      //   })
+      //   .catch((error) => {
+      //     console.log("Error fetching data:", error);
+      //   })
+      //   .finally(() => {
+      //     setIsLoading(false);
+      //   });
+
+      axios.get(`http://115.124.120.251:5064/api/v1/dashboard/total_sales/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`).then((response)=>{
+        const { data } = response;
+        if(data['graph1']){
+          let temp = []
+          let tabletemp = []
+          for (let i=0;i<data['graph1'].length;i++) {
+            temp.push({
+              "officeName": data['graph1'][i].officeName,
+              "sales": data['graph1'][i].totalIncome.toFixed(0),
+            });
+            tabletemp.push({
+              "officeName": data['graph1'][i].officeName,
+              "sales": data['graph1'][i].totalIncome.toFixed(2),
+            });
           }
-  
-        })
-        .catch((error) => {
-          console.log("Error fetching data:", error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+          tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) })
+
+          setTableData(tabletemp)
+          setChartData(temp)
+
+        };
+      }).catch((error) => {
+        console.log("Error fetching data:", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
     };
     if(selectedRange && selectedOffice){
     fetchData();
@@ -507,7 +535,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       <div className="container-fluid">
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
           <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
-            }`} >Total Sales by Office</div>
+            }`} >Total Sales by Business Entity</div>
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
             
