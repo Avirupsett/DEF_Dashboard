@@ -342,7 +342,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) 
           </div>
           <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px",borderRadius:"8px",marginBottom:"5px" }} />}>
-              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} SelectedOfficeName={officeName} />
+              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} SelectedOfficeName={officeName} s/>
             </Suspense>
           </div>
         </div>
