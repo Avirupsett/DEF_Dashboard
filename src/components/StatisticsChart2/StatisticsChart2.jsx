@@ -6,9 +6,10 @@ import { saveAs } from "file-saver";
 
 import "jspdf-autotable";
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable,FaRegChartBar } from "react-icons/fa6";
-import logo from "../../logo.png";
+import logo from "/assets/logo.png";
 import { CircularProgress } from "@mui/material";
 import MUIDataTable from "mui-datatables";
+import { useTranslation } from "react-i18next";
 
 
 const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName }) => {
@@ -24,10 +25,11 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [tableStatus, setTableStatus] = useState(false)
   const [tableData, setTableData] = useState([])
+  const { t } = useTranslation();
 
 
 
-  const columns = [{ name: "officeName", label: "Office" }, { name: "sales", label: "Sales(₹)" }];
+  const columns = [{ name: "officeName", label: t("Office" )}, { name: "sales", label: `${t("Sales")}(₹)`}];
 
   const options = {
     // filterType: 'checkbox',
@@ -46,7 +48,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     fixedHeader: false,
     textLabels: {
       pagination: {
-        rowsPerPage: "Rows"
+        rowsPerPage: t("Rows")
       }
     }
   };
@@ -77,75 +79,15 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   }, []);
 
   useEffect(() => {
+    const startDate = formatDate(selectedRange[0]);
+    const endDate = formatDate(selectedRange[1]);
+    
     const fetchData = () => {
       setIsLoading(true);
-      const startDate = formatDate(selectedRange[0]);
-      const endDate = formatDate(selectedRange[1]);
   
-      // axios
-      //   .get(
-      //     `http://115.124.120.251:5064/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
-      //   )
-      //   .then((response) => {
-      //     const { data } = response;
-      //     // console.log("API response data:", data);
-      //     let result = {}
-  
-      //     data.graph1.forEach((item) => {
-      //       const { lstOffice } = item;
-  
-      //       lstOffice.forEach((office) => {
-      //         let { officeName, totalIncome } = office;
-      //         if (totalIncome !== 0) {
-      //           if (result[officeName]) {
-      //             result[officeName] += totalIncome;
-      //           } else {
-      //             result[officeName] = totalIncome;
-      //           }
-      //         }
-      //       }
-      //       )
-  
-      //       if (item.totalIncome > 0 && lstOffice.length == 0) {
-      //         if (result[SelectedOfficeName]) {
-      //           result[SelectedOfficeName] += item.totalIncome;
-      //         }
-      //         else {
-      //           result[SelectedOfficeName] = item.totalIncome
-      //         }
-      //       }
-  
-  
-      //     })
-      //     if (result) {
-      //       let temp = []
-      //       let tabletemp = []
-      //       for (let key in result) {
-      //         temp.push({
-      //           "officeName": key,
-      //           "sales": result[key].toFixed(0),
-      //         });
-      //         tabletemp.push({
-      //           "officeName": key,
-      //           "sales": result[key].toFixed(2),
-      //         });
-      //       }
-      //       tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) })
-  
-      //       setTableData(tabletemp)
-      //       setChartData(temp)
-  
-      //     }
-  
-      //   })
-      //   .catch((error) => {
-      //     console.log("Error fetching data:", error);
-      //   })
-      //   .finally(() => {
-      //     setIsLoading(false);
-      //   });
+      if(selectedRange && selectedOffice){
 
-      axios.get(`http://115.124.120.251:5064/api/v1/dashboard/total_sales/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`).then((response)=>{
+      axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/total_sales/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`).then((response)=>{
         const { data } = response;
         if(data['graph1']){
           let temp = []
@@ -160,11 +102,11 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
               "sales": data['graph1'][i].totalIncome.toFixed(2),
             });
           }
-          tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) })
+          tabletemp.push({ "officeName": t("Total"), "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) })
 
           setTableData(tabletemp)
           setChartData(temp)
-
+          
         };
       }).catch((error) => {
         console.log("Error fetching data:", error);
@@ -172,10 +114,12 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       .finally(() => {
         setIsLoading(false);
       })
+    }
     };
-    if(selectedRange && selectedOffice){
+    if(startDate && endDate && selectedOffice){
     fetchData();
     }
+   
   }, [selectedRange, selectedOffice, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
@@ -197,7 +141,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     },
     tooltip: {
       trigger: "axis",
-      formatter: "<b>Office:</b> {b} <br> <b>Sales:</b> {c} ",
+      formatter: `<b>${t("Office")}:</b> {b} <br> <b>${t("Sales")}:</b> {c} `,
       textStyle: {
         fontSize: window.innerWidth <= 768 ? 10 : 14,
       },
@@ -230,13 +174,13 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     },
     grid: {
       left: window.innerWidth <= 768 ? 85 : 100, // Adjust the left margin to give space for the y-axis labels
-      right: 15,
+      right: 50,
       bottom: 50,
       top: 15,
     },
     xAxis: {
       type: "value",
-      name: window.innerWidth > 550 ? "Sales" : "",
+      name: window.innerWidth > 550 ? t("Sales") : "",
       nameLocation: "middle",
       nameGap: 30,
       nameTextStyle: {
@@ -278,9 +222,9 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
         barWidth: "30%",
         data: chartData.map((item) => item.sales),
         label: {
-          show: chartData.length<=5 && window.innerWidth > 768 ?true:false,
-          position: 'inside',
-          color:'#fff',
+          show: chartData.length<=5 ?true:false,
+          position: 'right',
+          color:themeMode === "dark" ? "#ffffff" : "#000000",
           
         }
       
@@ -330,7 +274,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
 
     // Add extra header - Sales-Expense Summary
     const extraHeaderCell = worksheet.getCell("A1");
-    extraHeaderCell.value = "Total Sales by Office";
+    extraHeaderCell.value = t("Total Sales by Business Entity");
     extraHeaderCell.font = {
       bold: true,
       color: { argb: "000000" }, // Black color
@@ -341,7 +285,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
 
     // Add period - startDate to endDate
     const periodCell = worksheet.getCell("A2");
-    periodCell.value = `Period: ${startDate} to ${endDate}`;
+    periodCell.value = `${t("Period")}: ${startDate} ${t("to")} ${endDate}`;
     periodCell.font = {
       bold: true,
       color: { argb: "000000" }, // Black color
@@ -356,7 +300,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     worksheet.getColumn(3).width = 15;
 
     // Add headers
-    const headerRow = worksheet.addRow(["Office Name", "Sales"]);
+    const headerRow = worksheet.addRow([t("Office Name"), t("Sales")]);
     headerRow.font = { bold: true };
 
     // Add data rows
@@ -365,7 +309,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     });
 
     // Add the total row
-    const totalRow = worksheet.addRow(["Total", ""]);
+    const totalRow = worksheet.addRow([t("Total"), ""]);
     totalRow.font = {
       bold: true,
       color: { argb: "000000" }, // Black color
@@ -411,7 +355,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
 
     // Add Sales-Expense Summary header
-    const summaryHeader = [["Total Sales by Office"]];
+    const summaryHeader = [[t("Total Sales by Business Entity")]];
     doc.autoTable({
       startY: 27,
       head: summaryHeader,
@@ -427,7 +371,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     });
 
     // Add period - startDate to endDate
-    const periodCell = [[`Period: ${startDate} to ${endDate}`]];
+    const periodCell = [[`${t(Period)}: ${startDate} ${t(to)} ${endDate}`]];
     doc.autoTable({
       startY: 36,
       head: periodCell,
@@ -455,10 +399,10 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     );
 
     // Add total row
-    tableData.push(["Total", `${totalSales.toFixed(2)}`]);
+    tableData.push([t("Total"), `${totalSales.toFixed(2)}`]);
 
     // Set table headers
-    const headers = ["Office Name", "Sales"];
+    const headers = [t("Office Name"), t("Sales")];
     const columnStyles = {
       1: { halign: "right" }, // Align Sales column to center
       2: { halign: "right" }, // Align Expense column to center
@@ -533,9 +477,9 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
         }`}
     >
       <div className="container-fluid">
-        <div className="d-flex w-100 g-0 align-items-center justify-content-between">
+        <div className="d-flex w-100 g-0 align-items-start justify-content-between">
           <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
-            }`} >Total Sales by Business Entity</div>
+            }`} >{t("Total Sales by Business Entity")}</div>
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
             
@@ -555,19 +499,19 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
               >{!tableStatus ?
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
                   <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
-                  <span>Export to Table</span>
+                  <span>{t("View Table")}</span>
                 </div>:
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
                   <FaRegChartBar style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
-                  <span>Export to Graph</span>
+                  <span>{t("View Graph")}</span>
                 </div>}
                 <div className={css.exportOption} onClick={exportToExcel}>
                   <FaFileExcel style={{ fontSize: "1.1rem", color: "green" }} />
-                  <span>Export to Excel</span>
+                  <span>{t("Export to Excel")}</span>
                 </div>
                 <div className={css.exportOption} onClick={exportToPDF}>
                   <FaFilePdf style={{ fontSize: "1.1rem", color: "red" }} />
-                  <span>Export to PDF</span>
+                  <span>{t("Export to PDF")}</span>
                 </div>
               </div>
             )}
@@ -585,6 +529,9 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
           <CircularProgress disableShrink />
         </div>
       )}
+       {tableData.length==1 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>
+       {t("No Data Found")}
+      </div>:''}
       {!tableStatus ? <ReactECharts
         option={option}
         style={{

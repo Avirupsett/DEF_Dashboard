@@ -9,6 +9,7 @@ import css from './ProductQtyChart.module.css';
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "react-icons/fa6";
 import logo from "../../logo.png";
 import MUIDataTable from 'mui-datatables';
+import { useTranslation } from 'react-i18next';
 
 
 
@@ -30,7 +31,8 @@ const ProductQtyChart = ({
   const [tableData, setTableData] = useState([])
   const [tableStatus, setTableStatus] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const columns = [{ name: "Product Name", label: "Product" }, { name: "Quantity", label: "Quantity" }, { name: "Sales", label: "Sales(₹)" }];
+  const { t } = useTranslation();
+  const columns = [{ name: "Product Name", label: t("Product") }, { name: "Quantity", label: t("Quantity") }, { name: "Sales", label: `${t("Sales")}(₹)` }];
 
   const options = {
     // filterType: 'checkbox',
@@ -49,7 +51,7 @@ const ProductQtyChart = ({
     fixedHeader: false,
     textLabels: {
       pagination: {
-        rowsPerPage: "Rows"
+        rowsPerPage: t("Rows")
       }
     }
   };
@@ -74,10 +76,10 @@ const ProductQtyChart = ({
     setIsLoading(true)
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-
+    if(startDate && endDate && selectedOffice){
     axios
       .get(
-        `http://115.124.120.251:5064/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
+        `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
       )
       .then((response) => {
         const data = response.data;
@@ -129,7 +131,7 @@ const ProductQtyChart = ({
       }).finally(() => {
         setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
       });
-
+    }
 
   }, [selectedRange, selectedOffice, isAdmin]);
 
@@ -161,7 +163,7 @@ const ProductQtyChart = ({
 
     tooltip: {
       trigger: "item",
-      formatter: "<b>{b}</b><br><b>Total Qty:</b> {c}",
+      formatter: `<b>{b}</b><br><b>${t("Total Qty")}:</b> {c}`,
       textStyle: {
         fontSize: window.innerWidth <= 768 ? 10 : 14,
       },
@@ -279,7 +281,7 @@ const ProductQtyChart = ({
   
           // Add extra header - Product Wise Summary Data
           const extraHeaderCell = worksheet.getCell("A2"); // Shifted down by one row
-          extraHeaderCell.value = "Product Wise Summary Data";
+          extraHeaderCell.value = t("Product Wise Summary Data");
           extraHeaderCell.font = {
             bold: true,
             color: { argb: "000000" }, // Black color
@@ -293,7 +295,7 @@ const ProductQtyChart = ({
   
           // Add period - startDate to endDate
           const periodCell = worksheet.getCell("A3"); // Shifted down by two rows
-          periodCell.value = `Period: ${startDate} to ${endDate}`;
+          periodCell.value = `${t("Period")}: ${startDate} ${t("to")} ${endDate}`;
           periodCell.font = {
             bold: true,
             color: { argb: "000000" }, // Black color
@@ -307,7 +309,7 @@ const ProductQtyChart = ({
           worksheet.getColumn(2).width = 15;
   
           // Add headers
-          const headerRow = worksheet.addRow(["Product Name", "Quantity", "Total Sale"]);
+          const headerRow = worksheet.addRow([t("Product Name"), t("Quantity"), t("Total Sales")]);
   
           headerRow.font = {
             bold: true,
@@ -503,16 +505,16 @@ const ProductQtyChart = ({
               ref={legendButtonRef}
             >
               <img
-                src="http://115.124.120.251:5007/images/code-block.png"
+                src={import.meta.env.VITE_LEGEND_LOGO}
                 alt="Code Block Icon"
                 className={css.codeBlockIcon}
                 title="Legends"
-                style={{ filter: showLegend ? "opacity(0.4)" : "opacity(1)", transition: "all .25s ease-in-out" }}
+                style={{ filter: showLegend||sellData.length===0 ? "opacity(0.4)" : "opacity(1)", transition: "all .25s ease-in-out" }}
               />{" "}
 
             </button>
             <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
-            }`} >Product Quantity</div>
+            }`} >{t("Product Quantity")}</div>
             <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
               {/* Data grid icon */}
           
@@ -533,19 +535,19 @@ const ProductQtyChart = ({
                    {!tableStatus ?
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
                   <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
-                  <span>Export to Table</span>
+                  <span>{t("View Table")}</span>
                 </div>:
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
                   <FaChartPie style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
-                  <span>Export to Graph</span>
+                  <span>{t("View Graph")}</span>
                 </div>}
                   <div className={css.exportOption} onClick={exportToExcel}>
                     <FaFileExcel style={{ fontSize: "1.1rem", color: "green" }} />
-                    <span>Export to Excel</span>
+                    <span>{t("Export to Excel")}</span>
                   </div>
                   <div className={css.exportOption} onClick={exportToPDF}>
                     <FaFilePdf style={{ fontSize: "1.1rem", color: "red" }} />
-                    <span>Export to PDF</span>
+                    <span>{t("Export to PDF")}</span>
                   </div>
                 </div>
               )}
@@ -558,6 +560,9 @@ const ProductQtyChart = ({
             <CircularProgress disableShrink />
           </div>
         )}
+         {tableData.length==0 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>
+         {t("No Data Found")}
+      </div>:''}
 
 
 

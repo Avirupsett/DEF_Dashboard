@@ -8,87 +8,89 @@ import './Statistics.module.css'
 import { FaCalendarAlt, FaRegBuilding, FaCoins } from "react-icons/fa";
 import { FaXmark, FaFilter } from "react-icons/fa6";
 import { Skeleton } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 
 const StatisticsChart = React.lazy(() => import('../StatisticsChart/StatisticsChart'));
 const StatisticsChart2 = React.lazy(() => import('../StatisticsChart2/StatisticsChart2'));
 const OrdersPieChart = React.lazy(() => import('../OrdersPieChart/OrdersPieChart'));
 const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
-const predefinedRanges = [
-  {
-    label: 'Today',
-    value: [new Date(), new Date()],
-    placement: 'left'
-  },
-  {
-    label: 'Yesterday',
-    value: [addDays(new Date(), -1), addDays(new Date(), -1)],
-    placement: 'left'
-  },
-  {
-    label: 'This week',
-    value: [startOfWeek(new Date()), endOfWeek(new Date())],
-    placement: 'left'
-  },
-  {
-    label: 'Last 7 days',
-    value: [subDays(new Date(), 6), new Date()],
-    placement: 'left'
-  },
-  {
-    label: 'Last 30 days',
-    value: [subDays(new Date(), 29), new Date()],
-    placement: 'left'
-  },
-  {
-    label: 'This month',
-    value: [startOfMonth(new Date()), new Date()],
-    placement: 'left'
-  },
-  {
-    label: 'Last month',
-    value: [startOfMonth(addMonths(new Date(), -1)), endOfMonth(addMonths(new Date(), -1))],
-    placement: 'left'
-  },
-  {
-    label: 'This year',
-    value: [new Date(new Date().getFullYear(), 0, 1), new Date()],
-    placement: 'left'
-  },
-  {
-    label: 'Last year',
-    value: [new Date(new Date().getFullYear() - 1, 0, 1), new Date(new Date().getFullYear(), 0, 0)],
-    placement: 'left'
-  },
-  {
-    label: 'Last week',
-    closeOverlay: false,
-    value: value => {
-      const [start = new Date()] = value || [];
-      return [
-        addDays(startOfWeek(start, { weekStartsOn: 0 }), -7),
-        addDays(endOfWeek(start, { weekStartsOn: 0 }), -7)
-      ];
-    },
-    appearance: 'default'
-  },
-  {
-    label: 'Next week',
-    closeOverlay: false,
-    value: value => {
-      const [start = new Date()] = value || [];
-      return [
-        addDays(startOfWeek(start, { weekStartsOn: 0 }), 7),
-        addDays(endOfWeek(start, { weekStartsOn: 0 }), 7)
-      ];
-    },
-    appearance: 'default'
-  }
-];
 
 
 const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) => {
-
+  
+  const { t } = useTranslation();
+  const predefinedRanges = [
+    {
+      label: t('Today'),
+      value: [new Date(), new Date()],
+      placement: 'left'
+    },
+    {
+      label: t('Yesterday'),
+      value: [addDays(new Date(), -1), addDays(new Date(), -1)],
+      placement: 'left'
+    },
+    {
+      label: t('This week'),
+      value: [startOfWeek(new Date()), endOfWeek(new Date())],
+      placement: 'left'
+    },
+    {
+      label: t('Last 7 days'),
+      value: [subDays(new Date(), 6), new Date()],
+      placement: 'left'
+    },
+    {
+      label: t('Last 30 days'),
+      value: [subDays(new Date(), 29), new Date()],
+      placement: 'left'
+    },
+    {
+      label: t('This month'),
+      value: [startOfMonth(new Date()), new Date()],
+      placement: 'left'
+    },
+    {
+      label: t('Last month'),
+      value: [startOfMonth(addMonths(new Date(), -1)), endOfMonth(addMonths(new Date(), -1))],
+      placement: 'left'
+    },
+    {
+      label: t('This year'),
+      value: [new Date(new Date().getFullYear(), 0, 1), new Date()],
+      placement: 'left'
+    },
+    {
+      label: t('Last year'),
+      value: [new Date(new Date().getFullYear() - 1, 0, 1), new Date(new Date().getFullYear(), 0, 0)],
+      placement: 'left'
+    },
+    {
+      label: t('Last week'),
+      closeOverlay: false,
+      value: value => {
+        const [start = new Date()] = value || [];
+        return [
+          addDays(startOfWeek(start, { weekStartsOn: 0 }), -7),
+          addDays(endOfWeek(start, { weekStartsOn: 0 }), -7)
+        ];
+      },
+      appearance: 'default'
+    },
+    {
+      label: t('Next week'),
+      closeOverlay: false,
+      value: value => {
+        const [start = new Date()] = value || [];
+        return [
+          addDays(startOfWeek(start, { weekStartsOn: 0 }), 7),
+          addDays(endOfWeek(start, { weekStartsOn: 0 }), 7)
+        ];
+      },
+      appearance: 'default'
+    }
+  ];
   const [selectedRange, setSelectedRange] = useState([
     toDate(subDays(new Date(), 6)),
     toDate(new Date())
@@ -123,7 +125,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) 
     const fetchData = async () => {
       try {
         if (userId && officeId) {
-          const response = await axios.get(`http://115.124.120.251:5064/api/v1/dashboard/dropdown_list/${userId}`);
+          const response = await axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/dropdown_list/${userId}`);
           const officeDataFromApi = await response.data;
 
           if (officeDataFromApi) {
@@ -192,8 +194,8 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) 
 
     <div className={`${css.container} ${themeMode === 'dark' ? 'theme-container' : 'theme2-container'} pb-5`}>
       <div className='d-flex justify-content-between align-items-center mb-0'>
-        <div className='fs-2 mx-sm-0 mx-md-3 fw-bold'><span className='me-2 ms-md-1  ms-2 text-primary'><FaCoins /></span> Sales Overview</div>
-        <button className="btn btn-primary btn-lg mx-2 d-flex align-items-center" type="submit" onClick={() => setFilterOn(!filterOn)}><span className='d-flex'>{filterOn ? <FaXmark style={{ fontSize: "1.4rem", marginRight: window.innerWidth > 500 ? "4px" : "0px" }} /> : <FaFilter style={{ fontSize: "1.2rem", marginRight: window.innerWidth > 500 ? "8px" : "0px" }} />}</span>  {window.innerWidth > 500 ? filterOn ? 'Close' : `Filter` : ""}</button>
+        <div className='fs-2 mx-sm-0 mx-md-3 fw-bold'><span className='me-2 ms-md-1  ms-2 text-primary'><FaCoins /></span> {t("Sales Overview")}</div>
+        <button className="btn btn-primary btn-lg mx-2 d-flex align-items-center" type="submit" onClick={() => setFilterOn(!filterOn)}><span className='d-flex'>{filterOn ? <FaXmark style={{ fontSize: "1.4rem", marginRight: window.innerWidth > 500 ? "4px" : "0px" }} /> : <FaFilter style={{ fontSize: "1.2rem", marginRight: window.innerWidth > 500 ? "8px" : "0px" }} />}</span>  {window.innerWidth > 500 ? filterOn ? t('Close') : t(`Filter`) : ""}</button>
       </div>
       <div style={{ visibility: filterOn ? 'visible' : 'hidden', opacity: filterOn ? 1 : 0, height: filterOn ? window.innerWidth >= 768 ? "85px" : "130px" : 0, marginBottom: filterOn ? "10px" : 0 }} className={`${css.topContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
         }`}>
@@ -224,7 +226,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) 
                 className={`${css.boldOption}`}
 
               >
-                All Entities
+                {t("All Entities")}
 
               </option> </> : ''}
               {companies.length > 0 ? <><option
@@ -234,7 +236,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) 
                 className={`${css.boldOption}`}
 
               >
-                &nbsp;&nbsp;All Companies
+                &nbsp;&nbsp;{t("All Companies")}
               </option></> : ''}
 
               {companies.map((company) => (
@@ -257,7 +259,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) 
                 className={`${css.boldOption}`}
 
               >
-                &nbsp;&nbsp;All Pumps
+                &nbsp;&nbsp;{t("All Pumps")}
               </option></> : ''}
               {wholesales.length > 0 && companies.length > 0 ? <><option
                 value={officeId}
@@ -266,8 +268,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) 
                 className={`${css.boldOption}`}
 
               >
-                &nbsp;&nbsp;&nbsp;Wholesale
-                Pumps
+                &nbsp;&nbsp;&nbsp;{t("Wholesale Pumps")}
               </option></> : ''}
               {wholesales.map((wholesalep) => (
                 <option
@@ -288,7 +289,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) 
                 className={`${css.boldOption}`}
 
               >
-                &nbsp;&nbsp;&nbsp;Retail Pumps
+                &nbsp;&nbsp;&nbsp;{t("Retail Pumps")}
               </option> : ''}
 
               {(retails.length > 0 && companies.length > 0) ? retails.map((retailp) => (
@@ -328,7 +329,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId,userOfficeName}) 
               <StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} />
             </Suspense>
           </div>
-          <div className='col-md-12 col-lg-4'>
+           <div className='col-md-12 col-lg-4'>
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px",borderRadius:"8px",marginBottom:"5px" }} />}>
               <OrdersPieChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} />
             </Suspense>

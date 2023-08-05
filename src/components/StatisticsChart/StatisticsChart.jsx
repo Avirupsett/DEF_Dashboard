@@ -4,12 +4,14 @@ import css from "./StatisticsChart.module.css";
 import { saveAs } from "file-saver";
 import "jspdf-autotable"
 
-import logo from "../../logo.png";
+import logo from "/assets/logo.png";
 import { differenceInDays } from 'date-fns';
 import { FaFileExcel,FaXmark,FaFilePdf,FaListUl,FaTable,FaChartColumn} from "react-icons/fa6";
 import { CircularProgress} from "@mui/material";
 import MUIDataTable from "mui-datatables";
 import ReactECharts from "echarts-for-react";
+import { useTranslation } from "react-i18next";
+
 
 const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) => {
   const [chartData, setChartData] = useState([]);
@@ -23,10 +25,11 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
   
   const [tableData, setTableData] = useState([])
   const [tableStatus, setTableStatus] = useState(false)
+  const { t } = useTranslation();
 
 
 
-  const columns = [{ name: "requestedDate", label: "Date" }, {name:"sales",label:"Sales(₹)"}, {name:"expense",label:"Expense(₹)"}];
+  const columns = [{ name: "requestedDate", label: t("Date") }, {name:"sales",label:`${t("Sales")}(₹)`}, {name:"expense",label:`${t("Expense")}(₹)`}];
 
   const options = {
     // filterType: 'checkbox',
@@ -45,7 +48,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
     fixedHeader: false,
     textLabels: {
       pagination: {
-        rowsPerPage: "Rows"
+        rowsPerPage: t("Rows")
       }
     }
   };
@@ -68,14 +71,15 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
 
   useEffect(() => {
    
+    const startDate = formatDate(selectedRange[0]);
+    const endDate = formatDate(selectedRange[1]);
+
     const fetchData = () => {
       setIsLoading(true); // Set loading state to true before making the API call
-      const startDate = formatDate(selectedRange[0]);
-      const endDate = formatDate(selectedRange[1]);
   
       axios
         .get(
-          `http://115.124.120.251:5059/api/Dashboard/DEFDashBoardGraphData/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
+          `${import.meta.env.VITE_API_URL_2}/api/Dashboard/DEFDashBoardGraphData/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
         )
         .then((response) => {
           const { data } = response;
@@ -93,7 +97,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
               (total, item) => total + item.expense,
               0
             ).toFixed(2);
-            addedFilteredData.push({"requestedDate":"Total","sales":salesTotal,"expense":expenseTotal})
+            addedFilteredData.push({"requestedDate":t("Total"),"sales":salesTotal,"expense":expenseTotal})
   
   
             setTableData(addedFilteredData)
@@ -111,7 +115,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
           setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
         });
     };
-    if(selectedRange && selectedOffice){
+    if(startDate && endDate && selectedOffice){
     fetchData();}
      
   }, [selectedRange, selectedOffice, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -165,7 +169,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
     tooltip: {
       trigger: "axis",
       formatter: function (params) {
-        var tooltip = "<b>Date:</b> " + params[0].name + "<br/>";
+        var tooltip = `<b>${t("Date")}:</b> ` + params[0].name + "<br/>";
         for (var i = 0; i < params.length; i++) {
           tooltip +=
             "<b>" + params[i].seriesName + ":</b> " + params[i].value + "<br/>";
@@ -179,7 +183,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
     legend: {
       top: window.innerWidth > 550 ? 0 : 270,
 
-      data: ["Sales", "Expense", "Average Sales"],
+      data: [t("Sales"), t("Expense"), t("Average Sales")],
       textStyle: {
         color: themeMode === "dark" ? "#ffffff" : "#000000",
         fontSize: window.innerWidth <= 768 ? 10 : 12,
@@ -194,7 +198,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
     },
     xAxis: {
       type: "category",
-      name: window.innerWidth > 550 ? "Date" : "",
+      name: window.innerWidth > 550 ? t("Date") : "",
       nameLocation: "middle",
       nameGap: 35,
       nameTextStyle: {
@@ -262,19 +266,19 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
     series: isBarChart // Conditional check for the chart type
       ? [
         {
-          name: "Sales",
+          name: t("Sales"),
           type: "bar", // Display as a bar chart if the selected range is 7 days or less
           data: chartData.map((item) => item.sales),
           yAxisIndex: 0,
         },
         {
-          name: "Expense",
+          name: t("Expense"),
           type: "bar", // Display as a bar chart if the selected range is 7 days or less
           data: chartData.map((item) => item.expense),
           yAxisIndex: 0,
         },
         {
-          name: "Average Sales",
+          name: t("Average Sales"),
           type: "line", // Display as a line chart if the selected range is 7 days or less
           yAxisIndex: 0,
           smooth: true,
@@ -288,21 +292,21 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       ]
       : [
         {
-          name: "Sales",
+          name: t("Sales"),
           type: "line", // Display as a line chart if the selected range is more than 7 days
           smooth: true,
           data: chartData.map((item) => item.sales),
           yAxisIndex: 0,
         },
         {
-          name: "Expense",
+          name: t("Expense"),
           type: "line", // Display as a line chart if the selected range is more than 7 days
           smooth: true,
           data: chartData.map((item) => item.expense),
           yAxisIndex: 0,
         },
         {
-          name: "Average Sales",
+          name: t("Average Sales"),
           type: "line", // Display as a line chart if the selected range is more than 7 days
           yAxisIndex: 0,
           smooth: true,
@@ -345,7 +349,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
 
       // Add extra header - Sales-Expense Summary
       const extraHeaderCell = worksheet.getCell("A1");
-      extraHeaderCell.value = "Sales-Expense Summary";
+      extraHeaderCell.value = t("Sales-Expense Summary");
       extraHeaderCell.font = {
         bold: true,
         color: { argb: "000000" }, // Black color
@@ -356,7 +360,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
 
       // Add period - startDate to endDate
       const periodCell = worksheet.getCell("A2");
-      periodCell.value = `Period: ${startDate} to ${endDate}`;
+      periodCell.value = `${t("Period")}: ${startDate} ${t("to")} ${endDate}`;
       periodCell.font = {
         bold: true,
         color: { argb: "000000" }, // Black color
@@ -371,7 +375,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       worksheet.getColumn(3).width = 15;
 
       // Add headers
-      const headerRow = worksheet.addRow(["Date", "Sales", "Expense"]);
+      const headerRow = worksheet.addRow([t("Date"), t("Sales"), t("Expense")]);
       headerRow.font = {
         bold: true,
         color: { argb: "000000" }, // Black color
@@ -407,7 +411,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       });
 
       // Add the total row
-      const totalRow = worksheet.addRow(["Total", "", ""]);
+      const totalRow = worksheet.addRow([t("Total"), "", ""]);
       totalRow.font = {
         bold: true,
         color: { argb: "000000" }, // Black color
@@ -445,13 +449,14 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
     import('jspdf').then(module => { 
       let jsPDF = module.default
     const doc = new jsPDF();
+    doc.setFontSize(12); // Set the font size
 
     // Add the image
     const imgData = logo; // Replace with the path or URL of your image file
     const imgWidth = 35;
     const imgHeight = 20;
     doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
-
+  
     // Add Sales-Expense Summary header
     const summaryHeader = [["Sales-Expense Summary"]];
     doc.autoTable({
@@ -492,8 +497,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
     // Convert filtered chart data to table format
     const tableData = filteredData.map((item) => [
       item.requestedDate,
-      parseFloat(item.sales),
-      parseFloat(item.expense),
+      item.sales.toFixed(2),
+      item.expense.toFixed(2),
     ]);
 
     // Calculate totals
@@ -534,6 +539,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       headStyles: headerStyles,
       columnStyles: columnStyles,
     });
+    
 
     // Save PDF
     doc.save("sales-expense.pdf");
@@ -596,7 +602,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       <div className="container-fluid" >
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
           <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
-            }`} >Sales-Expense</div>
+            }`} >{t("Sales-Expense")}</div>
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
               <div
@@ -616,19 +622,19 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
                 {!tableStatus ?
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
                   <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
-                  <span>Export to Table</span>
+                  <span>{t("View Table")}</span>
                 </div>:
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
                   <FaChartColumn style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
-                  <span>Export to Graph</span>
+                  <span>{t("View Graph")}</span>
                 </div>}
                 <div className={css.exportOption} onClick={exportToExcel}>
                   <FaFileExcel style={{fontSize:"1.1rem",color:"green"}}/>
-                  <span>Export to Excel</span>
+                  <span>{t("Export to Excel")}</span>
                 </div>
                 <div className={css.exportOption} onClick={exportToPDF}>
                   <FaFilePdf style={{fontSize:"1.1rem",color:"red"}}/>
-                  <span>Export to PDF</span>
+                  <span>{t("Export to PDF")}</span>
                 </div>
               </div>
             )}
@@ -646,6 +652,11 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
           <CircularProgress disableShrink />
         </div>
       )}
+      
+       {tableData.length==1 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>
+       {t("No Data Found")}
+      </div>:''}
+      
       {!tableStatus ? <ReactECharts
         option={option}
         style={{

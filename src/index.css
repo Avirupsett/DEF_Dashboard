@@ -6,6 +6,7 @@
   --orange: #ff805d;
   --green: rgb(54, 234, 54);
   --option-color:"white";
+  --backgroundOverlay:rgb(249 249 249 / 81%);
   --orange-gradient: linear-gradient(
     268.35deg,
     rgba(255, 70, 70, 0.99) 3.47%,
@@ -32,7 +33,7 @@ body {
 }
 
 .theme-container {
-  background: rgba(0, 0, 0, 0.59);
+  background: #1a1c2d;;
   border-radius: 20px;
   padding: 1.2rem;
 }

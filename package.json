@@ -19,11 +19,13 @@
     "echarts-for-react": "^3.0.2",
     "exceljs": "^4.3.0",
     "file-saver": "^2.0.5",
+    "i18next": "^23.4.1",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.5.31",
     "mui-datatables": "^4.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^13.0.3",
     "react-icons": "^4.10.1",
     "rsuite": "^5.37.3"
   },
