@@ -72,18 +72,71 @@ const Dashboard = () => {
         //   Authorization: `Bearer ${jwtToken}`,
         // };
         const urlParams = new URLSearchParams(window.location.search);
+        const userIdParams = urlParams.get("userId");
         const jwtToken = urlParams.get("jwtToken");
-        const payload = JSON.parse(atob(jwtToken.split('.')[1]))
+        let payload = ""
+        if (jwtToken) {
+          payload = JSON.parse(atob(jwtToken.split('.')[1]))
+        }
         i18n.changeLanguage(urlParams.get("lang") || "en");
+        if (userIdParams) {
+          setUserId(userIdParams)
 
-        if (payload) {
+
+          const apiKey = `${import.meta.env.VITE_API_URL_2}/api/Auth/User/${userIdParams}`;
+
+          // Fetch user data to get the officeId, roleName, and officeName
+          const response = await axios.get(apiKey);
+          const userDataResponse = await response.data;
+          setUserData(userDataResponse);
+          setOfficeName(userDataResponse.officeName)
+          if (userDataResponse.roleName === "CompanyAdmin") {
+            setAdminStatus(6)
+          }
+          else if (userDataResponse.roleName === "PumpAdmin") {
+            setAdminStatus(0)
+          }
+          else {
+            setAdminStatus(0)
+
+          }
+          const officeId = userDataResponse.officeId;
+
+          // Use the officeId to construct the second API endpoint
+          const apiUrl2 = `${import.meta.env.VITE_API_URL_2}/api/Dashboard/AdminDashboradData/${officeId}/${userDataResponse.roleName === "PumpUser" ? 1 : userDataResponse.roleName === "CompanyAdmin" ? 1 : 1}`;
+
+          // Fetch data from the second API endpoint
+          const response2 = await axios.get(apiUrl2);
+          const data2 = await response2.data;
+          setOfficeData(data2)
+          // Now you have all the data from apiUrl2 available in the 'data2' object
+          const userCountData = data2.userCount || [];
+          const officeCountData = data2.officeCount || [];
+          const totalIncome = data2.incomeDetails.total;
+          const countIncome = data2.incomeDetails.count;
+          const totalExpense = data2.expenseDetails.total;
+          const countExpense = data2.expenseDetails.count;
+
+
+          setTodaySales(data2.incomeDetailsCurrentDay.total)
+          setTodayExpense(data2.expenseDetailsCurrentDay.total)
+
+          setUserCountData(userCountData);
+          setOfficeCountData(officeCountData);
+
+          setTotalIncome(totalIncome);
+          setTotalExpense(totalExpense);
+          setCountIncome(countIncome);
+          setCountExpense(countExpense);
+        }
+        else if (payload) {
           const initialuserId = payload["sub"];
           if (initialuserId) {
             setUserId(initialuserId)
 
-            
+
             const apiKey = `${import.meta.env.VITE_API_URL_2}/api/Auth/User/${initialuserId}`;
-       
+
             // Fetch user data to get the officeId, roleName, and officeName
             const response = await axios.get(apiKey);
             const userDataResponse = await response.data;
@@ -115,7 +168,7 @@ const Dashboard = () => {
             const countIncome = data2.incomeDetails.count;
             const totalExpense = data2.expenseDetails.total;
             const countExpense = data2.expenseDetails.count;
-            
+
 
             setTodaySales(data2.incomeDetailsCurrentDay.total)
             setTodayExpense(data2.expenseDetailsCurrentDay.total)
@@ -129,6 +182,7 @@ const Dashboard = () => {
             setCountExpense(countExpense);
           }
         }
+
       } catch (error) {
         console.log("Error fetching data:", error);
       }
@@ -164,7 +218,7 @@ const Dashboard = () => {
               {officeData ? <SalesCard totalIncome={totalIncome} countIncome={countIncome} todaySales={todaySales} /> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
             <Suspense fallback={<Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}>
-              {officeData ? <ExpenseCard totalExpense={totalExpense} countExpense={countExpense} todayExpense={todayExpense}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
+              {officeData ? <ExpenseCard totalExpense={totalExpense} countExpense={countExpense} todayExpense={todayExpense} /> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
 
 

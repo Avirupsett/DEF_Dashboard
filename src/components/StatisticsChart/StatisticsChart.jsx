@@ -3,7 +3,8 @@ import axios from "axios";
 import css from "./StatisticsChart.module.css";
 import { saveAs } from "file-saver";
 import "jspdf-autotable"
-
+import Lottie from 'lottie-react';
+import animationData from '../../loading.json';
 import logo from "/assets/logo.png";
 import { differenceInDays } from 'date-fns';
 import { FaFileExcel,FaXmark,FaFilePdf,FaListUl,FaTable,FaChartColumn} from "react-icons/fa6";
@@ -648,9 +649,9 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
 
       {/* Loading spinner */}
       {isLoading && (
-        <div className={css.loadingOverlay}>
-          <CircularProgress disableShrink />
-        </div>
+        <div className={css.NoDataOverlay}>
+        <Lottie animationData={animationData} loop={true} />
+      </div>
       )}
       
        {tableData.length==1 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>

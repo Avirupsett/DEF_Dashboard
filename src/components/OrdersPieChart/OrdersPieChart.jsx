@@ -10,7 +10,8 @@ import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "
 import logo from "/assets/logo.png";
 import MUIDataTable from "mui-datatables";
 import { useTranslation } from 'react-i18next';
-
+import Lottie from 'lottie-react';
+import animationData from '../../loading.json';
 
 
 const OrdersPieChart = ({
@@ -25,6 +26,7 @@ const OrdersPieChart = ({
   const exportOptionsRef = useRef(null);
   const legendButtonRef = useRef(null);
   const { t } = useTranslation();
+
   
   const [showLegend, setShowLegend] = useState(false);
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -217,7 +219,7 @@ const OrdersPieChart = ({
         selectedMode: "single",
         avoidLabelOverlap: true,
         label: {
-          show: sellData.length<=5?true:false,
+          show: sellData.length<=10?true:false,
           color:themeMode === "dark" ? "#ffffff" : "#111111"
           // position: "center",
         },
@@ -553,8 +555,8 @@ const OrdersPieChart = ({
           </div>
         </div>
         {isLoading && (
-          <div className={css.loadingOverlay}>
-            <CircularProgress disableShrink />
+          <div className={css.NoDataOverlay}>
+            <Lottie animationData={animationData} loop={true} />
           </div>
         )}
          {tableData.length==0 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>

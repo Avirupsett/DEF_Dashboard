@@ -10,7 +10,8 @@ import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "
 import logo from "../../logo.png";
 import MUIDataTable from 'mui-datatables';
 import { useTranslation } from 'react-i18next';
-
+import Lottie from 'lottie-react';
+import animationData from '../../loading.json';
 
 
 
@@ -219,7 +220,7 @@ const ProductQtyChart = ({
         
         avoidLabelOverlap: true,
         label: {
-          show: sellData.length<=5?true:false,
+          show: sellData.length<=10?true:false,
           color:themeMode === "dark" ? "#ffffff" : "#111111"
           // position: "center",
         },
@@ -556,9 +557,9 @@ const ProductQtyChart = ({
           </div>
         </div>
         {isLoading && (
-          <div className={css.loadingOverlay}>
-            <CircularProgress disableShrink />
-          </div>
+          <div className={css.NoDataOverlay}>
+          <Lottie animationData={animationData} loop={true} />
+        </div>
         )}
          {tableData.length==0 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>
          {t("No Data Found")}
