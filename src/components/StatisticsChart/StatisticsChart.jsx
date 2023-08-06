@@ -14,7 +14,7 @@ import ReactECharts from "echarts-for-react";
 import { useTranslation } from "react-i18next";
 
 
-const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, alldata,isLoading}) => {
+const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, alldata, isLoading }) => {
   const [chartData, setChartData] = useState([]);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const iconContainerRef = useRef(null);
@@ -61,7 +61,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
     const endDate = formatDate(selectedRange[1]);
 
     const fetchData = () => {
-   
+
       const data = alldata;
 
       if (Array.isArray(data.graph1)) {
@@ -70,7 +70,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
           sales: item.totalIncome,
           expense: item.totalExpense,
         }));
-        
+
         let addedFilteredData = filteredData.filter((item) => item.sales !== 0 || item.expense !== 0)
         const salesTotal = filteredData.reduce((total, item) => total + item.sales, 0).toFixed(2);
         const expenseTotal = filteredData.reduce(
@@ -88,11 +88,11 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       }
 
     };
-    if (startDate && endDate && selectedOffice ) {
+    if (startDate && endDate && selectedOffice) {
       fetchData();
     }
 
-  }, [selectedRange, selectedOffice, isAdmin,alldata]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedRange, selectedOffice, isAdmin, alldata]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -103,7 +103,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
   // ).toFixed(2);
   // console.log(chartData)
   //Find the average Sales of chartData if sales>0
- const averageSales = (chartData.filter((item) => item.totalIncome > 0).reduce((total, item) => total + item.totalIncome, 0) / chartData.filter((item) => item.totalIncome > 0).length).toFixed(0);
+  const averageSales = (chartData.filter((item) => item.totalIncome > 0).reduce((total, item) => total + item.totalIncome, 0) / chartData.filter((item) => item.totalIncome > 0).length).toFixed(0);
 
 
 
@@ -289,7 +289,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
             width: 2,
             type: "dashed",
           },
-          data:  chartData.map(() => averageSales)
+          data: chartData.map(() => averageSales)
         },
       ],
   };
@@ -577,22 +577,24 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
           <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Sales-Expense")}</div>
-             <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                    <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
-                    <span>{t("View Table")}</span>
-                  </div>
+          {/* <div className={css.exportOption}
+            onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+            <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
+            <span>{t("View Table")}</span>
+          </div> */}
+          <button  onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }} className='btn btn-primary btn-sm'>Table</button>
+          <a href="javascript:void(0)" className="btn btn-primary btn-sm" onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>Graph</a>
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
             <div
               className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
                 } px-2 py-1`}
 
-              onClick={()=>{alert("OnClick")}}
-              onTouchStart={()=>{alert("OnTouchStart")}}
+              onClick={handleIconClick}
             >
               {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
             </div>
-            
+
             {showExportOptions && (
               <div
                 className={`${css.exportOptions} ${themeMode === "dark" ? css.darkMode : css.lightMode
