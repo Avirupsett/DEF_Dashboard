@@ -467,7 +467,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       if (clickedOfficeType === "Retail Pumps") {
         setIsAdmin(0); // Set to 0 for "pumps"
       } else if (clickedOfficeType === "Wholesale Pumps") {
-        setIsAdmin(3); // Set to 5 or appropriate value for other offices
+        setIsAdmin(0); // Set to 5 or appropriate value for other offices
       } else if (clickedOfficeType === "Company") {
         setIsAdmin(5);
       }
