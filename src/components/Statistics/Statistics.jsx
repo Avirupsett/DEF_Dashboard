@@ -173,9 +173,23 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
   }, [userId, officeId, adminStatus]);
 
+  useEffect(()=>{
+    if(selectedOffice)
+    handleSelectedOffice()
 
+  },[selectedOffice])
+
+ const handleSelectedOffice =async()=>{
+     setIsLoading(true)
+    let SalesResponse = await fetchSalesData(selectedRange[0], selectedRange[1], selectedOffice, isAdmin)
+      if (SalesResponse) {
+        setAlldata(SalesResponse)
+        setIsLoading(false)
+      }
+ }
 
   const handleDateRange = async (value) => {
+
     if (value === null) {
       setSelectedRange([null, null]); // Clear the dateRange value
     } else {
@@ -377,7 +391,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           </div>
           <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} SelectedOfficeName={officeName} s />
+              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin}/>
             </Suspense>
           </div>
         </div>

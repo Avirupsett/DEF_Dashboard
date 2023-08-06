@@ -103,7 +103,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
   // ).toFixed(2);
   // console.log(chartData)
   //Find the average Sales of chartData if sales>0
- const averageSales = (chartData.filter((item) => item.totalIncome > 0).reduce((total, item) => total + item.totalIncome, 0) / chartData.filter((item) => item.totalIncome > 0).length).toFixed(2);
+ const averageSales = (chartData.filter((item) => item.totalIncome > 0).reduce((total, item) => total + item.totalIncome, 0) / chartData.filter((item) => item.totalIncome > 0).length).toFixed(0);
 
 
 
@@ -587,7 +587,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
               className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
                 } px-2 py-1`}
 
-              onClick={handleIconClick}
+              onClick={()=>{alert("OnClick")}}
+              onTouchStart={()=>{alert("OnTouchStart")}}
             >
               {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
             </div>

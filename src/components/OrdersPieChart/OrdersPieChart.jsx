@@ -218,7 +218,7 @@ const OrdersPieChart = ({
 
     tooltip: {
       trigger: "item",
-      formatter: `<b>{b}</b><br><b>${t("Total Sales")}:</b> ₹{c}`,
+      formatter: `<b>{b}</b><br><b>${t("Total Sales")}:</b> {c}`,
       textStyle: {
         fontSize: window.innerWidth <= 768 ? 10 : 14,
       },

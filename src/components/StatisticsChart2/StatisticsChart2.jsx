@@ -5,15 +5,15 @@ import css from "./StatisticsChart2.module.css";
 import { saveAs } from "file-saver";
 
 import "jspdf-autotable";
-import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable,FaRegChartBar } from "react-icons/fa6";
+import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable,FaRegChartBar, FaAngleLeft, FaAnglesLeft } from "react-icons/fa6";
 import logo from "/assets/logo.png";
-import { CircularProgress } from "@mui/material";
+
 import MUIDataTable from "mui-datatables";
 import { useTranslation } from "react-i18next";
 import Lottie from 'lottie-react';
 import animationData from '../../loading.json';
 
-const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName }) => {
+const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName,setSelectedOffice,setIsAdmin }) => {
   const [chartData, setChartData] = useState([]);
 
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -26,11 +26,18 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [tableStatus, setTableStatus] = useState(false)
   const [tableData, setTableData] = useState([])
+  const [selectionHistory, setSelectionHistory] = useState([]);
+  const [showPreviousButton, setShowPreviousButton] = useState(false);
+  const [showResetButton, setShowResetButton] = useState(false);
+  const [originalSelection, setOriginalSelection] = useState({
+    selectedOffice,
+    isAdmin,
+  });
   const { t } = useTranslation();
 
 
 
-  const columns = [{ name: "officeName", label: t("Office" )}, { name: "sales", label: `${t("Sales")}(₹)`}];
+  const columns = [{ name: "officeName", label: t("Office") }, { name: "sales", label: `${t("Sales")}(₹)` }];
 
   const options = {
     // filterType: 'checkbox',
@@ -67,65 +74,65 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       ) {
         setShowExportOptions(false);
       }
-      
+
     };
-  
+
     // Add the click event listener to the document
     document.addEventListener("click", handleClickOutsideIconContainer);
-  
+
     // Clean up the event listener when the component unmounts
     return () => {
       document.removeEventListener("click", handleClickOutsideIconContainer);
     };
   }, []);
 
-  useEffect(() => {
+  const fetchData = () => {
+    setIsLoading(true);
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    
-    const fetchData = () => {
-      setIsLoading(true);
-  
-      if(selectedRange && selectedOffice){
 
-      axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/total_sales/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`).then((response)=>{
+
+
+    axios
+      .get(`http://115.124.120.251:5064/api/v1/dashboard/total_sales/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`)
+      .then((response) => {
         const { data } = response;
-        if(data['graph1']){
-          let temp = []
-          let tabletemp = []
-          for (let i=0;i<data['graph1'].length;i++) {
+        if (data['graph1']) {
+          let temp = [];
+          let tabletemp = [];
+          for (let i = 0; i < data['graph1'].length; i++) {
             temp.push({
+              "officeId": data['graph1'][i].officeId,
               "officeName": data['graph1'][i].officeName,
-              "officeType":data['graph1'][i].officeType,
+              "officeType": data['graph1'][i].officeType,
               "sales": data['graph1'][i].totalIncome.toFixed(0),
               "color": data['graph1'][i].officeTypeColor
-        
             });
             tabletemp.push({
               "officeName": data['graph1'][i].officeName,
               "sales": data['graph1'][i].totalIncome.toFixed(2),
             });
           }
-          tabletemp.push({ "officeName": t("Total"), "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) })
-       
-          setTableData(tabletemp)
-          setChartData(temp)
-          
-        };
-      }).catch((error) => {
+          tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) });
+
+          setTableData(tabletemp);
+          setChartData(temp);
+        }
+      })
+      .catch((error) => {
         console.log("Error fetching data:", error);
       })
       .finally(() => {
         setIsLoading(false);
-      })
-    }
-    };
-    if(startDate && endDate && selectedOffice){
-    fetchData();
-    }
-   
-  }, [selectedRange, selectedOffice, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+      });
+  };
 
+  useEffect(() => {
+
+    if (selectedRange && selectedOffice) {
+      fetchData();
+    }
+  }, [selectedRange, selectedOffice, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -232,12 +239,15 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
           },
         })),
         label: {
-          show: chartData.length<=5 ?true:false,
+          show: chartData.length <= 5 ? true : false,
           position: 'right',
-          color:themeMode === "dark" ? "#ffffff" : "#000000",
-          
-        }
-      
+          color: themeMode === "dark" ? "#ffffff" : "#000000",
+
+        },
+        emphasis: {
+          focus: 'series',
+        },
+
       },
 
     ],
@@ -259,7 +269,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   const exportToExcel = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    const ExcelJS=await import('exceljs');
+    const ExcelJS = await import('exceljs');
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Total Sales by Office");
 
@@ -354,91 +364,177 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       responseType: "arraybuffer",
     });
     const imageBase64 = arrayBufferToBase64(response.data);
-    import('jspdf').then(module => { 
+    import('jspdf').then(module => {
       let jsPDF = module.default
-    const doc = new jsPDF();
+      const doc = new jsPDF();
 
-    // Add the image
-    const imgData = imageBase64;
-    const imgWidth = 35;
-    const imgHeight = 20;
-    doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
+      // Add the image
+      const imgData = imageBase64;
+      const imgWidth = 35;
+      const imgHeight = 20;
+      doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
 
-    // Add Sales-Expense Summary header
-    const summaryHeader = [[t("Total Sales by Business Entity")]];
-    doc.autoTable({
-      startY: 27,
-      head: summaryHeader,
-      body: [],
-      headStyles: {
+      // Add Sales-Expense Summary header
+      const summaryHeader = [[t("Total Sales by Business Entity")]];
+      doc.autoTable({
+        startY: 27,
+        head: summaryHeader,
+        body: [],
+        headStyles: {
+          fontSize: 12,
+          fontStyle: "bold",
+          halign: "center",
+          fillColor: "#3CB043", // Green color for Sales-Expense Summary header
+          textColor: "#FFFFFF", // White color
+        },
+        margin: { top: 20, bottom: 0 }, // Move it a little down after the image
+      });
+
+      // Add period - startDate to endDate
+      const periodCell = [[`${t(Period)}: ${startDate} ${t(to)} ${endDate}`]];
+      doc.autoTable({
+        startY: 36,
+        head: periodCell,
+        body: [],
+        headStyles: {
+          fontSize: 12,
+          fontStyle: "bold",
+          halign: "center",
+          fillColor: "#3CB043",
+          textColor: "#FFFFFF",
+        },
+        margin: { top: 30 }, // Move it upwards and provide some space at the bottom
+      });
+
+      // Convert chart data to table format
+      const tableData = chartData.map((item) => [
+        item.officeName,
+        parseFloat(item.sales.toFixed(2)),
+      ]);
+
+      // Calculate total sales
+      const totalSales = chartData.reduce(
+        (sales, item) => sales + parseFloat(item.sales),
+        0
+      );
+
+      // Add total row
+      tableData.push([t("Total"), `${totalSales.toFixed(2)}`]);
+
+      // Set table headers
+      const headers = [t("Office Name"), t("Sales")];
+      const columnStyles = {
+        1: { halign: "right" }, // Align Sales column to center
+        2: { halign: "right" }, // Align Expense column to center
+      };
+
+      // Set header styles
+      const headerStyles = {
         fontSize: 12,
         fontStyle: "bold",
         halign: "center",
-        fillColor: "#3CB043", // Green color for Sales-Expense Summary header
+        fillColor: "#75AAF0", // Sky blue color for Office Name, Sales header
         textColor: "#FFFFFF", // White color
-      },
-      margin: { top: 20, bottom: 0 }, // Move it a little down after the image
-    });
+      };
 
-    // Add period - startDate to endDate
-    const periodCell = [[`${t(Period)}: ${startDate} ${t(to)} ${endDate}`]];
-    doc.autoTable({
-      startY: 36,
-      head: periodCell,
-      body: [],
-      headStyles: {
-        fontSize: 12,
-        fontStyle: "bold",
-        halign: "center",
-        fillColor: "#3CB043",
-        textColor: "#FFFFFF",
-      },
-      margin: { top: 30 }, // Move it upwards and provide some space at the bottom
-    });
+      // Add table to PDF
+      doc.autoTable(headers, tableData, {
+        startY: 45, // Start below the header and period
+        headStyles: headerStyles,
+        columnStyles: columnStyles,
+      });
 
-    // Convert chart data to table format
-    const tableData = chartData.map((item) => [
-      item.officeName,
-      parseFloat(item.sales.toFixed(2)),
-    ]);
-
-    // Calculate total sales
-    const totalSales = chartData.reduce(
-      (sales, item) => sales + parseFloat(item.sales),
-      0
-    );
-
-    // Add total row
-    tableData.push([t("Total"), `${totalSales.toFixed(2)}`]);
-
-    // Set table headers
-    const headers = [t("Office Name"), t("Sales")];
-    const columnStyles = {
-      1: { halign: "right" }, // Align Sales column to center
-      2: { halign: "right" }, // Align Expense column to center
-    };
-
-    // Set header styles
-    const headerStyles = {
-      fontSize: 12,
-      fontStyle: "bold",
-      halign: "center",
-      fillColor: "#75AAF0", // Sky blue color for Office Name, Sales header
-      textColor: "#FFFFFF", // White color
-    };
-
-    // Add table to PDF
-    doc.autoTable(headers, tableData, {
-      startY: 45, // Start below the header and period
-      headStyles: headerStyles,
-      columnStyles: columnStyles,
-    });
-
-    // Save PDF
-    doc.save("total_sales_by_office.pdf");
-  })
+      // Save PDF
+      doc.save("total_sales_by_office.pdf");
+    })
   };
 
+  // Function to handle the graph click event...
+  const handleGraphClick = (params) => {
+    // Check if the click event occurred on a valid data point
+    if (params && params.data && params.dataIndex >= 0 && chartData[params.dataIndex]) {
+      // Get the office name and ID from the clicked data point
+      const clickedOfficeId = chartData[params.dataIndex].officeId;
+      const clickedOfficeType = chartData[params.dataIndex].officeType;
+
+      // Save the current selectedOffice and isAdmin values to the history
+      setSelectionHistory((prevHistory) => [...prevHistory, { selectedOffice, isAdmin }]);
+
+      // Update the selectedOffice state variable
+      setSelectedOffice(clickedOfficeId);
+
+      // Check if the officeName contains "Pump" (case-insensitive)
+      if (clickedOfficeType === "Retail Pumps") {
+        setIsAdmin(0); // Set to 0 for "pumps"
+      } else if (clickedOfficeType === "Wholesale Pumps") {
+        setIsAdmin(3); // Set to 5 or appropriate value for other offices
+      } else if (clickedOfficeType === "Company") {
+        setIsAdmin(5);
+      }
+
+      // Save the original selectedOffice and isAdmin values
+      setOriginalSelection({
+        selectedOffice,
+        isAdmin,
+      });
+
+      // Fetch data for the selected office
+      fetchData();
+
+
+      // Show the reset button after the graph click event is triggered
+      setShowResetButton(true);
+      setShowPreviousButton(true);
+    }
+  };
+  // Function to handle the "Previous" button click event
+  const handlePrevious = () => {
+    // Check if there is a history of selections
+    if (selectionHistory.length > 0) {
+      // Get the last entry from the selectionHistory array
+      const lastSelection = selectionHistory.pop();
+
+      // Update the localSelectedOffice and localIsAdmin states with the last entry values
+      setSelectedOffice(lastSelection.selectedOffice);
+      setIsAdmin(lastSelection.isAdmin);
+
+      // Update the selectionHistory state with the updated array
+      setSelectionHistory([...selectionHistory]);
+
+      // Fetch data with the original selectedOffice and isAdmin values
+      fetchData();
+
+
+
+      // Show the "Reset" button if there is no more previous state to go back
+      if (selectionHistory.length === 0) {
+        setShowResetButton(false);
+      }
+
+      // Check if the "Previous" button should be hidden
+      if (selectionHistory.length === 0) {
+        setShowPreviousButton(false);
+      }
+    }
+  };
+  // Function to handle the "Reset" button click event
+  const handleReset = () => {
+    // Reset the selectedOffice and isAdmin states to their original values
+    setSelectedOffice(originalSelection.selectedOffice);
+    setIsAdmin(originalSelection.isAdmin);
+
+    // Clear the selectionHistory array
+    setSelectionHistory([]);
+
+    // Fetch data with the original selectedOffice and isAdmin values
+    fetchData();
+
+    // Hide the reset button after resetting the state
+    setShowResetButton(false);
+
+    // Hide the previous button as well since we are resetting to the original state
+    setShowPreviousButton(false);
+  };
 
 
 
@@ -490,17 +586,35 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
         <div className="d-flex w-100 g-0 align-items-start justify-content-between">
           <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Total Sales by Business Entity")}</div>
+          {/* Stylish "Reset" button */}
+          {showResetButton && selectedOffice !== originalSelection.selectedOffice && isAdmin !== originalSelection.isAdmin ? (
+            <div className={css.resetButtonContainer}>
+              <button className={css.resetButton} onClick={handleReset}>
+                <FaAnglesLeft style={{ fontSize: "1rem" }} />
+              </button>
+            </div>
+
+          ) : null}
+          {/* "Previous" button */}
+          {showPreviousButton && selectionHistory.length > 0 ? (
+            <div className={css.resetButtonContainer}>
+              <button className={css.resetButton} onClick={handlePrevious}>
+                <FaAngleLeft style={{ fontSize: "1rem" }} />
+              </button>
+            </div>
+
+          ) : null}
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
-            
-              <div
-                className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
-                  } px-2 py-1`}
 
-                onClick={handleIconClick}
-              >
-                {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
-              </div> 
+            <div
+              className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
+                } px-2 py-1`}
+
+              onClick={handleIconClick}
+            >
+              {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
+            </div>
             {showExportOptions && (
               <div
                 className={`${css.exportOptions} ${themeMode === "dark" ? css.darkMode : css.lightMode
@@ -510,7 +624,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
                   <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
                   <span>{t("View Table")}</span>
-                </div>:
+                </div> :
                 <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
                   <FaRegChartBar style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
                   <span>{t("View Graph")}</span>
@@ -536,12 +650,12 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       {/* Loading spinner */}
       {isLoading && (
         <div className={css.NoDataOverlay}>
-        <Lottie animationData={animationData} loop={true} />
-      </div>
+          <Lottie animationData={animationData} loop={true} />
+        </div>
       )}
-       {tableData.length==1 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>
-       {t("No Data Found")}
-      </div>:''}
+      {tableData.length == 1 && !tableStatus && !isLoading ? <div className={`${css.NoDataOverlay} fs-5`}>
+        {t("No Data Found")}
+      </div> : ''}
       {!tableStatus ? <ReactECharts
         option={option}
         style={{
@@ -549,6 +663,9 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
           height: "300px",
           width: "100%",
           maxWidth: "2300px",
+        }}
+        onEvents={{
+          click: handleGraphClick,
         }}
         className={themeMode === "dark" ? css.darkMode : css.lightMode}
       /> :
