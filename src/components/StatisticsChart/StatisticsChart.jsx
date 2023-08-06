@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import css from "./StatisticsChart.module.css";
 import { saveAs } from "file-saver";
@@ -7,30 +7,30 @@ import Lottie from 'lottie-react';
 import animationData from '../../loading.json';
 import logo from "/assets/logo.png";
 import { differenceInDays } from 'date-fns';
-import { FaFileExcel,FaXmark,FaFilePdf,FaListUl,FaTable,FaChartColumn} from "react-icons/fa6";
-import { CircularProgress} from "@mui/material";
+import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartColumn } from "react-icons/fa6";
+
 import MUIDataTable from "mui-datatables";
 import ReactECharts from "echarts-for-react";
 import { useTranslation } from "react-i18next";
 
 
-const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) => {
+const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, alldata,isLoading}) => {
   const [chartData, setChartData] = useState([]);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const iconContainerRef = useRef(null);
   const exportOptionsRef = useRef(null);
   // const iconRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isBarChart, setIsBarChart] = useState(true); // State to track the chart type
-  
+
   const [tableData, setTableData] = useState([])
   const [tableStatus, setTableStatus] = useState(false)
   const { t } = useTranslation();
 
 
 
-  const columns = [{ name: "requestedDate", label: t("Date") }, {name:"sales",label:`${t("Sales")}(₹)`}, {name:"expense",label:`${t("Expense")}(₹)`}];
+  const columns = [{ name: "requestedDate", label: t("Date") }, { name: "sales", label: `${t("Sales")}(₹)` }, { name: "expense", label: `${t("Expense")}(₹)` }];
 
   const options = {
     // filterType: 'checkbox',
@@ -55,71 +55,44 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
   };
 
 
-  // Function to update the window width state on window resize
-  // const handleWindowResize = () => {
-  //   setWindowWidth(window.innerWidth);
-  // };
-
-  // useEffect(() => {
-  //   // Add a window resize event listener
-  //   window.addEventListener('resize', handleWindowResize);
-
-  //   // Clean up the event listener when the component unmounts
-  //   return () => {
-  //     window.removeEventListener('resize', handleWindowResize);
-  //   };
-  // }, []);
-
   useEffect(() => {
-   
+
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
 
     const fetchData = () => {
-      setIsLoading(true); // Set loading state to true before making the API call
-  
-      axios
-        .get(
-          `${import.meta.env.VITE_API_URL_2}/api/Dashboard/DEFDashBoardGraphData/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
-        )
-        .then((response) => {
-          const { data } = response;
-          // console.log("API response data:", data);
-  
-          if (Array.isArray(data.graph1)) {
-            const filteredData = data.graph1.map((item) => ({
-              requestedDate: item.requestedDate,
-              sales: item.totalIncome,
-              expense: item.totalExpense,
-            }));
-            let addedFilteredData=filteredData.filter((item) => item.sales !== 0 || item.expense !== 0)
-            const salesTotal = filteredData.reduce((total, item) => total + item.sales, 0).toFixed(2);
-            const expenseTotal = filteredData.reduce(
-              (total, item) => total + item.expense,
-              0
-            ).toFixed(2);
-            addedFilteredData.push({"requestedDate":t("Total"),"sales":salesTotal,"expense":expenseTotal})
-  
-  
-            setTableData(addedFilteredData)
-  
-            setChartData(filteredData);
-          } else {
-            // console.log("Invalid data format:", data);
-          }
-        })
-        .catch((error) => {
-          console.log("Error fetching data:", error);
-          // You can display an error message to the user or handle the error in an appropriate way
-        })
-        .finally(() => {
-          setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
-        });
+   
+      const data = alldata;
+
+      if (Array.isArray(data.graph1)) {
+        const filteredData = data.graph1.map((item) => ({
+          requestedDate: item.requestedDate,
+          sales: item.totalIncome,
+          expense: item.totalExpense,
+        }));
+        
+        let addedFilteredData = filteredData.filter((item) => item.sales !== 0 || item.expense !== 0)
+        const salesTotal = filteredData.reduce((total, item) => total + item.sales, 0).toFixed(2);
+        const expenseTotal = filteredData.reduce(
+          (total, item) => total + item.expense,
+          0
+        ).toFixed(2);
+        addedFilteredData.push({ "requestedDate": t("Total"), "sales": salesTotal, "expense": expenseTotal })
+
+
+        setTableData(addedFilteredData)
+
+        setChartData(data.graph1);
+      } else {
+        // console.log("Invalid data format:", data);
+      }
+
     };
-    if(startDate && endDate && selectedOffice){
-    fetchData();}
-     
-  }, [selectedRange, selectedOffice, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (startDate && endDate && selectedOffice ) {
+      fetchData();
+    }
+
+  }, [selectedRange, selectedOffice, isAdmin,alldata]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -130,7 +103,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
   // ).toFixed(2);
   // console.log(chartData)
   //Find the average Sales of chartData if sales>0
-  const averageSales = (chartData.filter((item) => item.sales > 0).reduce((total, item) => total + item.sales, 0) / chartData.filter((item) => item.sales > 0).length).toFixed(2);;
+ const averageSales = (chartData.filter((item) => item.totalIncome > 0).reduce((total, item) => total + item.totalIncome, 0) / chartData.filter((item) => item.totalIncome > 0).length).toFixed(2);
 
 
 
@@ -147,7 +120,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
 
       // Check if the number of days is 7 or less to decide the chart type
       setIsBarChart(days <= 7);
-      
+
     }
   }, [selectedRange, selectedOffice]);
 
@@ -157,7 +130,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
 
 
   const option = {
-    color: ["#66BA69","#E81A1A", "#FFC107"],
+    color: ["#66BA69", "#E81A1A", "#FFC107"],
     title: {
 
 
@@ -194,8 +167,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       left: window.innerWidth <= 768 ? '7%' : '4%',
       right: "3%",
       top: "10%",
-      bottom: chartData.length>0?"15%":"20%",
-      containLabel: chartData.length>0?true:false,
+      bottom: chartData.length > 0 ? "15%" : "20%",
+      containLabel: chartData.length > 0 ? true : false,
     },
     xAxis: {
       type: "category",
@@ -269,13 +242,13 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
         {
           name: t("Sales"),
           type: "bar", // Display as a bar chart if the selected range is 7 days or less
-          data: chartData.map((item) => item.sales),
+          data: chartData.map((item) => item.totalIncome),
           yAxisIndex: 0,
         },
         {
           name: t("Expense"),
           type: "bar", // Display as a bar chart if the selected range is 7 days or less
-          data: chartData.map((item) => item.expense),
+          data: chartData.map((item) => item.totalExpense),
           yAxisIndex: 0,
         },
         {
@@ -288,7 +261,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
             width: 2,
             type: "dashed",
           },
-          data: chartData.map(() => averageSales),
+          data: chartData.map(() => averageSales)
         },
       ]
       : [
@@ -296,14 +269,14 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
           name: t("Sales"),
           type: "line", // Display as a line chart if the selected range is more than 7 days
           smooth: true,
-          data: chartData.map((item) => item.sales),
+          data: chartData.map((item) => item.totalIncome),
           yAxisIndex: 0,
         },
         {
           name: t("Expense"),
           type: "line", // Display as a line chart if the selected range is more than 7 days
           smooth: true,
-          data: chartData.map((item) => item.expense),
+          data: chartData.map((item) => item.totalExpense),
           yAxisIndex: 0,
         },
         {
@@ -316,7 +289,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
             width: 2,
             type: "dashed",
           },
-          data: chartData.map(() => averageSales),
+          data:  chartData.map(() => averageSales)
         },
       ],
   };
@@ -324,7 +297,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
   const exportToExcel = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    const ExcelJS=await import('exceljs');
+    const ExcelJS = await import('exceljs');
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Graph Data");
 
@@ -396,14 +369,14 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       });
 
       // Filter chartData to exclude sales or expense values with zero
-      const filteredData = chartData.filter((item) => item.sales !== 0 || item.expense !== 0);
+      const filteredData = chartData.filter((item) => item.totalIncome !== 0 || item.totalExpense !== 0);
 
       // Add data rows
       filteredData.forEach((item) => {
         const row = worksheet.addRow([
           item.requestedDate, // Convert to a Date object
-          Number(item.sales), // Convert to a Number
-          Number(item.expense), // Convert to a Number
+          Number(item.totalIncome), // Convert to a Number
+          Number(item.totalExpense), // Convert to a Number
         ]);
 
         // Set the number format for sales and expense columns
@@ -420,8 +393,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       };
 
       // Calculate total values
-      const totalSales = filteredData.reduce((total, item) => total + item.sales, 0);
-      const totalExpense = filteredData.reduce((total, item) => total + item.expense, 0);
+      const totalSales = filteredData.reduce((total, item) => total + item.totalIncome, 0);
+      const totalExpense = filteredData.reduce((total, item) => total + item.totalExpense, 0);
 
       // Set total values in the total row
       const totalSalesCell = worksheet.getCell(`B${totalRow.number}`);
@@ -447,108 +420,108 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
   const exportToPDF = () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    import('jspdf').then(module => { 
+    import('jspdf').then(module => {
       let jsPDF = module.default
-    const doc = new jsPDF();
-    doc.setFontSize(12); // Set the font size
+      const doc = new jsPDF();
+      doc.setFontSize(12); // Set the font size
 
-    // Add the image
-    const imgData = logo; // Replace with the path or URL of your image file
-    const imgWidth = 35;
-    const imgHeight = 20;
-    doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
-  
-    // Add Sales-Expense Summary header
-    const summaryHeader = [["Sales-Expense Summary"]];
-    doc.autoTable({
-      startY: 27,
-      head: summaryHeader,
-      body: [],
-      headStyles: {
-        fontSize: 12,
-        fontStyle: "bold",
-        halign: "center",
-        fillColor: "#3CB043", // Green color for Sales-Expense Summary header
-        textColor: "#FFFFFF", // White color
-      },
-      margin: { top: 20, bottom: 0 }, // Move it a little down after the image
-    });
+      // Add the image
+      const imgData = logo; // Replace with the path or URL of your image file
+      const imgWidth = 35;
+      const imgHeight = 20;
+      doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
 
-    // Add period - startDate to endDate
-    const periodCell = [[`Period: ${startDate} to ${endDate}`]];
-    doc.autoTable({
-      startY: 36,
-      head: periodCell,
-      body: [],
-      headStyles: {
-        fontSize: 12,
-        fontStyle: "bold",
-        halign: "center",
-        fillColor: "#3CB043",
-        textColor: "#FFFFFF",
-      },
-      margin: { top: 30 }, // Move it upwards and provide some space at the bottom
-    });
+      // Add Sales-Expense Summary header
+      const summaryHeader = [["Sales-Expense Summary"]];
+      doc.autoTable({
+        startY: 27,
+        head: summaryHeader,
+        body: [],
+        headStyles: {
+          fontSize: 12,
+          fontStyle: "bold",
+          halign: "center",
+          fillColor: "#3CB043", // Green color for Sales-Expense Summary header
+          textColor: "#FFFFFF", // White color
+        },
+        margin: { top: 20, bottom: 0 }, // Move it a little down after the image
+      });
 
-    // Filter out rows with zero sales and expense values
-    const filteredData = chartData.filter(
-      (item) => item.sales !== 0 || item.expense !== 0
-    );
+      // Add period - startDate to endDate
+      const periodCell = [[`Period: ${startDate} to ${endDate}`]];
+      doc.autoTable({
+        startY: 36,
+        head: periodCell,
+        body: [],
+        headStyles: {
+          fontSize: 12,
+          fontStyle: "bold",
+          halign: "center",
+          fillColor: "#3CB043",
+          textColor: "#FFFFFF",
+        },
+        margin: { top: 30 }, // Move it upwards and provide some space at the bottom
+      });
 
-    // Convert filtered chart data to table format
-    const tableData = filteredData.map((item) => [
-      item.requestedDate,
-      item.sales.toFixed(2),
-      item.expense.toFixed(2),
-    ]);
+      // Filter out rows with zero sales and expense values
+      const filteredData = chartData.filter(
+        (item) => item.totalIncome !== 0 || item.totalExpense !== 0
+      );
 
-    // Calculate totals
-    const salesTotal = filteredData.reduce((total, item) => total + item.sales, 0);
-    const expenseTotal = filteredData.reduce(
-      (total, item) => total + item.expense,
-      0
-    );
-
-    // Add totals row if there are non-zero values
-    if (salesTotal !== 0 || expenseTotal !== 0) {
-      tableData.push([
-        "Total",
-        `${salesTotal.toFixed(2)}`,
-        `${expenseTotal.toFixed(2)}`,
+      // Convert filtered chart data to table format
+      const tableData = filteredData.map((item) => [
+        item.requestedDate,
+        item.totalIncome.toFixed(2),
+        item.totalExpense.toFixed(2),
       ]);
-    }
 
-    // Set table headers
-    const headers = ["Date", "Sales", "Expense"];
-    const columnStyles = {
-      1: { halign: "right" }, // Align Sales column to center
-      2: { halign: "right" }, // Align Expense column to center
-    };
+      // Calculate totals
+      const salesTotal = filteredData.reduce((total, item) => total + item.totalIncome, 0);
+      const expenseTotal = filteredData.reduce(
+        (total, item) => total + item.totalExpense,
+        0
+      );
 
-    // Set header styles
-    const headerStyles = {
-      fontSize: 12,
-      fontStyle: "bold",
-      halign: "center",
-      fillColor: "#75AAF0", // Sky blue color for Date, Expense, Sales header
-      textColor: "#FFFFFF", // White color
-    };
+      // Add totals row if there are non-zero values
+      if (salesTotal !== 0 || expenseTotal !== 0) {
+        tableData.push([
+          "Total",
+          `${salesTotal.toFixed(2)}`,
+          `${expenseTotal.toFixed(2)}`,
+        ]);
+      }
 
-    // Add table to PDF
-    doc.autoTable(headers, tableData, {
-      startY: 45, // Start below the header and period
-      headStyles: headerStyles,
-      columnStyles: columnStyles,
-    });
-    
+      // Set table headers
+      const headers = ["Date", "Sales", "Expense"];
+      const columnStyles = {
+        1: { halign: "right" }, // Align Sales column to center
+        2: { halign: "right" }, // Align Expense column to center
+      };
 
-    // Save PDF
-    doc.save("sales-expense.pdf");
-  })
+      // Set header styles
+      const headerStyles = {
+        fontSize: 12,
+        fontStyle: "bold",
+        halign: "center",
+        fillColor: "#75AAF0", // Sky blue color for Date, Expense, Sales header
+        textColor: "#FFFFFF", // White color
+      };
+
+      // Add table to PDF
+      doc.autoTable(headers, tableData, {
+        startY: 45, // Start below the header and period
+        headStyles: headerStyles,
+        columnStyles: columnStyles,
+      });
+
+
+      // Save PDF
+      doc.save("sales-expense.pdf");
+    })
   };
 
 
-  
+
 
 
   useEffect(() => {
@@ -565,12 +538,12 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       ) {
         setShowExportOptions(false);
       }
-      
+
     };
-  
+
     // Add the click event listener to the document
     document.addEventListener("click", handleClickOutsideIconContainer);
-  
+
     // Clean up the event listener when the component unmounts
     return () => {
       document.removeEventListener("click", handleClickOutsideIconContainer);
@@ -595,7 +568,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
   };
 
   return (
-   
+
     <div
       className={`${css.chartContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
         }`}
@@ -606,39 +579,39 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
             }`} >{t("Sales-Expense")}</div>
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
-              <div
-                className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
-                  } px-2 py-1`}
-                  
-                  onClick={handleIconClick}
-              >
-                {showExportOptions ? <FaXmark style={{fontSize:"1.1rem"}}/> : <FaListUl style={{fontSize:"1.1rem"}}/>}
-              </div>
-            {showExportOptions && (
+            <div
+              className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
+                } px-2 py-1`}
+
+              onClick={handleIconClick}
+            >
+              {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
+            </div>
+            {/* {showExportOptions && ( */}
               <div
                 className={`${css.exportOptions} ${themeMode === "dark" ? css.darkMode : css.lightMode
                   }`}
                 ref={exportOptionsRef}
               >
                 {!tableStatus ?
-                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                  <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
-                  <span>{t("View Table")}</span>
-                </div>:
-                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                  <FaChartColumn style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
-                  <span>{t("View Graph")}</span>
-                </div>}
+                  <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                    <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
+                    <span>{t("View Table")}</span>
+                  </div> :
+                  <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                    <FaChartColumn style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
+                    <span>{t("View Graph")}</span>
+                  </div>}
                 <div className={css.exportOption} onClick={exportToExcel}>
-                  <FaFileExcel style={{fontSize:"1.1rem",color:"green"}}/>
+                  <FaFileExcel style={{ fontSize: "1.1rem", color: "green" }} />
                   <span>{t("Export to Excel")}</span>
                 </div>
                 <div className={css.exportOption} onClick={exportToPDF}>
-                  <FaFilePdf style={{fontSize:"1.1rem",color:"red"}}/>
+                  <FaFilePdf style={{ fontSize: "1.1rem", color: "red" }} />
                   <span>{t("Export to PDF")}</span>
                 </div>
               </div>
-            )}
+            {/* )}*/}
           </div>
           </div>
         </div>
@@ -650,14 +623,14 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
       {/* Loading spinner */}
       {isLoading && (
         <div className={css.NoDataOverlay}>
-        <Lottie animationData={animationData} loop={true} />
-      </div>
+          <Lottie animationData={animationData} loop={true} />
+        </div>
       )}
-      
-       {tableData.length==1 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>
-       {t("No Data Found")}
-      </div>:''}
-      
+
+      {tableData.length == 1 && !tableStatus && !isLoading ? <div className={`${css.NoDataOverlay} fs-5`}>
+        {t("No Data Found")}
+      </div> : ''}
+
       {!tableStatus ? <ReactECharts
         option={option}
         style={{
@@ -677,7 +650,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin }) 
           />
         </div>}
     </div>
-  
+
   );
 };
 

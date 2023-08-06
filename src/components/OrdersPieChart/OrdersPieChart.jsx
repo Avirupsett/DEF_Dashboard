@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
-import axios from 'axios';
 import { saveAs } from 'file-saver';
 
 import 'jspdf-autotable';
-import { CircularProgress } from "@mui/material";
 import css from './OrdersPieChart.module.css';
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "react-icons/fa6";
 import logo from "/assets/logo.png";
@@ -19,20 +17,23 @@ const OrdersPieChart = ({
   selectedRange,
   selectedOffice,
   isAdmin,
+  alldata,
+  isLoading
 }) => {
   const [sellData, setSellData] = useState([]);
+  const [chartData, setChartData] = useState([])
   const [showExportOptions, setShowExportOptions] = useState(false);
   const iconContainerRef = useRef(null);
   const exportOptionsRef = useRef(null);
   const legendButtonRef = useRef(null);
   const { t } = useTranslation();
 
-  
+
   const [showLegend, setShowLegend] = useState(false);
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [tableData, setTableData] = useState([])
   const [tableStatus, setTableStatus] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  
   const columns = [{ name: "Product Name", label: t("Product") }, { name: "Quantity", label: t("Quantity") }, { name: "Sales", label: `${t("Sales")}(₹)` }];
 
   const options = {
@@ -57,6 +58,32 @@ const OrdersPieChart = ({
     }
   };
 
+  function calculateTotalSales(dataArray) {
+    const flatProducts = dataArray.flatMap((item) => item.lstproduct);
+
+    const totalSalesByProduct = flatProducts.reduce((result, product) => {
+      const { productName, totalSales, qty, color, unitShortName } = product;
+
+      if (totalSales !== 0) {
+        if (result[productName]) {
+          result[productName].totalSales += totalSales;
+          result[productName].qty += qty;
+        } else {
+          result[productName] = {
+            totalSales,
+            qty,
+            color, unitShortName
+          };
+        }
+      }
+
+      return result;
+    }, {});
+
+    return totalSalesByProduct;
+  }
+
+
   // useEffect(() => {
   //   // Function to update the window width state on window resize
   //   const handleWindowResize = () => {
@@ -73,68 +100,94 @@ const OrdersPieChart = ({
   // }, []);
 
   useEffect(() => {
-    setIsLoading(true)
+    // setIsLoading(true)
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    if(startDate && endDate && selectedOffice){
-    axios
-      .get(
-        `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
-      )
-      .then((response) => {
-        const data = response.data;
-        const graph2Data = data.graph2;
+    if (startDate && endDate && selectedOffice) {
+      if (alldata.graph2) {
+        const calculateTotal = calculateTotalSales(alldata.graph2)
 
-        let result = {}
-        let colorlist = {}
-        let qtylist = {}
-        let unitname = {}
-        graph2Data.forEach((item) => {
-          const { lstproduct } = item;
+        const result = Object.entries(calculateTotal).map(([pipeline, { totalSales, color }]) => ({
+          value: totalSales,
+          name: pipeline,
+          itemStyle: {
+            color: color,
+          },
+        }));
 
-          lstproduct.forEach((product) => {
-            let { productName, totalSales, color, qty, unitShortName } = product;
-            if (totalSales !== 0) {
-              if (result[productName]) {
-                result[productName] += totalSales;
-                qtylist[productName] += qty
-              } else {
-                result[productName] = totalSales;
-                colorlist[productName] = color
-                qtylist[productName] = qty
-                unitname[productName] = unitShortName
+        setChartData(result);
+        const result_export = Object.entries(calculateTotal).map(([pipeline, { totalSales, color, qty, unitShortName }]) => ({
+          "productName": pipeline, "totalSale": totalSales, "color": color, "totalQty": qty, "unit": unitShortName
+        }));
+        setSellData(result_export)
 
-              }
-            }
-          }
-          )
-
-        }
-        )
-
-        if (result) {
-          let temp = []
-          let tabletemp = []
-          for (let key in result) {
-            temp.push({ "productName": key, "totalSale": result[key], "color": colorlist[key], "totalQty": qtylist[key], "unit": unitname[key] })
-            tabletemp.push({ "Product Name": key, "Sales": result[key], "Quantity": `${qtylist[key]} ${unitname[key]}` })
-          }
-          setTableData(tabletemp)
-          setSellData(temp)
-        }
+        const result_table = Object.entries(calculateTotal).map(([pipeline, { totalSales, qty, unitShortName }]) => ({
+          "Product Name": pipeline, "Sales": totalSales, "Quantity": `${qty} ${unitShortName}`,
+        }));
+        setTableData(result_table)
 
 
-      })
-      .catch((error) => {
-        // setSellData([])
-        // console.error("Error fetching data:", error);
-      }).finally(() => {
-        setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
-      });
+      }
     }
-  
 
-  }, [selectedRange, selectedOffice, isAdmin]);
+    // axios
+    //   .get(
+    //     `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
+    //   )
+    //   .then((response) => {
+    //     const data = response.data;
+    //     const graph2Data = data.graph2;
+
+    //     let result = {}
+    //     let colorlist = {}
+    //     let qtylist = {}
+    //     let unitname = {}
+    //     graph2Data.forEach((item) => {
+    //       const { lstproduct } = item;
+
+    //       lstproduct.forEach((product) => {
+    //         let { productName, totalSales, color, qty, unitShortName } = product;
+    //         if (totalSales !== 0) {
+    //           if (result[productName]) {
+    //             result[productName] += totalSales;
+    //             qtylist[productName] += qty
+    //           } else {
+    //             result[productName] = totalSales;
+    //             colorlist[productName] = color
+    //             qtylist[productName] = qty
+    //             unitname[productName] = unitShortName
+
+    //           }
+    //         }
+    //       }
+    //       )
+
+    //     }
+    //     )
+
+    //     if (result) {
+    //       let temp = []
+    //       let tabletemp = []
+    //       for (let key in result) {
+    //         temp.push({ "productName": key, "totalSale": result[key], "color": colorlist[key], "totalQty": qtylist[key], "unit": unitname[key] })
+    //         tabletemp.push({ "Product Name": key, "Sales": result[key], "Quantity": `${qtylist[key]} ${unitname[key]}` })
+    //       }
+    //       setTableData(tabletemp)
+    //       setSellData(temp)
+    //     }
+
+
+    //   })
+    //   .catch((error) => {
+    //     // setSellData([])
+    //     // console.error("Error fetching data:", error);
+    //   }).finally(() => {
+    //     setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
+    //   });
+    // }
+
+
+  }, [selectedRange, selectedOffice, isAdmin, alldata]);
 
   const toggleLegend = () => {
     if (sellData.length > 0) {
@@ -219,11 +272,11 @@ const OrdersPieChart = ({
         selectedMode: "single",
         avoidLabelOverlap: true,
         label: {
-          show: sellData.length<=10?true:false,
-          color:themeMode === "dark" ? "#ffffff" : "#111111"
+          show: chartData.length <= 10 ? true : false,
+          color: themeMode === "dark" ? "#ffffff" : "#111111"
           // position: "center",
         },
-        
+
         emphasis: {
           label: {
             show: true,
@@ -231,13 +284,7 @@ const OrdersPieChart = ({
             fontWeight: "bold",
           }
         },
-        data: sellData.length > 0 ? sellData.map((item, index) => ({
-          value: item.totalSale,
-          name: item.productName,
-          itemStyle: {
-            color: item.color,
-          },
-        })) : [],
+        data: chartData.length > 0 ? chartData : [],
 
 
         // labelLine: {
@@ -253,13 +300,13 @@ const OrdersPieChart = ({
     ],
   };
 
-  const exportToExcel = async() => {
+  const exportToExcel = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    const ExcelJS=await import('exceljs');
+    const ExcelJS = await import('exceljs');
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Data");
-  
+
     // Fetch the image file (replace "logo.png" with the correct path/URL)
     fetch(logo)
       .then((response) => response.blob())
@@ -267,19 +314,19 @@ const OrdersPieChart = ({
         const fileReader = new FileReader();
         fileReader.onload = function () {
           const imageBase64 = fileReader.result;
-  
+
           // Add the image to the worksheet
           const logoImage = workbook.addImage({
             base64: imageBase64,
             extension: "png",
           });
-  
+
           // Set the image position and size with padding
           worksheet.addImage(logoImage, {
             tl: { col: 0, row: 0 }, // Adjusted offset values for padding
             ext: { width: 100, height: 70 },
           });
-  
+
           // Add extra header - Product Wise Summary Data
           const extraHeaderCell = worksheet.getCell("A2"); // Shifted down by one row
           extraHeaderCell.value = t("Product Wise Summary Data");
@@ -293,7 +340,7 @@ const OrdersPieChart = ({
             horizontal: "center",
           };
           worksheet.mergeCells("A2:C2"); // Shifted down by one row
-  
+
           // Add period - startDate to endDate
           const periodCell = worksheet.getCell("A3"); // Shifted down by two rows
           periodCell.value = `${t("Period")}: ${startDate} ${t("to")} ${endDate}`;
@@ -304,20 +351,20 @@ const OrdersPieChart = ({
           };
           periodCell.alignment = { horizontal: "center" }; // Center alignment
           worksheet.mergeCells("A3:C3"); // Shifted down by two rows
-  
+
           // Set column widths
           worksheet.getColumn(1).width = 50;
           worksheet.getColumn(2).width = 15;
-  
+
           // Add headers
           const headerRow = worksheet.addRow([t("Product Name"), t("Quantity"), t("Total Sales")]);
-  
+
           headerRow.font = {
             bold: true,
             color: { argb: "000000" }, // Black color
             size: 12,
           };
-  
+
           // Apply underline and border style to each cell
           headerRow.eachCell((cell) => {
             cell.font = {
@@ -329,7 +376,7 @@ const OrdersPieChart = ({
               bottom: { style: "thin", color: { argb: "000000" } }, // Black color
             };
           });
-  
+
           // Add data rows
           sellData.forEach((item) => {
             worksheet.addRow([
@@ -338,16 +385,16 @@ const OrdersPieChart = ({
               `₹${item.totalSale}`,
             ]); // Add "₹" symbol before the totalSale value
           });
-  
+
           // Generate a unique filename
           const fileName = `product_wise_summary_data_${Date.now()}.xlsx`;
-  
+
           // Save the workbook
           workbook.xlsx.writeBuffer().then((buffer) => {
             saveAs(new Blob([buffer]), fileName);
           });
         };
-  
+
         fileReader.readAsDataURL(blob);
       });
   };
@@ -363,95 +410,95 @@ const OrdersPieChart = ({
     return `${year}-${month}-${day}`;
   };
 
-  const exportToPDF = async() => {
+  const exportToPDF = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    import('jspdf').then(module => { 
-    let jsPDF = module.default
-    const doc = new jsPDF();
+    import('jspdf').then(module => {
+      let jsPDF = module.default
+      const doc = new jsPDF();
 
-    // Set table headers
-    const headers = [["Product Name", "Quantity", "Total Sale"]];
-    const columnStyles = {
-      1: { halign: "right" }, 
-      2: { halign: "right" }, 
-    };
+      // Set table headers
+      const headers = [["Product Name", "Quantity", "Total Sale"]];
+      const columnStyles = {
+        1: { halign: "right" },
+        2: { halign: "right" },
+      };
 
-    const headerStyles = {
-      fontSize: 12,
-      fontStyle: "bold",
-      halign: "center",
-    };
-
-    // Set background colors
-    const backgroundColors = {
-      summaryHeader: "#3CB043", // Green color for Sales-Expense Summary header
-      secondHeader: "#75AAF0", // Sky blue color for Date, Expense, Sales header
-    };
-
-    // Add the image
-    const imgData = logo; // Replace with the path or URL of your image file
-    const imgWidth = 35;
-    const imgHeight = 20;
-    doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
-
-    // Add Sales-Expense Summary header
-    const summaryHeader = [["Product Wise Summary Data"]];
-    doc.autoTable({
-      head: summaryHeader,
-      body: [],
-      headStyles: {
-        ...headerStyles,
-        fillColor: backgroundColors.summaryHeader,
-        textColor: "#FFFFFF", // White color
-      },
-      margin: { top: 30 }, // Move it a little down
-    });
-
-    const periodCell = [[`Period: ${startDate} to ${endDate}`]];
-    doc.autoTable({
-      startY: 39.5,
-      head: periodCell,
-      body: [],
-      headStyles: {
+      const headerStyles = {
         fontSize: 12,
         fontStyle: "bold",
         halign: "center",
-        fillColor: "#3CB043",
-        textColor: "#FFFFFF",
-      },
-      margin: { top: 30 }, // Move it upwards and provide some space at the bottom
-    });
+      };
 
-    // Set table rows
-    const rows = sellData.map((item) => [
-      item.productName,
-      `${item.totalQty} ${item.unit}`,
-      item.totalSale.toFixed(2),
-    ]);
+      // Set background colors
+      const backgroundColors = {
+        summaryHeader: "#3CB043", // Green color for Sales-Expense Summary header
+        secondHeader: "#75AAF0", // Sky blue color for Date, Expense, Sales header
+      };
 
-    // AutoTable configuration
-    const tableConfig = {
-      startY: doc.autoTable.previous.finalY + 1,
-      head: headers,
-      body: rows,
-      headStyles: {
-        ...headerStyles,
-        fillColor: backgroundColors.secondHeader,
-        textColor: "#FFFFFF", // White color
-      },
-      columnStyles:columnStyles
-    };
+      // Add the image
+      const imgData = logo; // Replace with the path or URL of your image file
+      const imgWidth = 35;
+      const imgHeight = 20;
+      doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
 
-    // Add table to the PDF document
-    doc.autoTable(tableConfig);
+      // Add Sales-Expense Summary header
+      const summaryHeader = [["Product Wise Summary Data"]];
+      doc.autoTable({
+        head: summaryHeader,
+        body: [],
+        headStyles: {
+          ...headerStyles,
+          fillColor: backgroundColors.summaryHeader,
+          textColor: "#FFFFFF", // White color
+        },
+        margin: { top: 30 }, // Move it a little down
+      });
 
-    // Generate a unique filename
-    const fileName = `product_wise_summary_data_${Date.now()}.pdf`;
+      const periodCell = [[`Period: ${startDate} to ${endDate}`]];
+      doc.autoTable({
+        startY: 39.5,
+        head: periodCell,
+        body: [],
+        headStyles: {
+          fontSize: 12,
+          fontStyle: "bold",
+          halign: "center",
+          fillColor: "#3CB043",
+          textColor: "#FFFFFF",
+        },
+        margin: { top: 30 }, // Move it upwards and provide some space at the bottom
+      });
 
-    // Save the PDF document
-    doc.save(fileName);
-  })
+      // Set table rows
+      const rows = sellData.map((item) => [
+        item.productName,
+        `${item.totalQty} ${item.unit}`,
+        item.totalSale.toFixed(2),
+      ]);
+
+      // AutoTable configuration
+      const tableConfig = {
+        startY: doc.autoTable.previous.finalY + 1,
+        head: headers,
+        body: rows,
+        headStyles: {
+          ...headerStyles,
+          fillColor: backgroundColors.secondHeader,
+          textColor: "#FFFFFF", // White color
+        },
+        columnStyles: columnStyles
+      };
+
+      // Add table to the PDF document
+      doc.autoTable(tableConfig);
+
+      // Generate a unique filename
+      const fileName = `product_wise_summary_data_${Date.now()}.pdf`;
+
+      // Save the PDF document
+      doc.save(fileName);
+    })
   };
 
   useEffect(() => {
@@ -471,12 +518,12 @@ const OrdersPieChart = ({
       if (legendButtonRef.current && !legendButtonRef.current.contains(event.target)) {
         setShowLegend(false);
       }
-  
+
     };
-  
+
     // Add the click event listener to the document
     document.addEventListener("click", handleClickOutsideIconContainer);
-  
+
     // Clean up the event listener when the component unmounts
     return () => {
       document.removeEventListener("click", handleClickOutsideIconContainer);
@@ -508,23 +555,23 @@ const OrdersPieChart = ({
                 alt="Code Block Icon"
                 className={css.codeBlockIcon}
                 title="Legends"
-                style={{filter: showLegend||sellData.length===0 ? "opacity(0.4)" : "opacity(1)",transition: "all .25s ease-in-out"}}
+                style={{ filter: showLegend || sellData.length === 0 ? "opacity(0.4)" : "opacity(1)", transition: "all .25s ease-in-out" }}
               />{" "}
 
             </button>
             <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
-            }`}>{t("Product Volume")}</div>
+              }`}>{t("Product Volume")}</div>
             <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
               {/* Data grid icon */}
- 
-                <div
-                  className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
-                    } px-2 py-1`}
 
-                  onClick={handleIconClick}
-                >
-                  {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
-                </div>
+              <div
+                className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
+                  } px-2 py-1`}
+
+                onClick={handleIconClick}
+              >
+                {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
+              </div>
               {showExportOptions && (
                 <div
                   className={`${css.exportOptions} ${themeMode === "dark" ? css.darkMode : css.lightMode
@@ -532,15 +579,15 @@ const OrdersPieChart = ({
                   ref={exportOptionsRef}
                 >
                   {!tableStatus ?
-                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                  <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
-                  <span>{t("View Table")}</span>
-                </div>:
-                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                  <FaChartPie style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
-                  <span>{t("View Graph")}</span>
-                </div>}
-                <div className={css.exportOption} onClick={exportToExcel}>
+                    <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                      <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
+                      <span>{t("View Table")}</span>
+                    </div> :
+                    <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                      <FaChartPie style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
+                      <span>{t("View Graph")}</span>
+                    </div>}
+                  <div className={css.exportOption} onClick={exportToExcel}>
                     <FaFileExcel style={{ fontSize: "1.1rem", color: "green" }} />
                     <span>{t("Export to Excel")}</span>
                   </div>
@@ -559,9 +606,9 @@ const OrdersPieChart = ({
             <Lottie animationData={animationData} loop={true} />
           </div>
         )}
-         {tableData.length==0 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>
-        {t("No Data Found")}
-      </div>:''}
+        {tableData.length == 0 && !tableStatus && !isLoading ? <div className={`${css.NoDataOverlay} fs-5`}>
+          {t("No Data Found")}
+        </div> : ''}
 
         {!tableStatus ? <ReactECharts
           key={sellData.length}

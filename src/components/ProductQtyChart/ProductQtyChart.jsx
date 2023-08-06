@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
-import axios from 'axios';
+
 import { saveAs } from 'file-saver';
-;
+
 import 'jspdf-autotable';
-import { CircularProgress } from "@mui/material";
 import css from './ProductQtyChart.module.css';
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "react-icons/fa6";
-import logo from "../../logo.png";
+import logo from "/assets/logo.png";
 import MUIDataTable from 'mui-datatables';
 import { useTranslation } from 'react-i18next';
 import Lottie from 'lottie-react';
@@ -20,6 +19,8 @@ const ProductQtyChart = ({
   selectedRange,
   selectedOffice,
   isAdmin,
+  alldata,
+  isLoading
 }) => {
   const [sellData, setSellData] = useState([]);
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -31,7 +32,8 @@ const ProductQtyChart = ({
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [tableData, setTableData] = useState([])
   const [tableStatus, setTableStatus] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  // const [isLoading, setIsLoading] = useState(false)
+  const [chartData, setChartData] = useState([])
   const { t } = useTranslation();
   const columns = [{ name: "Product Name", label: t("Product") }, { name: "Quantity", label: t("Quantity") }, { name: "Sales", label: `${t("Sales")}(₹)` }];
 
@@ -56,7 +58,31 @@ const ProductQtyChart = ({
       }
     }
   };
+  
+  function calculateTotalSales(dataArray) {
+    const flatProducts = dataArray.flatMap((item) => item.lstproduct);
 
+    const totalSalesByProduct = flatProducts.reduce((result, product) => {
+      const { productName, totalSales, qty, color, unitShortName } = product;
+
+      if (totalSales !== 0) {
+        if (result[productName]) {
+          result[productName].totalSales += totalSales;
+          result[productName].qty += qty;
+        } else {
+          result[productName] = {
+            totalSales,
+            qty,
+            color, unitShortName
+          };
+        }
+      }
+
+      return result;
+    }, {});
+
+    return totalSalesByProduct;
+  }
 
   // useEffect(() => {
   //   // Function to update the window width state on window resize
@@ -74,67 +100,95 @@ const ProductQtyChart = ({
   // }, []);
 
   useEffect(() => {
-    setIsLoading(true)
+    // setIsLoading(true)
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    if(startDate && endDate && selectedOffice){
-    axios
-      .get(
-        `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
-      )
-      .then((response) => {
-        const data = response.data;
-        const graph2Data = data.graph2;
+    if (startDate && endDate && selectedOffice) {
+      if (alldata.graph2) {
+        const calculateTotal = calculateTotalSales(alldata.graph2)
 
-        let result = {}
-        let colorlist = {}
-        let qtylist = {}
-        let unitname = {}
-        graph2Data.forEach((item) => {
-          const { lstproduct } = item;
+        const result = Object.entries(calculateTotal).map(([pipeline, { totalSales, color }]) => ({
+          value: totalSales,
+          name: pipeline,
+          itemStyle: {
+            color: color,
+          },
+        }));
 
-          lstproduct.forEach((product) => {
-            let { productName, totalSales, color, qty, unitShortName } = product;
-            if (totalSales !== 0) {
-              if (result[productName]) {
-                result[productName] += totalSales;
-                qtylist[productName] += qty
-              } else {
-                result[productName] = totalSales;
-                colorlist[productName] = color
-                qtylist[productName] = qty
-                unitname[productName] = unitShortName
+        setChartData(result);
+        const result_export = Object.entries(calculateTotal).map(([pipeline, { totalSales, color, qty, unitShortName }]) => ({
+          "productName": pipeline, "totalSale": totalSales, "color": color, "totalQty": qty, "unit": unitShortName
+        }));
+        setSellData(result_export)
 
-              }
-            }
-          }
-          )
-
-        }
-        )
-
-        if (result) {
-          let temp = []
-          let tabletemp = []
-          for (let key in result) {
-            temp.push({ "productName": key, "totalSale": result[key], "color": colorlist[key], "totalQty": qtylist[key], "unit": unitname[key] })
-            tabletemp.push({ "Product Name": key, "Sales": result[key], "Quantity": `${qtylist[key]} ${unitname[key]}` })
-          }
-          setTableData(tabletemp)
-          setSellData(temp)
-        }
+        const result_table = Object.entries(calculateTotal).map(([pipeline, { totalSales, qty, unitShortName }]) => ({
+          "Product Name": pipeline, "Sales": totalSales, "Quantity": `${qty} ${unitShortName}`,
+        }));
+        setTableData(result_table)
 
 
-      })
-      .catch((error) => {
-        // setSellData([])
-        // console.error("Error fetching data:", error);
-      }).finally(() => {
-        setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
-      });
+      }
     }
+    // const startDate = formatDate(selectedRange[0]);
+    // const endDate = formatDate(selectedRange[1]);
+    // if(startDate && endDate && selectedOffice){
+    // axios
+    //   .get(
+    //     `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
+    //   )
+    //   .then((response) => {
+    //     const data = response.data;
+    //     const graph2Data = data.graph2;
 
-  }, [selectedRange, selectedOffice, isAdmin]);
+    //     let result = {}
+    //     let colorlist = {}
+    //     let qtylist = {}
+    //     let unitname = {}
+    //     graph2Data.forEach((item) => {
+    //       const { lstproduct } = item;
+
+    //       lstproduct.forEach((product) => {
+    //         let { productName, totalSales, color, qty, unitShortName } = product;
+    //         if (totalSales !== 0) {
+    //           if (result[productName]) {
+    //             result[productName] += totalSales;
+    //             qtylist[productName] += qty
+    //           } else {
+    //             result[productName] = totalSales;
+    //             colorlist[productName] = color
+    //             qtylist[productName] = qty
+    //             unitname[productName] = unitShortName
+
+    //           }
+    //         }
+    //       }
+    //       )
+
+    //     }
+    //     )
+
+    //     if (result) {
+    //       let temp = []
+    //       let tabletemp = []
+    //       for (let key in result) {
+    //         temp.push({ "productName": key, "totalSale": result[key], "color": colorlist[key], "totalQty": qtylist[key], "unit": unitname[key] })
+    //         tabletemp.push({ "Product Name": key, "Sales": result[key], "Quantity": `${qtylist[key]} ${unitname[key]}` })
+    //       }
+    //       setTableData(tabletemp)
+    //       setSellData(temp)
+    //     }
+
+
+    //   })
+    //   .catch((error) => {
+    //     // setSellData([])
+    //     // console.error("Error fetching data:", error);
+    //   }).finally(() => {
+    //     setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
+    //   });
+    // }
+
+  }, [selectedRange, selectedOffice, isAdmin,alldata]);
 
   const toggleLegend = () => {
     if (sellData.length > 0)
@@ -220,7 +274,7 @@ const ProductQtyChart = ({
         
         avoidLabelOverlap: true,
         label: {
-          show: sellData.length<=10?true:false,
+          show: chartData.length<=10?true:false,
           color:themeMode === "dark" ? "#ffffff" : "#111111"
           // position: "center",
         },
@@ -232,13 +286,7 @@ const ProductQtyChart = ({
             fontWeight: "bold",
           }
         },
-        data: sellData.length > 0 ? sellData.map((item, index) => ({
-          value: item.totalQty,
-          name: item.productName,
-          itemStyle: {
-            color: item.color,
-          },
-        })) : [],
+        data: chartData.length > 0 ? chartData : [],
 
 
         // labelLine: {
