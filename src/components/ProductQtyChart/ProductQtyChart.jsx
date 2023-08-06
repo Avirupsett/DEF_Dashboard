@@ -107,8 +107,8 @@ const ProductQtyChart = ({
       if (alldata.graph2) {
         const calculateTotal = calculateTotalSales(alldata.graph2)
 
-        const result = Object.entries(calculateTotal).map(([pipeline, { totalSales, color }]) => ({
-          value: totalSales,
+        const result = Object.entries(calculateTotal).map(([pipeline, { qty, color }]) => ({
+          value: qty,
           name: pipeline,
           itemStyle: {
             color: color,

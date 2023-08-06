@@ -577,6 +577,10 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
           <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Sales-Expense")}</div>
+             <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                    <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
+                    <span>{t("View Table")}</span>
+                  </div>
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
             <div
@@ -587,7 +591,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
             >
               {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
             </div>
-            {/* {showExportOptions && ( */}
+            
+            {showExportOptions && (
               <div
                 className={`${css.exportOptions} ${themeMode === "dark" ? css.darkMode : css.lightMode
                   }`}
@@ -611,7 +616,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
                   <span>{t("Export to PDF")}</span>
                 </div>
               </div>
-            {/* )}*/}
+            )}
           </div>
           </div>
         </div>
