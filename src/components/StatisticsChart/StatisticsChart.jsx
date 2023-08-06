@@ -637,7 +637,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       {/* Loading spinner */}
       {isLoading && (
         <div className={css.NoDataOverlay}>
-          <img src={loading} alt="Loading..." />
+          <img src={loading} alt="Loading..." width={50} height={50} />
         </div>
       )}
 

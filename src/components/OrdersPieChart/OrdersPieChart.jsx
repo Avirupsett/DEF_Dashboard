@@ -602,7 +602,7 @@ const OrdersPieChart = ({
         </div>
         {isLoading && (
           <div className={css.NoDataOverlay}>
-            <img src={loading} alt="Loading..." />
+            <img src={loading} alt="Loading..." width={50} height={50}/>
           </div>
         )}
         {tableData.length == 0 && !tableStatus && !isLoading ? <div className={`${css.NoDataOverlay} fs-5`}>
