@@ -3,8 +3,7 @@ import axios from "axios";
 import css from "./StatisticsChart.module.css";
 import { saveAs } from "file-saver";
 import "jspdf-autotable"
-import Lottie from 'lottie-react';
-import animationData from '../../loading.json';
+import loading from '/assets/loading.gif';
 import logo from "/assets/logo.png";
 import { differenceInDays } from 'date-fns';
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartColumn } from "react-icons/fa6";
@@ -566,6 +565,10 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+  const handleTableClick = () => {
+    setTableStatus(!tableStatus); setShowExportOptions(false) 
+  }
+
 
   return (
 
@@ -582,8 +585,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
             <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
             <span>{t("View Table")}</span>
           </div> */}
-          <button  onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }} className='btn btn-primary btn-sm'>Table</button>
-          <a href="javascript:void(0)" className="btn btn-primary btn-sm" onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>Graph</a>
+         
+          {/* <a href="javascript:void(0)" className="btn btn-primary btn-sm" onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>Graph</a> */}
           <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
             <div
@@ -602,7 +605,10 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
                 ref={exportOptionsRef}
               >
                 {!tableStatus ?
-                  <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                  <div className={css.exportOption}
+             
+                 onClick={handleTableClick }
+                  >
                     <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
                     <span>{t("View Table")}</span>
                   </div> :
@@ -631,7 +637,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       {/* Loading spinner */}
       {isLoading && (
         <div className={css.NoDataOverlay}>
-          <Lottie animationData={animationData} loop={true} />
+          <img src={loading} alt="Loading..." />
         </div>
       )}
 

@@ -10,8 +10,8 @@ import logo from "/assets/logo.png";
 
 import MUIDataTable from "mui-datatables";
 import { useTranslation } from "react-i18next";
-import Lottie from 'lottie-react';
-import animationData from '../../loading.json';
+
+import loading from '/assets/loading.gif';
 
 const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName,setSelectedOffice,setIsAdmin }) => {
   const [chartData, setChartData] = useState([]);
@@ -650,7 +650,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       {/* Loading spinner */}
       {isLoading && (
         <div className={css.NoDataOverlay}>
-          <Lottie animationData={animationData} loop={true} />
+          <img src={loading} alt="Loading..." />
         </div>
       )}
       {tableData.length == 1 && !tableStatus && !isLoading ? <div className={`${css.NoDataOverlay} fs-5`}>
