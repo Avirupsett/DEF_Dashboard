@@ -245,7 +245,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         startValue: new Date(selectedRange[0]),
         endValue: new Date(selectedRange[1])
       },
-      
+
     ],
     series: isBarChart // Conditional check for the chart type
       ? [
@@ -577,7 +577,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
     return `${year}-${month}-${day}`;
   };
   const handleTableClick = () => {
-    setTableStatus(!tableStatus); setShowExportOptions(false) 
+    setTableStatus(!tableStatus); setShowExportOptions(false)
   }
 
 
@@ -596,7 +596,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
             <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
             <span>{t("View Table")}</span>
           </div> */}
-         
+
           {/* <a href="javascript:void(0)" className="btn btn-primary btn-sm" onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>Graph</a> */}
           <div title='Export Options' className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
@@ -617,8 +617,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
               >
                 {!tableStatus ?
                   <div className={css.exportOption}
-             
-                 onClick={handleTableClick }
+
+                    onClick={handleTableClick}
                   >
                     <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
                     <span>{t("View Table")}</span>
@@ -667,12 +667,35 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         className={themeMode === "dark" ? css.darkMode : css.lightMode}
       /> :
         <div className="container-fluid mt-2">
-          <MUIDataTable
+          {/* <MUIDataTable
             // title={"Employee List"}
             data={tableData}
             columns={columns}
             options={options}
-          />
+          /> */}
+          <table className="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">{t("Date")}</th>
+                <th scope="col">{t("Sales")}</th>
+                <th scope="col">{t("Expense")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((item, index) => {
+                return(
+                <tr key={item.requestedDate}>
+                  <th scope="row">{index+1}</th>
+                  <td>{item.requestedDate}</td>
+                  <td>{item.sales}</td>
+                  <td>{item.expense}</td>
+                </tr>
+                )
+              })}
+
+            </tbody>
+          </table>
         </div>}
     </div>
 
