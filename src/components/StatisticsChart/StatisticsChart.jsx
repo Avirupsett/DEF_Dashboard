@@ -24,7 +24,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
   const [isBarChart, setIsBarChart] = useState(true); // State to track the chart type
 
   const [tableData, setTableData] = useState([])
-  const [tableStatus, setTableStatus] = useState(false)
+  const [tableStatus, setTableStatus] = useState(true)
   const { t } = useTranslation();
 
 

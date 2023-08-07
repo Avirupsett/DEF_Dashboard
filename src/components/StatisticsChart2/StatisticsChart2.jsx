@@ -318,7 +318,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       size: 14,
     };
     extraHeaderCell.alignment = { vertical: "middle", horizontal: "center" };
-    worksheet.mergeCells("A1:C1");
+    worksheet.mergeCells("A1:B1");
 
     // Add period - startDate to endDate
     const periodCell = worksheet.getCell("A2");
