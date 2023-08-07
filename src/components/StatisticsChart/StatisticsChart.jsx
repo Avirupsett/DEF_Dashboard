@@ -236,6 +236,17 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       }
 
     ],
+    dataZoom: [
+      {
+        show: true,
+        type: 'inside',
+        filterMode: 'none',
+        xAxisIndex: [0],
+        startValue: new Date(selectedRange[0]),
+        endValue: new Date(selectedRange[1])
+      },
+      
+    ],
     series: isBarChart // Conditional check for the chart type
       ? [
         {
@@ -578,7 +589,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
     >
       <div className="container-fluid" >
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
-          <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
+          <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Sales-Expense")}</div>
           {/* <div className={css.exportOption}
             onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
@@ -587,7 +598,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
           </div> */}
          
           {/* <a href="javascript:void(0)" className="btn btn-primary btn-sm" onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>Graph</a> */}
-          <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
+          <div title='Export Options' className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
             <div
               className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode

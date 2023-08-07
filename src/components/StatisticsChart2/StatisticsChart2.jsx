@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 
 import loading from '/assets/loading.gif';
 
-const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails,originallist,setOfficeIdLocal,officeIdLocal}) => {
+const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails,originallist,setOfficeIdLocal,officeIdLocal,setOptionvalue}) => {
   const [chartData, setChartData] = useState([]);
 
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -103,7 +103,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
               "officeId": data['graph1'][i].officeId,
               "officeName": data['graph1'][i].officeName,
               "officeType": data['graph1'][i].officeType,
-              "sales": data['graph1'][i].totalIncome.toFixed(0),
+              "sales": data['graph1'][i].totalIncome.toFixed(2),
               "color": data['graph1'][i].officeTypeColor
             });
             tabletemp.push({
@@ -123,7 +123,9 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
             setRetails(temp.filter(
               (office) => office.officeType === "Retail Pumps"
               ));
-              setswitch1(true)
+              setTimeout(() => {
+                setswitch1(true)
+              }, 2000);
            }
             setTableData(tabletemp);
           }
@@ -304,7 +306,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     });
     worksheet.addImage(logoImage, {
       tl: { col: 0, row: 0 },
-      ext: { width: 40, height: 40 },
+      ext: { width: 100, height: 60 },
     });
 
     // Add extra header - Sales-Expense Summary
@@ -327,7 +329,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       size: 12,
     };
     periodCell.alignment = { horizontal: "center" }; // Center alignment
-    worksheet.mergeCells("A2:C2");
+    worksheet.mergeCells("A2:B2");
 
     // Set column widths
     worksheet.getColumn(1).width = 50;
@@ -390,7 +392,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
 
       // Add Sales-Expense Summary header
-      const summaryHeader = [[t("Total Sales by Business Entity")]];
+      const summaryHeader = [["Total Sales by Business Entity"]];
       doc.autoTable({
         startY: 27,
         head: summaryHeader,
@@ -406,7 +408,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       });
 
       // Add period - startDate to endDate
-      const periodCell = [[`${t(Period)}: ${startDate} ${t(to)} ${endDate}`]];
+      const periodCell = [[`"Period": ${startDate} "to" ${endDate}`]];
       doc.autoTable({
         startY: 36,
         head: periodCell,
@@ -424,7 +426,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       // Convert chart data to table format
       const tableData = chartData.map((item) => [
         item.officeName,
-        parseFloat(item.sales.toFixed(2)),
+       item.sales
       ]);
 
       // Calculate total sales
@@ -434,10 +436,10 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       );
 
       // Add total row
-      tableData.push([t("Total"), `${totalSales.toFixed(2)}`]);
+      tableData.push(["Total", `${totalSales.toFixed(2)}`]);
 
       // Set table headers
-      const headers = [t("Office Name"), t("Sales")];
+      const headers = ["Office Name", "Sales"];
       const columnStyles = {
         1: { halign: "right" }, // Align Sales column to center
         2: { halign: "right" }, // Align Expense column to center
@@ -516,6 +518,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       const lastSelection = selectionHistory.pop();
       const lastSelectionOfficeId = selectionHistoryOfficeId.pop();
       setIsLoading(true);
+      setOptionvalue({state:true,Ovalue:lastSelectionOfficeId})
       // Update the localSelectedOffice and localIsAdmin states with the last entry values
       setSelectedOffice(lastSelection.selectedOffice);
       setOfficeIdLocal(lastSelectionOfficeId)
@@ -544,6 +547,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     setswitch1(false)
     setIsLoading(true);
     setSelectedOffice(originallist.officeId)
+    setOptionvalue({state:true,Ovalue:originallist.officeId})
     setIsAdmin(originallist.adminStatus)
     setOfficeIdLocal(originallist.officeId)
     // Clear the selectionHistory array
@@ -618,9 +622,9 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
         <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Total Sales by Business Entity")}</div>
           {/* Stylish "Reset" button */}
-          {showResetButton && selectedOffice !== originallist.officeId  ? (
-            <div className={css.resetButtonContainer}>
-              <button className={`btn btn-primary mx-1 ${window.innerWidth<500?'btn-sm':''}`} onClick={handleReset}>
+          {showResetButton  ? (
+            <div title="Reset" className={css.resetButtonContainer}>
+              <button title="Reset" className={`btn btn-primary mx-1 ${window.innerWidth<500?'btn-sm':''} shadow border-2 border-white`} onClick={handleReset}>
                 <FaAnglesLeft style={{ fontSize: "1rem" }} />
               </button>
             </div>
@@ -628,14 +632,14 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
           ) : null}
           {/* "Previous" button */}
           {showPreviousButton && selectionHistory.length > 0 ? (
-            <div className={css.resetButtonContainer}>
-              <button className={`btn btn-primary mx-1 ${window.innerWidth<500?'btn-sm':''}`} onClick={handlePrevious}>
+            <div title="Previous" className={css.resetButtonContainer}>
+              <button title="Previous" className={`btn btn-primary mx-1 ${window.innerWidth<500?'btn-sm':''} shadow border-2 border-white`} onClick={handlePrevious}>
                 <FaAngleLeft style={{ fontSize: "1rem" }} />
               </button>
             </div>
 
           ) : null}
-          <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
+          <div title='Export Options' className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
             {/* Data grid icon */}
 
             <div

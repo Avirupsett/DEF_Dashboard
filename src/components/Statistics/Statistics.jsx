@@ -112,6 +112,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
   const [isLoading, setIsLoading] = useState(true)
   const [originallist, setOriginallist] = useState([])
   const [officeIdLocal, setOfficeIdLocal] = useState(officeId)
+  const [optionvalue, setOptionvalue] = useState("")
 
   // const handleResize = () => {
   //   setWindowWidth(window.innerWidth);
@@ -221,6 +222,9 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
   const handleOfficeChange = async (event) => {
     const selectedOption = event.target.selectedOptions[0];
+
+    // setOptionvalue(event.target.options[event.target.selectedIndex].text)
+    setOptionvalue({state:false,Ovalue:event.target.value})
     // const isRetail = selectedOption.getAttribute("data-isretail");
     setIsLoading(true)
     const isAdmin = selectedOption.getAttribute("data-isadmin");
@@ -259,8 +263,8 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
     <div className={`${css.container} ${themeMode === 'dark' ? 'theme-container' : 'theme2-container'} pb-5`}>
       <div className='d-flex justify-content-between align-items-center mb-0'>
-        <div className='fs-2 mx-sm-0 mx-md-3 fw-bold'><span className='me-2 ms-md-1  ms-2 text-primary'><FaCoins /></span> {t("Sales Overview")}</div>
-        <button className="btn btn-primary btn-lg mx-2 d-flex align-items-center" type="submit" onClick={() => setFilterOn(!filterOn)}><span className='d-flex'>{filterOn ? <FaXmark style={{ fontSize: "1.4rem", marginRight: window.innerWidth > 500 ? "4px" : "0px" }} /> : <FaFilter style={{ fontSize: "1.2rem", marginRight: window.innerWidth > 500 ? "8px" : "0px" }} />}</span>  {window.innerWidth > 500 ? filterOn ? t('Close') : t(`Filter`) : ""}</button>
+        <div className={`fs-${window.innerWidth <= 768 ? 3 : 2} mx-sm-0 mx-md-3 fw-bold`}><span className='me-2 ms-md-1  ms-2 text-primary'><FaCoins /></span> {t("Sales Overview")}</div>
+        <button className="btn btn-primary btn-lg mx-2 d-flex align-items-center shadow border-2 border-white" type="submit" onClick={() => setFilterOn(!filterOn)}><span className='d-flex'>{filterOn ? <FaXmark style={{ fontSize: "1.4rem", marginRight: window.innerWidth > 500 ? "4px" : "0px" }} /> : <FaFilter style={{ fontSize: "1.2rem", marginRight: window.innerWidth > 500 ? "8px" : "0px" }} />}</span>  {window.innerWidth > 500 ? filterOn ? t('Close') : t(`Filter`) : ""}</button>
       </div>
       <div style={{ visibility: filterOn ? 'visible' : 'hidden', opacity: filterOn ? 1 : 0, height: filterOn ? window.innerWidth >= 768 ? "85px" : "130px" : 0, marginBottom: filterOn ? "10px" : 0 }} className={`${css.topContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
         }`}>
@@ -283,7 +287,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           </div>
           <div className="col-md-6 col-lg-5 col-xl-4 col-xxl-4 my-sm-2   my-2 d-flex justify-content-center align-items-center mx-0">
             {window.innerWidth > 400 ? <div className="me-2 me-sm-3 ms-1 ms-lg-2 mt-1"><FaRegBuilding style={{ fontSize: '2.3rem', color: "white" }} /></div> : ''}
-            <select className="form-select form-select-lg" aria-label="Default select example" id="office" onChange={handleOfficeChange} style={{ paddingBottom: "4px !important", paddingTop: "4px !important" }}>
+            <select value={optionvalue.state?optionvalue.Ovalue:null} className="form-select form-select-lg" aria-label="Default select example" id="office" onChange={handleOfficeChange} style={{ paddingBottom: "4px !important", paddingTop: "4px !important" }}>
               {companies.length > 1 ? <><option
                 value={officeIdLocal}
                 data-isretail="-1"
@@ -408,7 +412,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           </div>
           <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal}/>
+              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue}/>
             </Suspense>
           </div>
         </div>

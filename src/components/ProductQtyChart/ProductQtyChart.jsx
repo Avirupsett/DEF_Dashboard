@@ -561,9 +561,9 @@ const ProductQtyChart = ({
               />{" "}
 
             </button>
-            <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
+            <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Product Quantity")}</div>
-            <div className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
+            <div title='Export Options' className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
               {/* Data grid icon */}
           
                 <div
