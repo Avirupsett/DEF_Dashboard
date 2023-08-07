@@ -7,7 +7,6 @@ import 'jspdf-autotable';
 import css from './ProductQtyChart.module.css';
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "react-icons/fa6";
 import logo from "/assets/logo.png";
-import MUIDataTable from 'mui-datatables';
 import { useTranslation } from 'react-i18next';
 import loading from '/assets/loading.gif';
 
@@ -34,29 +33,7 @@ const ProductQtyChart = ({
   // const [isLoading, setIsLoading] = useState(false)
   const [chartData, setChartData] = useState([])
   const { t } = useTranslation();
-  const columns = [{ name: "Product Name", label: t("Product") }, { name: "Quantity", label: t("Quantity") }, { name: "Sales", label: `${t("Sales")}(₹)` }];
 
-  const options = {
-    // filterType: 'checkbox',
-    selectableRowsHeader: false,
-    filter: false,
-    download: false,
-    print: false,
-    viewColumns: false,
-    search: false,
-    responsive: 'standard',
-    selectableRows: "none",
-    rowsPerPage: 10,
-    rowsPerPageOptions: [10, 25, 50],
-    tableBodyHeight: "229px",
-    elevation: 0,
-    fixedHeader: false,
-    textLabels: {
-      pagination: {
-        rowsPerPage: t("Rows")
-      }
-    }
-  };
   
   function calculateTotalSales(dataArray) {
     const flatProducts = dataArray.flatMap((item) => item.lstproduct);
@@ -121,7 +98,7 @@ const ProductQtyChart = ({
         setSellData(result_export)
 
         const result_table = Object.entries(calculateTotal).map(([pipeline, { totalSales, qty, unitShortName }]) => ({
-          "Product Name": pipeline, "Sales": totalSales, "Quantity": `${qty} ${unitShortName}`,
+          "ProductName": pipeline, "Sales": totalSales, "Quantity": `${qty} ${unitShortName}`,
         }));
         setTableData(result_table)
 
@@ -626,14 +603,31 @@ const ProductQtyChart = ({
           className={css.piechart}
         // className={themeMode === "dark" ? css.darkMode : css.lightMode}
         /> :
-          <div className="container-fluid pt-2">
-            <MUIDataTable
-              // title={"Employee List"}
-              data={tableData}
-              columns={columns}
-              options={options}
-            />
-          </div>
+        <div className="container-fluid mt-2 table-responsive" style={{ height: "291px" }}>
+        <table className={`table  ${themeMode == 'dark' ? 'table-dark' : ''}`}>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">{t("Product")}</th>
+              <th scope="col">{t("Quantity")}</th>
+              <th scope="col">{t("Sales")}(₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tableData.map((item, index) => {
+              return (
+                <tr key={item.ProductName}>
+                  <th scope="row">{index + 1}</th>
+                  <td>{item.ProductName}</td>
+                  <td>{item.Quantity}</td>
+                  <td>{parseFloat(item.Sales).toFixed(2)}</td>
+                </tr>
+              )
+            })}
+
+          </tbody>
+        </table>
+      </div>
         }
       
 

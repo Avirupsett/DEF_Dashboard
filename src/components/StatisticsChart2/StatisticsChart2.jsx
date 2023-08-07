@@ -8,7 +8,6 @@ import "jspdf-autotable";
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaRegChartBar, FaAngleLeft, FaAnglesLeft } from "react-icons/fa6";
 import logo from "/assets/logo.png";
 
-import MUIDataTable from "mui-datatables";
 import { useTranslation } from "react-i18next";
 
 import loading from '/assets/loading.gif';
@@ -704,14 +703,29 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
         }}
         className={themeMode === "dark" ? css.darkMode : css.lightMode}
       /> :
-        <div className="container-fluid mt-2">
-          <MUIDataTable
-            // title={"Employee List"}
-            data={tableData}
-            columns={columns}
-            options={options}
-          />
-        </div>}
+      <div className="container-fluid mt-2 table-responsive" style={{height:"291px"}}>
+      <table className={`table ${themeMode=='dark'?'table-dark':''}`}>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">{t("Office")}</th>
+            <th scope="col">{t("Sales")}(₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tableData.map((item, index) => {
+            return(
+            <tr key={item.officeName}>
+              <th scope="row">{index+1}</th>
+              <td>{item.officeName}</td>
+              <td>{parseFloat(item.sales).toFixed(2)}</td>
+            </tr>
+            )
+          })}
+
+        </tbody>
+      </table>
+    </div>}
     </div>
 
   );

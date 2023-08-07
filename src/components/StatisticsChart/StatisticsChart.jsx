@@ -8,7 +8,6 @@ import logo from "/assets/logo.png";
 import { differenceInDays } from 'date-fns';
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartColumn } from "react-icons/fa6";
 
-import MUIDataTable from "mui-datatables";
 import ReactECharts from "echarts-for-react";
 import { useTranslation } from "react-i18next";
 
@@ -24,7 +23,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
   const [isBarChart, setIsBarChart] = useState(true); // State to track the chart type
 
   const [tableData, setTableData] = useState([])
-  const [tableStatus, setTableStatus] = useState(true)
+  const [tableStatus, setTableStatus] = useState(false)
   const { t } = useTranslation();
 
 
@@ -666,20 +665,14 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         }}
         className={themeMode === "dark" ? css.darkMode : css.lightMode}
       /> :
-        <div className="container-fluid mt-2">
-          {/* <MUIDataTable
-            // title={"Employee List"}
-            data={tableData}
-            columns={columns}
-            options={options}
-          /> */}
-          <table className="table">
+        <div className="container-fluid mt-2 table-responsive" style={{height:"291px"}}>
+          <table className={`table ${themeMode=='dark'?'table-dark':''}`}>
             <thead>
               <tr>
                 <th scope="col">#</th>
                 <th scope="col">{t("Date")}</th>
-                <th scope="col">{t("Sales")}</th>
-                <th scope="col">{t("Expense")}</th>
+                <th scope="col">{t("Sales")}(₹)</th>
+                <th scope="col">{t("Expense")}(₹)</th>
               </tr>
             </thead>
             <tbody>
@@ -688,8 +681,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
                 <tr key={item.requestedDate}>
                   <th scope="row">{index+1}</th>
                   <td>{item.requestedDate}</td>
-                  <td>{item.sales}</td>
-                  <td>{item.expense}</td>
+                  <td>{parseFloat(item.sales).toFixed(2)}</td>
+                  <td>{parseFloat(item.expense).toFixed(2)}</td>
                 </tr>
                 )
               })}

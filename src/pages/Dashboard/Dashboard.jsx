@@ -25,12 +25,14 @@ const Dashboard = () => {
     document.documentElement.style.setProperty("--text-color", "#111111");
     document.documentElement.style.setProperty("--option-color", "white");
     document.documentElement.style.setProperty("--backgroundOverlay", "rgb(249 249 249 / 81%)");
+    document.documentElement.style.setProperty("--bs-table-bg", "#ffffff00");
   }
   else {
     document.documentElement.style.setProperty("--rs-body", "#111111");
     document.documentElement.style.setProperty("--text-color", "white");
     document.documentElement.style.setProperty("--option-color", "#111111");
     document.documentElement.style.setProperty("--backgroundOverlay", "#1a1c2db8");
+    document.documentElement.style.setProperty("--bs-table-bg", "#00000000");
   }
 
   const [userCountData, setUserCountData] = useState(0);
