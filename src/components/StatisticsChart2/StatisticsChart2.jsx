@@ -5,7 +5,7 @@ import css from "./StatisticsChart2.module.css";
 import { saveAs } from "file-saver";
 
 import "jspdf-autotable";
-import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable,FaRegChartBar, FaAngleLeft, FaAnglesLeft } from "react-icons/fa6";
+import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaRegChartBar, FaAngleLeft, FaAnglesLeft } from "react-icons/fa6";
 import logo from "/assets/logo.png";
 
 import MUIDataTable from "mui-datatables";
@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 
 import loading from '/assets/loading.gif';
 
-const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName,setSelectedOffice,setIsAdmin }) => {
+const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails,originallist,setOfficeIdLocal,officeIdLocal}) => {
   const [chartData, setChartData] = useState([]);
 
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -27,12 +27,11 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   const [tableStatus, setTableStatus] = useState(false)
   const [tableData, setTableData] = useState([])
   const [selectionHistory, setSelectionHistory] = useState([]);
+  const [selectionHistoryOfficeId, setSelectionHistoryOfficeId] = useState([])
   const [showPreviousButton, setShowPreviousButton] = useState(false);
   const [showResetButton, setShowResetButton] = useState(false);
-  const [originalSelection, setOriginalSelection] = useState({
-    selectedOffice,
-    isAdmin,
-  });
+  const [switch1, setswitch1] = useState(true)
+
   const { t } = useTranslation();
 
 
@@ -86,11 +85,10 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     };
   }, []);
 
-  const fetchData = () => {
+  const fetchData = (update) => {
     setIsLoading(true);
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-
 
 
     axios
@@ -114,10 +112,22 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
             });
           }
           tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) });
-
-          setTableData(tabletemp);
           setChartData(temp);
-        }
+           if(update===1){
+             setCompanies(temp.filter(
+              (office) => office.officeType === "Company"
+              ));
+              setWholesales(temp.filter(
+                (office) => office.officeType === "Wholesale Pumps"
+            ));
+            setRetails(temp.filter(
+              (office) => office.officeType === "Retail Pumps"
+              ));
+              setswitch1(true)
+           }
+            setTableData(tabletemp);
+          }
+        
       })
       .catch((error) => {
         console.log("Error fetching data:", error);
@@ -130,7 +140,12 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   useEffect(() => {
 
     if (selectedRange && selectedOffice) {
-      fetchData();
+      if(switch1){
+      fetchData(0);
+      }
+      else{
+        fetchData(1);
+      }
     }
   }, [selectedRange, selectedOffice, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -456,60 +471,66 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       // Get the office name and ID from the clicked data point
       const clickedOfficeId = chartData[params.dataIndex].officeId;
       const clickedOfficeType = chartData[params.dataIndex].officeType;
+      if (clickedOfficeType === "Company") {
+      setswitch1(false)
+        setIsLoading(true);
+        // Save the current selectedOffice and isAdmin values to the history
+        setSelectionHistory((prevHistory) => [...prevHistory, { selectedOffice, isAdmin }]);
+        setSelectionHistoryOfficeId((prevHistory) => [...prevHistory, officeIdLocal])
+        // Update the selectedOffice state variable
+        setSelectedOffice(clickedOfficeId);
+        setIsAdmin(6);
+        setOfficeIdLocal(clickedOfficeId)
 
-      // Save the current selectedOffice and isAdmin values to the history
-      setSelectionHistory((prevHistory) => [...prevHistory, { selectedOffice, isAdmin }]);
+        // Check if the officeName contains "Pump" (case-insensitive)
+        // if (clickedOfficeType === "Retail Pumps") {
+        //   setIsAdmin(0); // Set to 0 for "pumps"
+        // } else if (clickedOfficeType === "Wholesale Pumps") {
+        //   setIsAdmin(0); // Set to 5 or appropriate value for other offices
+        // } else if (clickedOfficeType === "Company") {
+        
+       
 
-      // Update the selectedOffice state variable
-      setSelectedOffice(clickedOfficeId);
+        // Save the original selectedOffice and isAdmin values
+        // setOriginalSelection({
+        //   selectedOffice,
+        //   isAdmin,
+        // });
 
-      // Check if the officeName contains "Pump" (case-insensitive)
-      if (clickedOfficeType === "Retail Pumps") {
-        setIsAdmin(0); // Set to 0 for "pumps"
-      } else if (clickedOfficeType === "Wholesale Pumps") {
-        setIsAdmin(0); // Set to 5 or appropriate value for other offices
-      } else if (clickedOfficeType === "Company") {
-        setIsAdmin(5);
+        // Fetch data for the selected office
+        // fetchData();
+
+
+        // Show the reset button after the graph click event is triggered
+        setShowResetButton(true);
+        setShowPreviousButton(true);
       }
-
-      // Save the original selectedOffice and isAdmin values
-      setOriginalSelection({
-        selectedOffice,
-        isAdmin,
-      });
-
-      // Fetch data for the selected office
-      fetchData();
-
-
-      // Show the reset button after the graph click event is triggered
-      setShowResetButton(true);
-      setShowPreviousButton(true);
     }
   };
   // Function to handle the "Previous" button click event
   const handlePrevious = () => {
     // Check if there is a history of selections
     if (selectionHistory.length > 0) {
+      setswitch1(false)
       // Get the last entry from the selectionHistory array
       const lastSelection = selectionHistory.pop();
-
+      const lastSelectionOfficeId = selectionHistoryOfficeId.pop();
+      setIsLoading(true);
       // Update the localSelectedOffice and localIsAdmin states with the last entry values
       setSelectedOffice(lastSelection.selectedOffice);
+      setOfficeIdLocal(lastSelectionOfficeId)
       setIsAdmin(lastSelection.isAdmin);
 
       // Update the selectionHistory state with the updated array
       setSelectionHistory([...selectionHistory]);
+      setSelectionHistoryOfficeId([...selectionHistoryOfficeId]);
 
       // Fetch data with the original selectedOffice and isAdmin values
-      fetchData();
+      // fetchData();
 
 
 
       // Show the "Reset" button if there is no more previous state to go back
-      if (selectionHistory.length === 0) {
-        setShowResetButton(false);
-      }
 
       // Check if the "Previous" button should be hidden
       if (selectionHistory.length === 0) {
@@ -520,14 +541,17 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   // Function to handle the "Reset" button click event
   const handleReset = () => {
     // Reset the selectedOffice and isAdmin states to their original values
-    setSelectedOffice(originalSelection.selectedOffice);
-    setIsAdmin(originalSelection.isAdmin);
-
+    setswitch1(false)
+    setIsLoading(true);
+    setSelectedOffice(originallist.officeId)
+    setIsAdmin(originallist.adminStatus)
+    setOfficeIdLocal(originallist.officeId)
     // Clear the selectionHistory array
     setSelectionHistory([]);
+    // Update the localSelectedOffice and localIsAdmin states with the original values
 
     // Fetch data with the original selectedOffice and isAdmin values
-    fetchData();
+    // fetchData();
 
     // Hide the reset button after resetting the state
     setShowResetButton(false);
@@ -535,6 +559,13 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     // Hide the previous button as well since we are resetting to the original state
     setShowPreviousButton(false);
   };
+  // const handleSelectionHistory=()=>{
+  //   setSelectionHistory([])
+  // }
+  // useEffect(() => {
+  //   handleSelectionHistory()
+  // }, [selectedOffice])
+
 
 
 
@@ -584,12 +615,12 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     >
       <div className="container-fluid">
         <div className="d-flex w-100 g-0 align-items-start justify-content-between">
-          <div className={`fw-bold fs-5 ${themeMode === "dark" ? css.darkMode : css.lightMode
+        <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Total Sales by Business Entity")}</div>
           {/* Stylish "Reset" button */}
-          {showResetButton && selectedOffice !== originalSelection.selectedOffice && isAdmin !== originalSelection.isAdmin ? (
+          {showResetButton && selectedOffice !== originallist.officeId  ? (
             <div className={css.resetButtonContainer}>
-              <button className={css.resetButton} onClick={handleReset}>
+              <button className={`btn btn-primary mx-1 ${window.innerWidth<500?'btn-sm':''}`} onClick={handleReset}>
                 <FaAnglesLeft style={{ fontSize: "1rem" }} />
               </button>
             </div>
@@ -598,7 +629,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
           {/* "Previous" button */}
           {showPreviousButton && selectionHistory.length > 0 ? (
             <div className={css.resetButtonContainer}>
-              <button className={css.resetButton} onClick={handlePrevious}>
+              <button className={`btn btn-primary mx-1 ${window.innerWidth<500?'btn-sm':''}`} onClick={handlePrevious}>
                 <FaAngleLeft style={{ fontSize: "1rem" }} />
               </button>
             </div>
