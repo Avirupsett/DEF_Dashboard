@@ -54,5 +54,7 @@
     "to": "से",
     "Product":"उत्पाद",
     "No Data Found": "कोई डेटा नहीं मिला",
-    "Rows": "पंक्तियाँ"
+    "Rows": "पंक्तियाँ",
+    "Product Wise Summary Data": "उत्पाद वार संक्षिप्त आंकड़े",
+    "Total Sale": "कुल बिक्री"
 }

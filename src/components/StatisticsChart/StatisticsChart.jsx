@@ -10,7 +10,8 @@ import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartColumn } fro
 
 import ReactECharts from "echarts-for-react";
 import { useTranslation } from "react-i18next";
-
+import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
+import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 
 const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, alldata, isLoading }) => {
   const [chartData, setChartData] = useState([]);
@@ -303,6 +304,16 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       ],
   };
 
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
   const exportToExcel = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
@@ -414,25 +425,59 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       totalExpenseCell.value = `₹${totalExpense.toFixed(2)}`;
       totalExpenseCell.alignment = { horizontal: "right" }; // Align to the right
 
-      // Generate a Blob from the workbook
-      workbook.xlsx.writeBuffer().then((buffer) => {
-        const excelBlob = new Blob([buffer], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(excelBlob, "sales-expense.xlsx");
-      });
+   
+  // Generate a Blob from the workbook
+  workbook.xlsx.writeBuffer().then(async (buffer) => {
+    const excelBlob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    // Create a FormData object to send the Blob to the server
+    const formData = new FormData();
+    formData.append("file", excelBlob, `${Date.now()}_sales-expense.xlsx`);
+
+    // Send FormData to the server using axios or fetch
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData,{headers: {'Content-Type': 'multipart/form-data'}}); // Replace with your API endpoint
+      const excelFileUrl = response.data.url; // Assuming the API returns the file URL
+      window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`)
+    } catch (error) {
+      console.error("Error saving Excel file:", error);
+    }
+  });
     };
     fileReader.readAsDataURL(response.data);
   };
 
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
+
+    // Get the 'lang' parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const lang = urlParams.get('lang');
+
+    const fontBytes = await axios.get(font, { responseType: 'arraybuffer' });
+    const fontBase64 = arrayBufferToBase64(fontBytes.data);
+
+    const fontBytes2 = await axios.get(font2, { responseType: 'arraybuffer' });
+    const fontBase642 = arrayBufferToBase64(fontBytes2.data);
+
+
     import('jspdf').then(module => {
       let jsPDF = module.default
       const doc = new jsPDF();
       doc.setFontSize(12); // Set the font size
+
+      // Add font to PDF
+      doc.addFileToVFS('NotoSansBengali.ttf', fontBase64);
+      doc.addFont('NotoSansBengali.ttf', 'NotoSansBengali', 'normal');
+      doc.setFont('NotoSansBengali');
+
+      doc.addFileToVFS('NotoSansDevanagari.ttf', fontBase642);
+      doc.addFont('NotoSansDevanagari.ttf', 'NotoSansDevanagari', 'normal');
+      doc.setFont('NotoSansDevanagari');
 
       // Add the image
       const imgData = logo; // Replace with the path or URL of your image file
@@ -441,7 +486,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
 
       // Add Sales-Expense Summary header
-      const summaryHeader = [["Sales-Expense Summary"]];
+      const summaryHeader = [[t("Sales-Expense Summary")]];
       doc.autoTable({
         startY: 27,
         head: summaryHeader,
@@ -454,10 +499,13 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
           textColor: "#FFFFFF", // White color
         },
         margin: { top: 20, bottom: 0 }, // Move it a little down after the image
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+        }
       });
 
       // Add period - startDate to endDate
-      const periodCell = [[`Period: ${startDate} to ${endDate}`]];
+      const periodCell = [[`${t("Period")}: ${startDate} ${t("to")} ${endDate}`]];
       doc.autoTable({
         startY: 36,
         head: periodCell,
@@ -470,6 +518,9 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
           textColor: "#FFFFFF",
         },
         margin: { top: 30 }, // Move it upwards and provide some space at the bottom
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+        }
       });
 
       // Filter out rows with zero sales and expense values
@@ -494,14 +545,14 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       // Add totals row if there are non-zero values
       if (salesTotal !== 0 || expenseTotal !== 0) {
         tableData.push([
-          "Total",
+          t("Total"),
           `${salesTotal.toFixed(2)}`,
           `${expenseTotal.toFixed(2)}`,
         ]);
       }
 
       // Set table headers
-      const headers = ["Date", "Sales", "Expense"];
+      const headers = [t("Date"), t("Sales"), t("Expense")];
       const columnStyles = {
         1: { halign: "right" }, // Align Sales column to center
         2: { halign: "right" }, // Align Expense column to center
@@ -521,6 +572,9 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         startY: 45, // Start below the header and period
         headStyles: headerStyles,
         columnStyles: columnStyles,
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+        }
       });
 
 
@@ -626,10 +680,10 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
                     <FaChartColumn style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
                     <span>{t("View Graph")}</span>
                   </div>}
-                <a href='https://www.africau.edu/images/default/sample.pdf' download className={css.exportOption}>
+                <div className={css.exportOption} onClick={exportToExcel}>
                   <FaFileExcel style={{ fontSize: "1.1rem", color: "green" }} />
                   <span>{t("Export to Excel")}</span>
-                </a>
+                </div>
                 <div className={css.exportOption} onClick={exportToPDF}>
                   <FaFilePdf style={{ fontSize: "1.1rem", color: "red" }} />
                   <span>{t("Export to PDF")}</span>
@@ -665,8 +719,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         }}
         className={themeMode === "dark" ? css.darkMode : css.lightMode}
       /> :
-        <div className="container-fluid mt-2 table-responsive" style={{height:"291px"}}>
-          <table className={`table ${themeMode=='dark'?'table-dark':''}`}>
+        <div className="container-fluid mt-2 table-responsive" style={{ height: "291px" }}>
+          <table className={`table ${themeMode == 'dark' ? 'table-dark' : ''}`}>
             <thead>
               <tr>
                 <th scope="col">#</th>
@@ -677,13 +731,13 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
             </thead>
             <tbody>
               {tableData.map((item, index) => {
-                return(
-                <tr key={item.requestedDate}>
-                  <th scope="row">{index+1}</th>
-                  <td>{item.requestedDate}</td>
-                  <td>{parseFloat(item.sales).toFixed(2)}</td>
-                  <td>{parseFloat(item.expense).toFixed(2)}</td>
-                </tr>
+                return (
+                  <tr key={item.requestedDate}>
+                    <th scope="row">{index + 1}</th>
+                    <td>{item.requestedDate}</td>
+                    <td>{parseFloat(item.sales).toFixed(2)}</td>
+                    <td>{parseFloat(item.expense).toFixed(2)}</td>
+                  </tr>
                 )
               })}
 

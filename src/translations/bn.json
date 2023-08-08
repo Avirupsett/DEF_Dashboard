@@ -53,5 +53,7 @@
     "to": "থেকে",
     "Product":"পণ্য",
     "No Data Found": "কোন ডেটা পাওয়া যায়নি",
-    "Rows": "সারি"
+    "Rows": "সারি",
+    "Product Wise Summary Data": "পণ্য ভিত্তিক সংক্ষিপ্ত উপাদান",
+    "Total Sale": "মোট বিক্রি"
 }

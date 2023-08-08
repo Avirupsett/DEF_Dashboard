@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { saveAs } from 'file-saver';
-
+import axios from "axios";
 import 'jspdf-autotable';
 import css from './OrdersPieChart.module.css';
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "react-icons/fa6";
 import logo from "/assets/logo.png";
 import { useTranslation } from 'react-i18next';
 import loading from '/assets/loading.gif';
-
+import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
+import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 
 const OrdersPieChart = ({
   themeMode,
@@ -276,6 +277,16 @@ const OrdersPieChart = ({
     ],
   };
 
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
   const exportToExcel = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
@@ -389,12 +400,32 @@ const OrdersPieChart = ({
   const exportToPDF = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
+
+    // Get the 'lang' parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const lang = urlParams.get('lang');
+
+    const fontBytes = await axios.get(font, { responseType: 'arraybuffer' });
+    const fontBase64 = arrayBufferToBase64(fontBytes.data);
+
+    const fontBytes2 = await axios.get(font2, { responseType: 'arraybuffer' });
+    const fontBase642 = arrayBufferToBase64(fontBytes2.data);
+
     import('jspdf').then(module => {
       let jsPDF = module.default
       const doc = new jsPDF();
 
+      // Add font to PDF
+      doc.addFileToVFS('NotoSansBengali.ttf', fontBase64);
+      doc.addFont('NotoSansBengali.ttf', 'NotoSansBengali', 'normal');
+      doc.setFont('NotoSansBengali');
+
+      doc.addFileToVFS('NotoSansDevanagari.ttf', fontBase642);
+      doc.addFont('NotoSansDevanagari.ttf', 'NotoSansDevanagari', 'normal');
+      doc.setFont('NotoSansDevanagari');
+
       // Set table headers
-      const headers = [["Product Name", "Quantity", "Total Sale"]];
+      const headers = [[t("Product Name"), t("Quantity"), t("Total Sale")]];
       const columnStyles = {
         1: { halign: "right" },
         2: { halign: "right" },
@@ -419,7 +450,7 @@ const OrdersPieChart = ({
       doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
 
       // Add Sales-Expense Summary header
-      const summaryHeader = [["Product Wise Summary Data"]];
+      const summaryHeader = [[t("Product Wise Summary Data")]];
       doc.autoTable({
         head: summaryHeader,
         body: [],
@@ -429,9 +460,13 @@ const OrdersPieChart = ({
           textColor: "#FFFFFF", // White color
         },
         margin: { top: 30 }, // Move it a little down
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+          fontStyle: 'bold'
+        },
       });
 
-      const periodCell = [[`Period: ${startDate} to ${endDate}`]];
+      const periodCell = [[`${t("Period")}: ${startDate} ${t("to")} ${endDate}`]];
       doc.autoTable({
         startY: 39.5,
         head: periodCell,
@@ -444,6 +479,10 @@ const OrdersPieChart = ({
           textColor: "#FFFFFF",
         },
         margin: { top: 30 }, // Move it upwards and provide some space at the bottom
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+          fontStyle: 'bold'
+        },
       });
 
       // Set table rows
@@ -463,7 +502,12 @@ const OrdersPieChart = ({
           fillColor: backgroundColors.secondHeader,
           textColor: "#FFFFFF", // White color
         },
-        columnStyles: columnStyles
+        columnStyles: columnStyles,
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+          fontStyle: 'bold'
+        },
+        
       };
 
       // Add table to the PDF document

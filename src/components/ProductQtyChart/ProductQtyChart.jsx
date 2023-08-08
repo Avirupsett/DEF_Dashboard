@@ -2,14 +2,15 @@ import React, { useEffect, useState, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
 
 import { saveAs } from 'file-saver';
-
+import axios from "axios";
 import 'jspdf-autotable';
 import css from './ProductQtyChart.module.css';
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "react-icons/fa6";
 import logo from "/assets/logo.png";
 import { useTranslation } from 'react-i18next';
 import loading from '/assets/loading.gif';
-
+import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
+import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 
 
 const ProductQtyChart = ({
@@ -277,6 +278,16 @@ const ProductQtyChart = ({
     ],
   };
 
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
   const exportToExcel = async() => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
@@ -387,95 +398,128 @@ const ProductQtyChart = ({
     return `${year}-${month}-${day}`;
   };
 
-  const exportToPDF = async() => {
+  const exportToPDF = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    import('jspdf').then(module => { 
-    let jsPDF = module.default
-    const doc = new jsPDF();
 
-    // Set table headers
-    const headers = [["Product Name", "Quantity", "Total Sale"]];
-    const columnStyles = {
-      1: { halign: "right" }, 
-      2: { halign: "right" }, 
-    };
+    // Get the 'lang' parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const lang = urlParams.get('lang');
 
-    const headerStyles = {
-      fontSize: 12,
-      fontStyle: "bold",
-      halign: "center",
-    };
+    const fontBytes = await axios.get(font, { responseType: 'arraybuffer' });
+    const fontBase64 = arrayBufferToBase64(fontBytes.data);
 
-    // Set background colors
-    const backgroundColors = {
-      summaryHeader: "#3CB043", // Green color for Sales-Expense Summary header
-      secondHeader: "#75AAF0", // Sky blue color for Date, Expense, Sales header
-    };
+    const fontBytes2 = await axios.get(font2, { responseType: 'arraybuffer' });
+    const fontBase642 = arrayBufferToBase64(fontBytes2.data);
 
-    // Add the image
-    const imgData = logo; // Replace with the path or URL of your image file
-    const imgWidth = 35;
-    const imgHeight = 20;
-    doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
+    import('jspdf').then(module => {
+      let jsPDF = module.default
+      const doc = new jsPDF();
 
-    // Add Sales-Expense Summary header
-    const summaryHeader = [["Product Wise Summary Data"]];
-    doc.autoTable({
-      head: summaryHeader,
-      body: [],
-      headStyles: {
-        ...headerStyles,
-        fillColor: backgroundColors.summaryHeader,
-        textColor: "#FFFFFF", // White color
-      },
-      margin: { top: 30 }, // Move it a little down
-    });
+      // Add font to PDF
+      doc.addFileToVFS('NotoSansBengali.ttf', fontBase64);
+      doc.addFont('NotoSansBengali.ttf', 'NotoSansBengali', 'normal');
+      doc.setFont('NotoSansBengali');
 
-    const periodCell = [[`Period: ${startDate} to ${endDate}`]];
-    doc.autoTable({
-      startY: 39.5,
-      head: periodCell,
-      body: [],
-      headStyles: {
+      doc.addFileToVFS('NotoSansDevanagari.ttf', fontBase642);
+      doc.addFont('NotoSansDevanagari.ttf', 'NotoSansDevanagari', 'normal');
+      doc.setFont('NotoSansDevanagari');
+
+      // Set table headers
+      const headers = [[t("Product Name"), t("Quantity"), t("Total Sale")]];
+      const columnStyles = {
+        1: { halign: "right" },
+        2: { halign: "right" },
+      };
+
+      const headerStyles = {
         fontSize: 12,
         fontStyle: "bold",
         halign: "center",
-        fillColor: "#3CB043",
-        textColor: "#FFFFFF",
-      },
-      margin: { top: 30 }, // Move it upwards and provide some space at the bottom
-    });
+      };
 
-    // Set table rows
-    const rows = sellData.map((item) => [
-      item.productName,
-      `${item.totalQty} ${item.unit}`,
-      item.totalSale.toFixed(2),
-    ]);
+      // Set background colors
+      const backgroundColors = {
+        summaryHeader: "#3CB043", // Green color for Sales-Expense Summary header
+        secondHeader: "#75AAF0", // Sky blue color for Date, Expense, Sales header
+      };
 
-    // AutoTable configuration
-    const tableConfig = {
-      startY: doc.autoTable.previous.finalY + 1,
-      head: headers,
-      body: rows,
-      headStyles: {
-        ...headerStyles,
-        fillColor: backgroundColors.secondHeader,
-        textColor: "#FFFFFF", // White color
-      },
-      columnStyles:columnStyles
-    };
+      // Add the image
+      const imgData = logo; // Replace with the path or URL of your image file
+      const imgWidth = 35;
+      const imgHeight = 20;
+      doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
 
-    // Add table to the PDF document
-    doc.autoTable(tableConfig);
+      // Add Sales-Expense Summary header
+      const summaryHeader = [[t("Product Wise Summary Data")]];
+      doc.autoTable({
+        head: summaryHeader,
+        body: [],
+        headStyles: {
+          ...headerStyles,
+          fillColor: backgroundColors.summaryHeader,
+          textColor: "#FFFFFF", // White color
+        },
+        margin: { top: 30 }, // Move it a little down
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+          fontStyle: 'bold'
+        },
+      });
 
-    // Generate a unique filename
-    const fileName = `product_wise_summary_data_${Date.now()}.pdf`;
+      const periodCell = [[`${t("Period")}: ${startDate} ${t("to")} ${endDate}`]];
+      doc.autoTable({
+        startY: 39.5,
+        head: periodCell,
+        body: [],
+        headStyles: {
+          fontSize: 12,
+          fontStyle: "bold",
+          halign: "center",
+          fillColor: "#3CB043",
+          textColor: "#FFFFFF",
+        },
+        margin: { top: 30 }, // Move it upwards and provide some space at the bottom
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+          fontStyle: 'bold'
+        },
+      });
 
-    // Save the PDF document
-    doc.save(fileName);
-  })
+      // Set table rows
+      const rows = sellData.map((item) => [
+        item.productName,
+        `${item.totalQty} ${item.unit}`,
+        item.totalSale.toFixed(2),
+      ]);
+
+      // AutoTable configuration
+      const tableConfig = {
+        startY: doc.autoTable.previous.finalY + 1,
+        head: headers,
+        body: rows,
+        headStyles: {
+          ...headerStyles,
+          fillColor: backgroundColors.secondHeader,
+          textColor: "#FFFFFF", // White color
+        },
+        columnStyles: columnStyles,
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+          fontStyle: 'bold'
+        },
+        
+      };
+
+      // Add table to the PDF document
+      doc.autoTable(tableConfig);
+
+      // Generate a unique filename
+      const fileName = `product_wise_summary_data_${Date.now()}.pdf`;
+
+      // Save the PDF document
+      doc.save(fileName);
+    })
   };
 
 

@@ -133,13 +133,13 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
         if (userId && officeId) {
           const response = await axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/dropdown_list/${userId}`);
           const officeDataFromApi = await response.data;
-          setIsLoading(true)
+          // setIsLoading(true)
 
-          let SalesResponse = await fetchSalesData(selectedRange[0], selectedRange[1], officeId, adminStatus)
-          if (SalesResponse) {
-            setAlldata(SalesResponse)
-            setIsLoading(false)
-          }
+          // let SalesResponse = await fetchSalesData(selectedRange[0], selectedRange[1], officeId, adminStatus)
+          // if (SalesResponse) {
+          //   setAlldata(SalesResponse)
+          //   setIsLoading(false)
+          // }
           if (officeDataFromApi) {
 
             if (officeDataFromApi.length === 1) {
@@ -193,7 +193,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
     if(selectedOffice)
     handleSelectedOffice()
 
-  },[selectedOffice])
+  },[selectedOffice,isAdmin])
 
  const handleSelectedOffice =async()=>{
      setIsLoading(true)
@@ -226,7 +226,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
     // setOptionvalue(event.target.options[event.target.selectedIndex].text)
     setOptionvalue({state:false,Ovalue:event.target.value})
     // const isRetail = selectedOption.getAttribute("data-isretail");
-    setIsLoading(true)
+    // setIsLoading(true)
     const isAdmin = selectedOption.getAttribute("data-isadmin");
 
     setSelectedOffice(event.target.value);
@@ -239,11 +239,11 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
         (office) => office.OfficeId === event.target.value
       )[0].OfficeName)
     }
-    let SalesResponse = await fetchSalesData(selectedRange[0], selectedRange[1], event.target.value, isAdmin)
-    if (SalesResponse) {
-      setAlldata(SalesResponse)
-      setIsLoading(false)
-    }
+    // let SalesResponse = await fetchSalesData(selectedRange[0], selectedRange[1], event.target.value, isAdmin)
+    // if (SalesResponse) {
+    //   setAlldata(SalesResponse)
+    //   setIsLoading(false)
+    // }
   };
   
   const trimName = (name, maxLength) => {
@@ -412,7 +412,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           </div>
           <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue}/>
+              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue}/>
             </Suspense>
           </div>
         </div>

@@ -11,8 +11,10 @@ import logo from "/assets/logo.png";
 import { useTranslation } from "react-i18next";
 
 import loading from '/assets/loading.gif';
+import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
+import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 
-const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, SelectedOfficeName, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails,originallist,setOfficeIdLocal,officeIdLocal,setOptionvalue}) => {
+const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, alldata, isLoading, SelectedOfficeName, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails, originallist, setOfficeIdLocal, officeIdLocal, setOptionvalue }) => {
   const [chartData, setChartData] = useState([]);
 
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -21,7 +23,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   // const iconRef = useRef(null);
 
 
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [tableStatus, setTableStatus] = useState(false)
   const [tableData, setTableData] = useState([])
@@ -85,70 +87,57 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   }, []);
 
   const fetchData = (update) => {
-    setIsLoading(true);
-    const startDate = formatDate(selectedRange[0]);
-    const endDate = formatDate(selectedRange[1]);
-
-
-    axios
-      .get(`http://115.124.120.251:5064/api/v1/dashboard/total_sales/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`)
-      .then((response) => {
-        const { data } = response;
-        if (data['graph1']) {
-          let temp = [];
-          let tabletemp = [];
-          for (let i = 0; i < data['graph1'].length; i++) {
-            temp.push({
-              "officeId": data['graph1'][i].officeId,
-              "officeName": data['graph1'][i].officeName,
-              "officeType": data['graph1'][i].officeType,
-              "sales": data['graph1'][i].totalIncome.toFixed(2),
-              "color": data['graph1'][i].officeTypeColor
-            });
-            tabletemp.push({
-              "officeName": data['graph1'][i].officeName,
-              "sales": data['graph1'][i].totalIncome.toFixed(2),
-            });
-          }
-          tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) });
-          setChartData(temp);
-           if(update===1){
-             setCompanies(temp.filter(
-              (office) => office.officeType === "Company"
-              ));
-              setWholesales(temp.filter(
-                (office) => office.officeType === "Wholesale Pumps"
-            ));
-            setRetails(temp.filter(
-              (office) => office.officeType === "Retail Pumps"
-              ));
-              setTimeout(() => {
-                setswitch1(true)
-              }, 2000);
-           }
-            setTableData(tabletemp);
-          }
-        
+    // setIsLoading(true);
+    let temp = [];
+    let tabletemp = [];
+    if (alldata.graph3) {
+      alldata.graph3.map((item) => {
+        temp.push({
+          "officeId": item.officeId,
+          "officeName": item.officeName,
+          "officeType": item.officeType,
+          "sales": item.totalIncome.toFixed(2),
+          "color": item.officeTypeColor
+        });
+        tabletemp.push({
+          "officeName": item.officeName,
+          "sales": item.totalIncome.toFixed(2),
+        });
       })
-      .catch((error) => {
-        console.log("Error fetching data:", error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) });
+
+      if (update === 1) {
+        setCompanies(temp.filter(
+          (office) => office.officeType === "Company"
+        ));
+        setWholesales(temp.filter(
+          (office) => office.officeType === "Wholesale Pumps"
+        ));
+        setRetails(temp.filter(
+          (office) => office.officeType === "Retail Pumps"
+        ));
+
+        setswitch1(true)
+      }
+     
+        setChartData(temp);
+        setTableData(tabletemp);
+      
+    }
+
   };
 
   useEffect(() => {
 
     if (selectedRange && selectedOffice) {
-      if(switch1){
-      fetchData(0);
+      if (switch1) {
+        fetchData(0);
       }
-      else{
+      else {
         fetchData(1);
       }
     }
-  }, [selectedRange, selectedOffice, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ alldata]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -200,7 +189,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       },
     },
     grid: {
-      left: window.innerWidth <= 768 ? 85 : 100, // Adjust the left margin to give space for the y-axis labels
+      left: window.innerWidth <= 768 ? 85 : 105, // Adjust the left margin to give space for the y-axis labels
       right: 50,
       bottom: 50,
       top: 15,
@@ -375,23 +364,44 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   const exportToPDF = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
+
+    // Get the 'lang' parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const lang = urlParams.get('lang');
     // Add image file
     const response = await axios.get(logo, {
       responseType: "arraybuffer",
     });
+
+    const fontBytes = await axios.get(font, { responseType: 'arraybuffer' });
+    const fontBase64 = arrayBufferToBase64(fontBytes.data);
+
+    const fontBytes2 = await axios.get(font2, { responseType: 'arraybuffer' });
+    const fontBase642 = arrayBufferToBase64(fontBytes2.data);
+
     const imageBase64 = arrayBufferToBase64(response.data);
     import('jspdf').then(module => {
       let jsPDF = module.default
       const doc = new jsPDF();
-
+      
       // Add the image
       const imgData = imageBase64;
       const imgWidth = 35;
       const imgHeight = 20;
       doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
 
+       // Add font to PDF
+      doc.addFileToVFS('NotoSansBengali.ttf', fontBase64);
+      doc.addFont('NotoSansBengali.ttf', 'NotoSansBengali', 'normal');
+      doc.setFont('NotoSansBengali');
+
+      doc.addFileToVFS('NotoSansDevanagari.ttf', fontBase642);
+      doc.addFont('NotoSansDevanagari.ttf', 'NotoSansDevanagari', 'normal');
+      doc.setFont('NotoSansDevanagari');
+
+
       // Add Sales-Expense Summary header
-      const summaryHeader = [["Total Sales by Business Entity"]];
+      const summaryHeader = [[t("Total Sales by Business Entity")]];
       doc.autoTable({
         startY: 27,
         head: summaryHeader,
@@ -404,10 +414,15 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
           textColor: "#FFFFFF", // White color
         },
         margin: { top: 20, bottom: 0 }, // Move it a little down after the image
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+          fontStyle: 'bold'
+        },
       });
-
+     
+      
       // Add period - startDate to endDate
-      const periodCell = [[`"Period": ${startDate} "to" ${endDate}`]];
+      const periodCell = [[`${t("Period")}: ${startDate} ${t("to")} ${endDate}`]];
       doc.autoTable({
         startY: 36,
         head: periodCell,
@@ -420,6 +435,10 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
           textColor: "#FFFFFF",
         },
         margin: { top: 30 }, // Move it upwards and provide some space at the bottom
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+        },
+        
       });
 
       // Convert chart data to table format
@@ -435,10 +454,10 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       );
 
       // Add total row
-      tableData.push(["Total", `${totalSales.toFixed(2)}`]);
+      tableData.push([t("Total"), `${totalSales.toFixed(2)}`]);
 
       // Set table headers
-      const headers = ["Office Name", "Sales"];
+      const headers = [t("Office Name"), t("Sales")];
       const columnStyles = {
         1: { halign: "right" }, // Align Sales column to center
         2: { halign: "right" }, // Align Expense column to center
@@ -458,6 +477,9 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
         startY: 45, // Start below the header and period
         headStyles: headerStyles,
         columnStyles: columnStyles,
+        styles: {
+          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+        },
       });
 
       // Save PDF
@@ -473,8 +495,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       const clickedOfficeId = chartData[params.dataIndex].officeId;
       const clickedOfficeType = chartData[params.dataIndex].officeType;
       if (clickedOfficeType === "Company") {
-      setswitch1(false)
-        setIsLoading(true);
+        setswitch1(false)
+        // setIsLoading(true);
         // Save the current selectedOffice and isAdmin values to the history
         setSelectionHistory((prevHistory) => [...prevHistory, { selectedOffice, isAdmin }]);
         setSelectionHistoryOfficeId((prevHistory) => [...prevHistory, officeIdLocal])
@@ -489,8 +511,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
         // } else if (clickedOfficeType === "Wholesale Pumps") {
         //   setIsAdmin(0); // Set to 5 or appropriate value for other offices
         // } else if (clickedOfficeType === "Company") {
-        
-       
+
+
 
         // Save the original selectedOffice and isAdmin values
         // setOriginalSelection({
@@ -516,8 +538,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
       // Get the last entry from the selectionHistory array
       const lastSelection = selectionHistory.pop();
       const lastSelectionOfficeId = selectionHistoryOfficeId.pop();
-      setIsLoading(true);
-      setOptionvalue({state:true,Ovalue:lastSelectionOfficeId})
+      // setIsLoading(true);
+      setOptionvalue({ state: true, Ovalue: lastSelectionOfficeId })
       // Update the localSelectedOffice and localIsAdmin states with the last entry values
       setSelectedOffice(lastSelection.selectedOffice);
       setOfficeIdLocal(lastSelectionOfficeId)
@@ -544,9 +566,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
   const handleReset = () => {
     // Reset the selectedOffice and isAdmin states to their original values
     setswitch1(false)
-    setIsLoading(true);
     setSelectedOffice(originallist.officeId)
-    setOptionvalue({state:true,Ovalue:originallist.officeId})
+    setOptionvalue({ state: true, Ovalue: originallist.officeId })
     setIsAdmin(originallist.adminStatus)
     setOfficeIdLocal(originallist.officeId)
     // Clear the selectionHistory array
@@ -618,12 +639,12 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
     >
       <div className="container-fluid">
         <div className="d-flex w-100 g-0 align-items-start justify-content-between">
-        <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
+          <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Total Sales by Business Entity")}</div>
           {/* Stylish "Reset" button */}
-          {showResetButton  ? (
+          {showResetButton ? (
             <div title="Reset" className={css.resetButtonContainer}>
-              <button title="Reset" className={`btn btn-primary mx-1 ${window.innerWidth<500?'btn-sm':''} shadow border-2 border-white`} onClick={handleReset}>
+              <button title="Reset" className={`btn btn-primary mx-1 ${window.innerWidth < 500 ? 'btn-sm' : ''} shadow border-2 border-white`} onClick={handleReset}>
                 <FaAnglesLeft style={{ fontSize: "1rem" }} />
               </button>
             </div>
@@ -632,7 +653,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
           {/* "Previous" button */}
           {showPreviousButton && selectionHistory.length > 0 ? (
             <div title="Previous" className={css.resetButtonContainer}>
-              <button title="Previous" className={`btn btn-primary mx-1 ${window.innerWidth<500?'btn-sm':''} shadow border-2 border-white`} onClick={handlePrevious}>
+              <button title="Previous" className={`btn btn-primary mx-1 ${window.innerWidth < 500 ? 'btn-sm' : ''} shadow border-2 border-white`} onClick={handlePrevious}>
                 <FaAngleLeft style={{ fontSize: "1rem" }} />
               </button>
             </div>
@@ -703,29 +724,29 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, S
         }}
         className={themeMode === "dark" ? css.darkMode : css.lightMode}
       /> :
-      <div className="container-fluid mt-2 table-responsive" style={{height:"291px"}}>
-      <table className={`table ${themeMode=='dark'?'table-dark':''}`}>
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">{t("Office")}</th>
-            <th scope="col">{t("Sales")}(₹)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tableData.map((item, index) => {
-            return(
-            <tr key={item.officeName}>
-              <th scope="row">{index+1}</th>
-              <td>{item.officeName}</td>
-              <td>{parseFloat(item.sales).toFixed(2)}</td>
-            </tr>
-            )
-          })}
+        <div className="container-fluid mt-2 table-responsive" style={{ height: "291px" }}>
+          <table className={`table ${themeMode == 'dark' ? 'table-dark' : ''}`}>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">{t("Office")}</th>
+                <th scope="col">{t("Sales")}(₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((item, index) => {
+                return (
+                  <tr key={item.officeName}>
+                    <th scope="row">{index + 1}</th>
+                    <td>{item.officeName}</td>
+                    <td>{parseFloat(item.sales).toFixed(2)}</td>
+                  </tr>
+                )
+              })}
 
-        </tbody>
-      </table>
-    </div>}
+            </tbody>
+          </table>
+        </div>}
     </div>
 
   );
