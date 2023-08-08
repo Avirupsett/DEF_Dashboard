@@ -626,10 +626,10 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
                     <FaChartColumn style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
                     <span>{t("View Graph")}</span>
                   </div>}
-                <div className={css.exportOption} onClick={exportToExcel}>
+                <a href='https://www.africau.edu/images/default/sample.pdf' download className={css.exportOption}>
                   <FaFileExcel style={{ fontSize: "1.1rem", color: "green" }} />
                   <span>{t("Export to Excel")}</span>
-                </div>
+                </a>
                 <div className={css.exportOption} onClick={exportToPDF}>
                   <FaFilePdf style={{ fontSize: "1.1rem", color: "red" }} />
                   <span>{t("Export to PDF")}</span>
