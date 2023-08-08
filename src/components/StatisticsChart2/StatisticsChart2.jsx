@@ -306,7 +306,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       size: 14,
     };
     extraHeaderCell.alignment = { vertical: "middle", horizontal: "center" };
-    worksheet.mergeCells("A1:B1");
+    worksheet.mergeCells("A1:C1");
 
     // Add period - startDate to endDate
     const periodCell = worksheet.getCell("A2");
@@ -351,55 +351,78 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
     totalSalesCell.alignment = { horizontal: "right" };
 
 
-    // Generate a Blob from the workbook
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const excelBlob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(excelBlob, "total_sales_by_office.xlsx");
+      // Generate a unique identifier
+  const uniqueIdentifier = Date.now(); // You can use any unique value generation logic
+
+  // Generate a Blob from the workbook
+  workbook.xlsx.writeBuffer().then(async (buffer) => {
+    const excelBlob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
+
+    // Create a FormData object to send the Blob to the server
+    const formData = new FormData();
+    formData.append("file", excelBlob, `${uniqueIdentifier}_sales_by_office.xlsx`);
+
+    // Send FormData to the server using axios or fetch
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL_1}/api/uploader`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      ); // Replace with your API endpoint
+
+      // Assuming the API returns the file URL
+      const excelFileUrl = response.data.url;
+      window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`)
+
+    } catch (error) {
+      console.error("Error saving Excel file:", error);
+    }
+  })
   };
 
 
   const exportToPDF = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-
+  
     // Get the 'lang' parameter from the URL
     const urlParams = new URLSearchParams(window.location.search);
     const lang = urlParams.get('lang');
+  
     // Add image file
     const response = await axios.get(logo, {
       responseType: "arraybuffer",
     });
-
+  
     const fontBytes = await axios.get(font, { responseType: 'arraybuffer' });
     const fontBase64 = arrayBufferToBase64(fontBytes.data);
-
+  
     const fontBytes2 = await axios.get(font2, { responseType: 'arraybuffer' });
     const fontBase642 = arrayBufferToBase64(fontBytes2.data);
-
+  
     const imageBase64 = arrayBufferToBase64(response.data);
-    import('jspdf').then(module => {
+    
+    import('jspdf').then(async module => {
       let jsPDF = module.default
       const doc = new jsPDF();
-      
+  
       // Add the image
       const imgData = imageBase64;
       const imgWidth = 35;
       const imgHeight = 20;
       doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
-
-       // Add font to PDF
+  
+      // Add font to PDF
       doc.addFileToVFS('NotoSansBengali.ttf', fontBase64);
       doc.addFont('NotoSansBengali.ttf', 'NotoSansBengali', 'normal');
       doc.setFont('NotoSansBengali');
-
+  
       doc.addFileToVFS('NotoSansDevanagari.ttf', fontBase642);
       doc.addFont('NotoSansDevanagari.ttf', 'NotoSansDevanagari', 'normal');
       doc.setFont('NotoSansDevanagari');
-
-
+  
       // Add Sales-Expense Summary header
       const summaryHeader = [[t("Total Sales by Business Entity")]];
       doc.autoTable({
@@ -419,8 +442,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
           fontStyle: 'bold'
         },
       });
-     
-      
+  
       // Add period - startDate to endDate
       const periodCell = [[`${t("Period")}: ${startDate} ${t("to")} ${endDate}`]];
       doc.autoTable({
@@ -438,31 +460,30 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         styles: {
           font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
         },
-        
       });
-
+  
       // Convert chart data to table format
       const tableData = chartData.map((item) => [
         item.officeName,
-       item.sales
+        item.sales
       ]);
-
+  
       // Calculate total sales
       const totalSales = chartData.reduce(
         (sales, item) => sales + parseFloat(item.sales),
         0
       );
-
+  
       // Add total row
       tableData.push([t("Total"), `${totalSales.toFixed(2)}`]);
-
+  
       // Set table headers
       const headers = [t("Office Name"), t("Sales")];
       const columnStyles = {
         1: { halign: "right" }, // Align Sales column to center
         2: { halign: "right" }, // Align Expense column to center
       };
-
+  
       // Set header styles
       const headerStyles = {
         fontSize: 12,
@@ -471,7 +492,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         fillColor: "#75AAF0", // Sky blue color for Office Name, Sales header
         textColor: "#FFFFFF", // White color
       };
-
+  
       // Add table to PDF
       doc.autoTable(headers, tableData, {
         startY: 45, // Start below the header and period
@@ -481,10 +502,33 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
           font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
         },
       });
-
-      // Save PDF
-      doc.save("total_sales_by_office.pdf");
-    })
+  
+      // Generate a unique identifier
+      const uniqueIdentifier = Date.now(); // You can use any unique value generation logic
+  
+      // Generate a Blob from the PDF content
+      const pdfBlob = doc.output('blob');
+  
+      // Create a FormData object to send the Blob to the server
+      const formData = new FormData();
+      formData.append("file", pdfBlob, `${uniqueIdentifier}_total_sales_by_office.pdf`);
+  
+      // Send FormData to the server using axios or fetch
+      try {
+        const response =await axios.post(
+          `${import.meta.env.VITE_API_URL_1}/api/uploader`,
+          formData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        ); // Replace with your API endpoint
+  
+        // Assuming the API returns the file URL
+        const pdfFileUrl =await response.data.url;
+        window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`)
+  
+      } catch (error) {
+        console.error("Error saving PDF file:", error);
+      }
+    });
   };
 
   // Function to handle the graph click event...

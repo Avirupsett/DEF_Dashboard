@@ -33,7 +33,7 @@ const OrdersPieChart = ({
   const [tableData, setTableData] = useState([])
   const [tableStatus, setTableStatus] = useState(false)
 
- 
+
 
   function calculateTotalSales(dataArray) {
     const flatProducts = dataArray.flatMap((item) => item.lstproduct);
@@ -286,6 +286,16 @@ const OrdersPieChart = ({
     }
     return window.btoa(binary);
   };
+  const formatDate = (date) => {
+    if (!date) {
+      return ""; // Return an empty string or a default date string
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
 
   const exportToExcel = async () => {
     const startDate = formatDate(selectedRange[0]);
@@ -297,9 +307,9 @@ const OrdersPieChart = ({
     // Fetch the image file (replace "logo.png" with the correct path/URL)
     fetch(logo)
       .then((response) => response.blob())
-      .then((blob) => {
+      .then(async (blob) => {
         const fileReader = new FileReader();
-        fileReader.onload = function () {
+        fileReader.onload = async function () {
           const imageBase64 = fileReader.result;
 
           // Add the image to the worksheet
@@ -374,11 +384,24 @@ const OrdersPieChart = ({
           });
 
           // Generate a unique filename
-          const fileName = `product_wise_summary_data_${Date.now()}.xlsx`;
+          const uniqueIdentifier = Date.now();
+          const fileName = `${uniqueIdentifier}_product_wise_summary_data.xlsx`;
 
           // Save the workbook
-          workbook.xlsx.writeBuffer().then((buffer) => {
-            saveAs(new Blob([buffer]), fileName);
+          workbook.xlsx.writeBuffer().then(async (buffer) => {
+            // Create a FormData object to send the Blob to the server
+            const formData = new FormData();
+            formData.append("file", new Blob([buffer]), fileName);
+
+            // Send FormData to the server using axios or fetch
+            try {
+              const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
+              const excelFileUrl = response.data.url; // Assuming the API returns the file URL
+              window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`)
+
+            } catch (error) {
+              console.error("Error saving Excel file:", error);
+            }
           });
         };
 
@@ -386,16 +409,6 @@ const OrdersPieChart = ({
       });
   };
 
-  const formatDate = (date) => {
-    if (!date) {
-      return ""; // Return an empty string or a default date string
-    }
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
 
   const exportToPDF = async () => {
     const startDate = formatDate(selectedRange[0]);
@@ -411,7 +424,7 @@ const OrdersPieChart = ({
     const fontBytes2 = await axios.get(font2, { responseType: 'arraybuffer' });
     const fontBase642 = arrayBufferToBase64(fontBytes2.data);
 
-    import('jspdf').then(module => {
+    import('jspdf').then(async module => {
       let jsPDF = module.default
       const doc = new jsPDF();
 
@@ -507,17 +520,32 @@ const OrdersPieChart = ({
           font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
           fontStyle: 'bold'
         },
-        
       };
 
       // Add table to the PDF document
       doc.autoTable(tableConfig);
 
-      // Generate a unique filename
-      const fileName = `product_wise_summary_data_${Date.now()}.pdf`;
 
-      // Save the PDF document
-      doc.save(fileName);
+
+      // Generate a unique filename
+      const uniqueIdentifier = Date.now();
+      const fileName = `${uniqueIdentifier}_product_wise_summary_data.pdf`;
+
+      // Generate the Blob from the PDF data
+      const pdfBlob = doc.output('blob');
+
+      // Create a FormData object to send the Blob to the server
+      const formData = new FormData();
+      formData.append("file", pdfBlob, fileName);
+
+      // Send FormData to the server using axios or fetch
+      try {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
+        const pdfFileUrl = await response.data.url; // Assuming the API returns the file URL
+        window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`)
+      } catch (error) {
+        console.error("Error saving PDF file:", error);
+      }
     })
   };
 
@@ -561,7 +589,6 @@ const OrdersPieChart = ({
         className={`${css.chartContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
           }`}
       >
-
 
         <div className="container-fluid" >
           <div className="d-flex w-100 g-0 align-items-center justify-content-between">

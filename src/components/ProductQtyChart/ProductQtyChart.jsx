@@ -288,19 +288,30 @@ const ProductQtyChart = ({
     return window.btoa(binary);
   };
 
-  const exportToExcel = async() => {
+  const formatDate = (date) => {
+    if (!date) {
+      return ""; // Return an empty string or a default date string
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const exportToExcel = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-    const ExcelJS=await import('exceljs');
+    const ExcelJS = await import('exceljs');
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Data");
   
     // Fetch the image file (replace "logo.png" with the correct path/URL)
     fetch(logo)
       .then((response) => response.blob())
-      .then((blob) => {
+      .then(async (blob) => {
         const fileReader = new FileReader();
-        fileReader.onload = function () {
+        fileReader.onload = async function () {
           const imageBase64 = fileReader.result;
   
           // Add the image to the worksheet
@@ -374,12 +385,25 @@ const ProductQtyChart = ({
             ]); // Add "₹" symbol before the totalSale value
           });
   
-          // Generate a unique filename
-          const fileName = `product_wise_summary_data_${Date.now()}.xlsx`;
+           // Generate a unique filename
+           const uniqueIdentifier = Date.now();
+           const fileName = `${uniqueIdentifier}_product_wise_summary_data.xlsx`;
   
           // Save the workbook
-          workbook.xlsx.writeBuffer().then((buffer) => {
-            saveAs(new Blob([buffer]), fileName);
+          workbook.xlsx.writeBuffer().then(async (buffer) => {
+            // Create a FormData object to send the Blob to the server
+            const formData = new FormData();
+            formData.append("file", new Blob([buffer]), fileName);
+  
+            // Send FormData to the server using axios or fetch
+            try {
+              const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
+              const excelFileUrl = response.data.url; // Assuming the API returns the file URL
+              window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`)
+
+            } catch (error) {
+              console.error("Error saving Excel file:", error);
+            }
           });
         };
   
@@ -387,69 +411,59 @@ const ProductQtyChart = ({
       });
   };
 
-  const formatDate = (date) => {
-    if (!date) {
-      return ""; // Return an empty string or a default date string
-    }
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
 
   const exportToPDF = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-
+  
     // Get the 'lang' parameter from the URL
     const urlParams = new URLSearchParams(window.location.search);
     const lang = urlParams.get('lang');
-
+  
     const fontBytes = await axios.get(font, { responseType: 'arraybuffer' });
     const fontBase64 = arrayBufferToBase64(fontBytes.data);
-
+  
     const fontBytes2 = await axios.get(font2, { responseType: 'arraybuffer' });
     const fontBase642 = arrayBufferToBase64(fontBytes2.data);
-
-    import('jspdf').then(module => {
+  
+    import('jspdf').then(async module => {
       let jsPDF = module.default
       const doc = new jsPDF();
-
+  
       // Add font to PDF
       doc.addFileToVFS('NotoSansBengali.ttf', fontBase64);
       doc.addFont('NotoSansBengali.ttf', 'NotoSansBengali', 'normal');
       doc.setFont('NotoSansBengali');
-
+  
       doc.addFileToVFS('NotoSansDevanagari.ttf', fontBase642);
       doc.addFont('NotoSansDevanagari.ttf', 'NotoSansDevanagari', 'normal');
       doc.setFont('NotoSansDevanagari');
-
+  
       // Set table headers
       const headers = [[t("Product Name"), t("Quantity"), t("Total Sale")]];
       const columnStyles = {
         1: { halign: "right" },
         2: { halign: "right" },
       };
-
+  
       const headerStyles = {
         fontSize: 12,
         fontStyle: "bold",
         halign: "center",
       };
-
+  
       // Set background colors
       const backgroundColors = {
         summaryHeader: "#3CB043", // Green color for Sales-Expense Summary header
         secondHeader: "#75AAF0", // Sky blue color for Date, Expense, Sales header
       };
-
+  
       // Add the image
       const imgData = logo; // Replace with the path or URL of your image file
       const imgWidth = 35;
       const imgHeight = 20;
       doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
-
+  
       // Add Sales-Expense Summary header
       const summaryHeader = [[t("Product Wise Summary Data")]];
       doc.autoTable({
@@ -466,7 +480,7 @@ const ProductQtyChart = ({
           fontStyle: 'bold'
         },
       });
-
+  
       const periodCell = [[`${t("Period")}: ${startDate} ${t("to")} ${endDate}`]];
       doc.autoTable({
         startY: 39.5,
@@ -485,14 +499,14 @@ const ProductQtyChart = ({
           fontStyle: 'bold'
         },
       });
-
+  
       // Set table rows
       const rows = sellData.map((item) => [
         item.productName,
         `${item.totalQty} ${item.unit}`,
         item.totalSale.toFixed(2),
       ]);
-
+  
       // AutoTable configuration
       const tableConfig = {
         startY: doc.autoTable.previous.finalY + 1,
@@ -508,20 +522,34 @@ const ProductQtyChart = ({
           font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
           fontStyle: 'bold'
         },
-        
       };
-
+  
       // Add table to the PDF document
       doc.autoTable(tableConfig);
 
+      
+  
       // Generate a unique filename
-      const fileName = `product_wise_summary_data_${Date.now()}.pdf`;
-
-      // Save the PDF document
-      doc.save(fileName);
+      const uniqueIdentifier = Date.now();
+      const fileName = `${uniqueIdentifier}_product_wise_summary_data.pdf`;
+  
+      // Generate the Blob from the PDF data
+      const pdfBlob = doc.output('blob');
+  
+      // Create a FormData object to send the Blob to the server
+      const formData = new FormData();
+      formData.append("file", pdfBlob, fileName);
+  
+      // Send FormData to the server using axios or fetch
+      try {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
+        const pdfFileUrl =await response.data.url; // Assuming the API returns the file URL
+        window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`)
+      } catch (error) {
+        console.error("Error saving PDF file:", error);
+      }
     })
   };
-
 
 
   useEffect(() => {

@@ -163,7 +163,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       }
     },
     grid: {
-      left: window.innerWidth <= 768 ? '7%' : '4%',
+      left: window.innerWidth <= 768 ? '4%' : '4%',
       right: "3%",
       top: "10%",
       bottom: chartData.length > 0 ? "15%" : "20%",
@@ -465,7 +465,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
     const fontBase642 = arrayBufferToBase64(fontBytes2.data);
 
 
-    import('jspdf').then(module => {
+    import('jspdf').then(async module => {
       let jsPDF = module.default
       const doc = new jsPDF();
       doc.setFontSize(12); // Set the font size
@@ -577,13 +577,29 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         }
       });
 
+       // Generate a unique identifier
+       const uniqueIdentifier = Date.now(); // You can use any unique value generation logic
+  
+      // Generate a Blob from the PDF
+    const pdfBlob = new Blob([doc.output('blob')], {
+      type: 'application/pdf',
+    });
 
-      // Save PDF
-      doc.save("sales-expense.pdf");
-    })
+    // Create a FormData object to send the Blob to the server
+    const formData = new FormData();
+    formData.append('file', pdfBlob, `${uniqueIdentifier}_sales-expense.pdf`);
+
+    // Send FormData to the server using axios or fetch
+    try {
+      const response =await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData,{headers: {'Content-Type': 'multipart/form-data'}}); // Replace with your API endpoint
+      const pdfFileUrl =await response.data.url; // Assuming the API returns the file URL
+      window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`)
+    } catch (error) {
+      console.error('Error saving PDF file:', error);
+    }
+      
+    });
   };
-
-
 
 
 
