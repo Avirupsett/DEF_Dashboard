@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import css from "./StatisticsChart.module.css";
-import { saveAs } from "file-saver";
+
 import "jspdf-autotable"
 import loading from '/assets/loading.gif';
 import logo from "/assets/logo.png";
@@ -10,10 +10,13 @@ import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartColumn } fro
 
 import ReactECharts from "echarts-for-react";
 import { useTranslation } from "react-i18next";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 
-const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, alldata, isLoading }) => {
+const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, alldata, isLoading, officeName }) => {
   const [chartData, setChartData] = useState([]);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const iconContainerRef = useRef(null);
@@ -154,7 +157,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       },
     },
     legend: {
-      top: window.innerWidth > 550 ? 0 : 270,
+      top: window.innerWidth > 550 ? 270 : 270,
 
       data: [t("Sales"), t("Expense"), t("Average Sales")],
       textStyle: {
@@ -171,7 +174,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
     },
     xAxis: {
       type: "category",
-      name: window.innerWidth > 550 ? t("Date") : "",
+      name:  "",
       nameLocation: "middle",
       nameGap: 35,
       nameTextStyle: {
@@ -315,6 +318,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
   };
 
   const exportToExcel = async () => {
+    const id = toast.loading("Please wait...")
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
     const ExcelJS = await import('exceljs');
@@ -425,26 +429,32 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       totalExpenseCell.value = `₹${totalExpense.toFixed(2)}`;
       totalExpenseCell.alignment = { horizontal: "right" }; // Align to the right
 
-   
-  // Generate a Blob from the workbook
-  workbook.xlsx.writeBuffer().then(async (buffer) => {
-    const excelBlob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
 
-    // Create a FormData object to send the Blob to the server
-    const formData = new FormData();
-    formData.append("file", excelBlob, `${Date.now()}_sales-expense.xlsx`);
+      // Generate a Blob from the workbook
+      workbook.xlsx.writeBuffer().then(async (buffer) => {
+        const excelBlob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
 
-    // Send FormData to the server using axios or fetch
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData,{headers: {'Content-Type': 'multipart/form-data'}}); // Replace with your API endpoint
-      const excelFileUrl = response.data.url; // Assuming the API returns the file URL
-      window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`)
-    } catch (error) {
-      console.error("Error saving Excel file:", error);
-    }
-  });
+        // Create a FormData object to send the Blob to the server
+        const formData = new FormData();
+        formData.append("file", excelBlob, `${Date.now()}_sales-expense.xlsx`);
+
+        // Send FormData to the server using axios or fetch
+        try {
+         
+          //do something else
+          const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
+          if (response.status==200)
+            toast.update(id, { render: "Download Starting...", type: "success", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+          else
+            toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+          const excelFileUrl = response.data.url; // Assuming the API returns the file URL
+          window.location.href=`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`
+        } catch (error) {
+          console.error("Error saving Excel file:", error);
+        }
+      });
     };
     fileReader.readAsDataURL(response.data);
   };
@@ -453,6 +463,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
   const exportToPDF = async () => {
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
+    const id = toast.loading("Please wait...")
 
     // Get the 'lang' parameter from the URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -577,27 +588,31 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         }
       });
 
-       // Generate a unique identifier
-       const uniqueIdentifier = Date.now(); // You can use any unique value generation logic
-  
+      // Generate a unique identifier
+      const uniqueIdentifier = Date.now(); // You can use any unique value generation logic
+
       // Generate a Blob from the PDF
-    const pdfBlob = new Blob([doc.output('blob')], {
-      type: 'application/pdf',
-    });
+      const pdfBlob = new Blob([doc.output('blob')], {
+        type: 'application/pdf',
+      });
 
-    // Create a FormData object to send the Blob to the server
-    const formData = new FormData();
-    formData.append('file', pdfBlob, `${uniqueIdentifier}_sales-expense.pdf`);
+      // Create a FormData object to send the Blob to the server
+      const formData = new FormData();
+      formData.append('file', pdfBlob, `${uniqueIdentifier}_sales-expense.pdf`);
 
-    // Send FormData to the server using axios or fetch
-    try {
-      const response =await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData,{headers: {'Content-Type': 'multipart/form-data'}}); // Replace with your API endpoint
-      const pdfFileUrl =await response.data.url; // Assuming the API returns the file URL
-      window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`)
-    } catch (error) {
-      console.error('Error saving PDF file:', error);
-    }
-      
+      // Send FormData to the server using axios or fetch
+      try {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
+        if (response.status==200)
+        toast.update(id, { render: "Download Starting...", type: "success", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+      else
+        toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+        const pdfFileUrl = await response.data.url; // Assuming the API returns the file URL
+        window.location.href=`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`
+      } catch (error) {
+        console.error('Error saving PDF file:', error);
+      }
+
     });
   };
 
@@ -656,10 +671,14 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       className={`${css.chartContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
         }`}
     >
+      <ToastContainer
+      position="top-center"
+      theme={themeMode}
+      />
       <div className="container-fluid" >
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
           <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
-            }`} >{t("Sales-Expense")}</div>
+            }`} >{t("Sales-Expense")} {t("of")} {officeName}</div>
           {/* <div className={css.exportOption}
             onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
             <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />

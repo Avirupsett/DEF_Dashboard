@@ -113,6 +113,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
   const [originallist, setOriginallist] = useState([])
   const [officeIdLocal, setOfficeIdLocal] = useState(officeId)
   const [optionvalue, setOptionvalue] = useState("")
+  const [selectedOfficeName, setSelectedOfficeName] = useState("")
 
   // const handleResize = () => {
   //   setWindowWidth(window.innerWidth);
@@ -142,11 +143,9 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           // }
           if (officeDataFromApi) {
 
-            if (officeDataFromApi.length === 1) {
-              setOfficeName(userOfficeName)
-            }
 
-
+            setOfficeName(userOfficeName)
+            setSelectedOfficeName(userOfficeName)
 
 
             setSelectedOffice(officeId)
@@ -155,8 +154,8 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
 
             setOfficeData(officeDataFromApi);
-            let temp=[]
-            officeDataFromApi.map((office)=>{
+            let temp = []
+            officeDataFromApi.map((office) => {
               temp.push(
                 {
                   "officeId": office.OfficeId,
@@ -164,7 +163,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
                   "officeType": office.OfficeTypeName,
                 }
               )
-            
+
             })
             setCompanies(temp.filter(
               (office) => office.officeType === "Company"
@@ -175,8 +174,8 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
             setRetails(temp.filter(
               (office) => office.officeType === "Retail Pumps"
             ));
-            setOriginallist({officeId,adminStatus})
-          
+            setOriginallist({ officeId, adminStatus,userOfficeName })
+
           }
         }
 
@@ -189,20 +188,20 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
   }, [userId, officeId, adminStatus]);
 
-  useEffect(()=>{
-    if(selectedOffice)
-    handleSelectedOffice()
+  useEffect(() => {
+    if (selectedOffice)
+      handleSelectedOffice()
 
-  },[selectedOffice,isAdmin])
+  }, [selectedOffice, isAdmin])
 
- const handleSelectedOffice =async()=>{
-     setIsLoading(true)
+  const handleSelectedOffice = async () => {
+    setIsLoading(true)
     let SalesResponse = await fetchSalesData(selectedRange[0], selectedRange[1], selectedOffice, isAdmin)
-      if (SalesResponse) {
-        setAlldata(SalesResponse)
-        setIsLoading(false)
-      }
- }
+    if (SalesResponse) {
+      setAlldata(SalesResponse)
+      setIsLoading(false)
+    }
+  }
 
   const handleDateRange = async (value) => {
 
@@ -224,28 +223,36 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
     const selectedOption = event.target.selectedOptions[0];
 
     // setOptionvalue(event.target.options[event.target.selectedIndex].text)
-    setOptionvalue({state:false,Ovalue:event.target.value})
+    setOptionvalue({ state: false, Ovalue: event.target.value })
     // const isRetail = selectedOption.getAttribute("data-isretail");
     // setIsLoading(true)
     const isAdmin = selectedOption.getAttribute("data-isadmin");
-
     setSelectedOffice(event.target.value);
     setIsAdmin(isAdmin);
-
-    if (officeData.filter(
-      (office) => office.OfficeId === event.target.value
-    ).length > 0) {
-      setOfficeName(officeData.filter(
-        (office) => office.OfficeId === event.target.value
-      )[0].OfficeName)
-    }
+    setSelectedOfficeName(event.target.selectedOptions[0].getAttribute("data-officename"))
+    // if (officeData.filter(
+    //   (office) => office.OfficeId === event.target.value
+    // ).length > 0) {
+    //   setSelectedOfficeName((officeData.filter(
+    //     (office) => office.OfficeId === event.target.value
+    //   )[0].OfficeName))
+    // }else{
+      // setSelectedOfficeName(userOfficeName)
+    // }
+    // if (officeData.filter(
+    //   (office) => office.OfficeId === event.target.value
+    // ).length > 0) {
+    //   setOfficeName(officeData.filter(
+    //     (office) => office.OfficeId === event.target.value
+    //   )[0].OfficeName)
+    // }
     // let SalesResponse = await fetchSalesData(selectedRange[0], selectedRange[1], event.target.value, isAdmin)
     // if (SalesResponse) {
     //   setAlldata(SalesResponse)
     //   setIsLoading(false)
     // }
   };
-  
+
   const trimName = (name, maxLength) => {
     if (window.innerWidth > 500) {
       return name; // For larger screens, show the full name without truncation
@@ -287,31 +294,34 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           </div>
           <div className="col-md-6 col-lg-5 col-xl-4 col-xxl-4 my-sm-2   my-2 d-flex justify-content-center align-items-center mx-0">
             {window.innerWidth > 400 ? <div className="me-2 me-sm-3 ms-1 ms-lg-2 mt-1"><FaRegBuilding style={{ fontSize: '2.3rem', color: "white" }} /></div> : ''}
-            <select value={optionvalue.state?optionvalue.Ovalue:null} className="form-select form-select-lg" aria-label="Default select example" id="office" onChange={handleOfficeChange} style={{ paddingBottom: "4px !important", paddingTop: "4px !important" }}>
+            <select value={optionvalue.state ? optionvalue.Ovalue : null} className="form-select form-select-lg" aria-label="Default select example" id="office" onChange={handleOfficeChange} style={{ paddingBottom: "4px !important", paddingTop: "4px !important" }}>
               {companies.length > 1 ? <><option
                 value={officeIdLocal}
+                data-officename={officeName}
                 data-isretail="-1"
                 data-isadmin="6"
                 className={`${css.boldOption}`}
 
               >
-                {t("All Entities")}
+                {t("Entities")}({trimName(officeName, 10)})
 
               </option> </> : ''}
               {companies.length > 0 ? <><option
                 value={officeIdLocal}
+                data-officename={officeName}
                 data-isretail="0"
                 data-isadmin="4"
                 className={`${css.boldOption}`}
 
               >
-                &nbsp;&nbsp;{t("All Companies")}
+                &nbsp;&nbsp;{t("Companies")}({trimName(officeName, 10)})
               </option></> : ''}
 
               {companies.map((company) => (
                 <option
                   key={company.officeId}
                   value={company.officeId}
+                  data-officename={company.officeName}
                   // data-isretail={company.OfficeTypeId === 2 ? "1" : "0"}
                   data-isadmin="5"
                   className={`${css.optionGroup}`}
@@ -323,15 +333,17 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
               {wholesales.length > 1 || retails.length > 1 ? <> <option
                 value={officeIdLocal}
+                data-officename={officeName}
                 data-isretail="-1"
                 data-isadmin="1"
                 className={`${css.boldOption}`}
 
               >
-                &nbsp;&nbsp;{t("All Pumps")}
+                &nbsp;&nbsp;{t("Pumps")}({trimName(officeName, 10)})
               </option></> : ''}
-              {wholesales.length > 0  ? <><option
+              {wholesales.length > 0 ? <><option
                 value={officeIdLocal}
+                data-officename={officeName}
                 data-isretail="0"
                 data-isadmin="3"
                 className={`${css.boldOption}`}
@@ -343,6 +355,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
                 <option
                   key={wholesalep.officeId}
                   value={wholesalep.officeId}
+                  data-officename={wholesalep.officeName}
                   // data-isretail={wholesalep.OfficeTypeId === 2 ? "1" : "0"}
                   data-isadmin="0"
                   className={`${css.optionGroup}`}
@@ -353,6 +366,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
               ))}
               {(retails.length > 0) ? <option
                 value={officeIdLocal}
+                data-officename={officeName}
                 data-isretail="1"
                 data-isadmin="2"
                 className={`${css.boldOption}`}
@@ -361,10 +375,11 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
                 &nbsp;&nbsp;&nbsp;{t("Retail Pumps")}
               </option> : ''}
 
-               {retails.map((retailp) => (
+              {retails.map((retailp) => (
                 <option
                   key={retailp.officeId}
                   value={retailp.officeId}
+                  data-officename={retailp.officeName}
                   // data-isretail={retailp.officeTypeId === 2 ? "1" : "0"}
                   data-isadmin="0"
                   className={`${css.optionGroup}`}
@@ -372,8 +387,8 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   {retailp.officeName}
                 </option>
-              )) }
-              
+              ))}
+
               {/* retails.map((retailp) => (
                 <option
                   key={retailp.officeId}
@@ -396,7 +411,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
           <div className='col-md-12 col-lg-8'>
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} />
+              <StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={trimName(selectedOfficeName, 10)}/>
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-4'>
@@ -412,7 +427,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           </div>
           <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue}/>
+              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} setSelectedOfficeName={setOfficeName} selectedOfficeNameLocal={selectedOfficeName} setSelectedOfficeNameLocal={setSelectedOfficeName} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue} />
             </Suspense>
           </div>
         </div>

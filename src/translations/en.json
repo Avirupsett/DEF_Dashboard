@@ -27,9 +27,9 @@
     "View Graph":"View Graph",
     "Export to Excel":"Export to Excel",
     "Export to PDF":"Export to PDF",
-    "All Entities":"All Entities",
-    "All Companies":"All Companies",
-    "All Pumps":"All Pumps",
+    "Entities":"Entities",
+    "Companies":"Companies",
+    "Pumps":"Pumps",
     "Today":"Today",
     "Yesterday":"Yesterday",
     "This week":"This week",
@@ -52,5 +52,8 @@
     "Product":"Product",
     "No Data Found":"No Data Found",
     "Rows":"Rows",
-    "Total Sale": "Total Sale"
+    "Total Sale": "Total Sale",
+    "Product Wise Sale":"Product Wise Sale",
+    "Product Wise Qty": "Product Wise Qty",
+    "of":"of"
 }

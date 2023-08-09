@@ -13,8 +13,10 @@ import { useTranslation } from "react-i18next";
 import loading from '/assets/loading.gif';
 import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, alldata, isLoading, SelectedOfficeName, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails, originallist, setOfficeIdLocal, officeIdLocal, setOptionvalue }) => {
+const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, alldata, isLoading, SelectedOfficeName,setSelectedOfficeName,selectedOfficeNameLocal,setSelectedOfficeNameLocal, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails, originallist, setOfficeIdLocal, officeIdLocal, setOptionvalue }) => {
   const [chartData, setChartData] = useState([]);
 
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -32,7 +34,6 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
   const [showPreviousButton, setShowPreviousButton] = useState(false);
   const [showResetButton, setShowResetButton] = useState(false);
   const [switch1, setswitch1] = useState(true)
-
   const { t } = useTranslation();
 
 
@@ -105,7 +106,6 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         });
       })
       tabletemp.push({ "officeName": "Total", "sales": temp.reduce((sales, item) => sales + parseFloat(item.sales), 0).toFixed(2) });
-
       if (update === 1) {
         setCompanies(temp.filter(
           (office) => office.officeType === "Company"
@@ -272,6 +272,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
 
 
   const exportToExcel = async () => {
+    const id = toast.loading("Please wait...")
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
     const ExcelJS = await import('exceljs');
@@ -371,10 +372,13 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       ); // Replace with your API endpoint
-
+      if (response.status==200)
+      toast.update(id, { render: "Download Starting...", type: "success", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+    else
+      toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
       // Assuming the API returns the file URL
       const excelFileUrl = response.data.url;
-      window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`)
+      window.location.href=`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`
 
     } catch (error) {
       console.error("Error saving Excel file:", error);
@@ -384,6 +388,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
 
 
   const exportToPDF = async () => {
+    const id = toast.loading("Please wait...")
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
   
@@ -520,10 +525,13 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
           formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         ); // Replace with your API endpoint
-  
+        if (response.status==200)
+        toast.update(id, { render: "Download Starting...", type: "success", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+      else
+        toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
         // Assuming the API returns the file URL
         const pdfFileUrl =await response.data.url;
-        window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`)
+        window.location.href=`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`
   
       } catch (error) {
         console.error("Error saving PDF file:", error);
@@ -538,13 +546,17 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       // Get the office name and ID from the clicked data point
       const clickedOfficeId = chartData[params.dataIndex].officeId;
       const clickedOfficeType = chartData[params.dataIndex].officeType;
+      const clickedOfficeName = chartData[params.dataIndex].officeName;
       if (clickedOfficeType === "Company") {
         setswitch1(false)
         // setIsLoading(true);
         // Save the current selectedOffice and isAdmin values to the history
-        setSelectionHistory((prevHistory) => [...prevHistory, { selectedOffice, isAdmin }]);
+        setSelectionHistory((prevHistory) => [...prevHistory, { selectedOffice, isAdmin,selectedOfficeNameLocal }]);
         setSelectionHistoryOfficeId((prevHistory) => [...prevHistory, officeIdLocal])
         // Update the selectedOffice state variable
+        setOptionvalue({ state: true, Ovalue: clickedOfficeId})
+        setSelectedOfficeName(clickedOfficeName)
+        setSelectedOfficeNameLocal(clickedOfficeName)
         setSelectedOffice(clickedOfficeId);
         setIsAdmin(6);
         setOfficeIdLocal(clickedOfficeId)
@@ -585,6 +597,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       // setIsLoading(true);
       setOptionvalue({ state: true, Ovalue: lastSelectionOfficeId })
       // Update the localSelectedOffice and localIsAdmin states with the last entry values
+      setSelectedOfficeName(lastSelection.selectedOfficeNameLocal)
+      setSelectedOfficeNameLocal(lastSelection.selectedOfficeNameLocal)
       setSelectedOffice(lastSelection.selectedOffice);
       setOfficeIdLocal(lastSelectionOfficeId)
       setIsAdmin(lastSelection.isAdmin);
@@ -614,6 +628,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
     setOptionvalue({ state: true, Ovalue: originallist.officeId })
     setIsAdmin(originallist.adminStatus)
     setOfficeIdLocal(originallist.officeId)
+    setSelectedOfficeName(originallist.userOfficeName)
+    setSelectedOfficeNameLocal(originallist.userOfficeName)
     // Clear the selectionHistory array
     setSelectionHistory([]);
     // Update the localSelectedOffice and localIsAdmin states with the original values
@@ -673,6 +689,17 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+  const trimName = (name, maxLength) => {
+    if (window.innerWidth > 500) {
+      return name; // For larger screens, show the full name without truncation
+    } else {
+      if (name.length <= maxLength) {
+        return name;
+      } else {
+        return name.substring(0, maxLength) + '...';
+      }
+    }
+  };
 
 
 
@@ -681,10 +708,14 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       className={`${css.chartContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
         }`}
     >
+      <ToastContainer
+      position="top-center"
+      theme={themeMode}
+      />
       <div className="container-fluid">
         <div className="d-flex w-100 g-0 align-items-start justify-content-between">
           <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
-            }`} >{t("Total Sales by Business Entity")}</div>
+            }`} >{t("Sales")} {t("of")} {trimName(selectedOfficeNameLocal, 10)}</div>
           {/* Stylish "Reset" button */}
           {showResetButton ? (
             <div title="Reset" className={css.resetButtonContainer}>

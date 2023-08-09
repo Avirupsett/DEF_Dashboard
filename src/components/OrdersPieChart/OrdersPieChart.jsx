@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
-import { saveAs } from 'file-saver';
 import axios from "axios";
 import 'jspdf-autotable';
 import css from './OrdersPieChart.module.css';
@@ -10,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import loading from '/assets/loading.gif';
 import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const OrdersPieChart = ({
   themeMode,
@@ -101,6 +102,12 @@ const OrdersPieChart = ({
         const result_table = Object.entries(calculateTotal).map(([pipeline, { totalSales, qty, unitShortName }]) => ({
           "ProductName": pipeline, "Sales": totalSales, "Quantity": `${qty} ${unitShortName}`,
         }));
+        const salesTotal = result_export.reduce((total, item) => total + item.totalSale, 0).toFixed(2);
+        const qtyTotal = result_export.reduce(
+          (total, item) => total + item.totalQty,
+          0
+        );
+        result_table.push({"ProductName": t("Total"), "Sales": `${salesTotal}`, "Quantity": `${qtyTotal}`})
         setTableData(result_table)
 
 
@@ -298,6 +305,7 @@ const OrdersPieChart = ({
   };
 
   const exportToExcel = async () => {
+    const id = toast.loading("Please wait...")
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
     const ExcelJS = await import('exceljs');
@@ -382,6 +390,25 @@ const OrdersPieChart = ({
               `₹${item.totalSale}`,
             ]); // Add "₹" symbol before the totalSale value
           });
+          const totalRow = worksheet.addRow([t("Total"), "", ""]);
+      totalRow.font = {
+        bold: true,
+        color: { argb: "000000" }, // Black color
+        size: 12,
+      };
+
+      // Calculate total values
+      const totalSales = sellData.reduce((total, item) => total + item.totalSale, 0);
+      const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
+
+      // Set total values in the total row
+      const totalSalesCell = worksheet.getCell(`B${totalRow.number}`);
+      totalSalesCell.value = `${totalQty.toFixed(2)}`;
+      totalSalesCell.alignment = { horizontal: "right" }; // Align to the right
+
+      const totalExpenseCell = worksheet.getCell(`C${totalRow.number}`);
+      totalExpenseCell.value = `₹${totalSales.toFixed(2)}`;
+      totalExpenseCell.alignment = { horizontal: "right" }; 
 
           // Generate a unique filename
           const uniqueIdentifier = Date.now();
@@ -396,6 +423,10 @@ const OrdersPieChart = ({
             // Send FormData to the server using axios or fetch
             try {
               const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
+              if (response.status == 200)
+                toast.update(id, { render: "Download Starting...", type: "success", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
+              else
+                toast.update(id, { render: "Download Failed !", type: "error", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
               const excelFileUrl = response.data.url; // Assuming the API returns the file URL
               window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`)
 
@@ -411,6 +442,7 @@ const OrdersPieChart = ({
 
 
   const exportToPDF = async () => {
+    const id = toast.loading("Please wait...")
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
 
@@ -499,11 +531,20 @@ const OrdersPieChart = ({
       });
 
       // Set table rows
-      const rows = sellData.map((item) => [
+      let rows = sellData.map((item) => [
         item.productName,
         `${item.totalQty} ${item.unit}`,
         item.totalSale.toFixed(2),
       ]);
+      // Calculate total values
+      const totalSales = sellData.reduce((total, item) => total + item.totalSale, 0);
+      const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
+
+     rows.push([
+       t("Total"),
+       `${totalQty.toFixed(2)}`,
+       `${totalSales.toFixed(2)}`,
+     ]);
 
       // AutoTable configuration
       const tableConfig = {
@@ -521,6 +562,7 @@ const OrdersPieChart = ({
           fontStyle: 'bold'
         },
       };
+       
 
       // Add table to the PDF document
       doc.autoTable(tableConfig);
@@ -541,6 +583,10 @@ const OrdersPieChart = ({
       // Send FormData to the server using axios or fetch
       try {
         const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
+        if (response.status==200)
+        toast.update(id, { render: "Download Starting...", type: "success", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+      else
+        toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
         const pdfFileUrl = await response.data.url; // Assuming the API returns the file URL
         window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`)
       } catch (error) {
@@ -588,7 +634,10 @@ const OrdersPieChart = ({
       <div
         className={`${css.chartContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
           }`}
-      >
+      ><ToastContainer
+      position="top-center"
+      theme={themeMode}
+      />
 
         <div className="container-fluid" >
           <div className="d-flex w-100 g-0 align-items-center justify-content-between">
@@ -607,7 +656,7 @@ const OrdersPieChart = ({
 
             </button>
             <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
-              }`}>{t("Product Volume")}</div>
+              }`}>{t("Product Wise Sale")}</div>
             <div title='Export Options' className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
               {/* Data grid icon */}
 

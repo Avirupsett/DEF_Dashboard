@@ -27,9 +27,9 @@
     "View Graph": "গ্রাফ দেখুন",
     "Export to Excel": "এক্সেলে রপ্তানি করুন",
     "Export to PDF": "পিডিএফে রপ্তানি করুন",
-    "All Entities": "সমস্ত ইণ্টিটি",
-    "All Companies": "সমস্ত কোম্পানি",
-    "All Pumps": "সমস্ত পাম্প",
+    "Entities": "ইণ্টিটি",
+    "Companies": "কোম্পানি",
+    "Pumps": "পাম্প",
     "Today": "আজ",
     "Yesterday": "গতকাল",
     "This week": "এই সপ্তাহ",
@@ -55,5 +55,8 @@
     "No Data Found": "কোন ডেটা পাওয়া যায়নি",
     "Rows": "সারি",
     "Product Wise Summary Data": "পণ্য ভিত্তিক সংক্ষিপ্ত উপাদান",
-    "Total Sale": "মোট বিক্রি"
+    "Total Sale": "মোট বিক্রি",
+    "Product Wise Sale": "পণ্য অনুযায়ী বিক্রি",
+    "Product Wise Qty": "পণ্য অনুযায়ী পরিমাণ",
+    "of": "এর"
 }

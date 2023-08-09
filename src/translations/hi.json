@@ -27,9 +27,9 @@
     "View Graph":"ग्राफ़ देखें",
     "Export to Excel": "एक्सेल में निर्यात करें",
     "Export to PDF": "पीडीएफ में निर्यात करें",
-    "All Entities": "सभी संस्थान",
-    "All Companies": "सभी कंपनियाँ",
-    "All Pumps": "सभी पंप",
+    "Entities": "संस्थान",
+    "Companies": "कंपनियाँ",
+    "Pumps": "पंप",
     "Today": "आज",
     "Yesterday": "कल",
     "This week": "इस सप्ताह",
@@ -56,5 +56,8 @@
     "No Data Found": "कोई डेटा नहीं मिला",
     "Rows": "पंक्तियाँ",
     "Product Wise Summary Data": "उत्पाद वार संक्षिप्त आंकड़े",
-    "Total Sale": "कुल बिक्री"
+    "Total Sale": "कुल बिक्री",
+    "Product Wise Sale": "उत्पाद वार बिक्री",
+    "Product Wise Qty": "उत्पाद वार मात्रा",
+    "of": "की"
 }

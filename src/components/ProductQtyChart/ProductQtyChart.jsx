@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
 
-import { saveAs } from 'file-saver';
 import axios from "axios";
 import 'jspdf-autotable';
 import css from './ProductQtyChart.module.css';
@@ -11,7 +10,8 @@ import { useTranslation } from 'react-i18next';
 import loading from '/assets/loading.gif';
 import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ProductQtyChart = ({
   themeMode,
@@ -35,7 +35,7 @@ const ProductQtyChart = ({
   const [chartData, setChartData] = useState([])
   const { t } = useTranslation();
 
-  
+
   function calculateTotalSales(dataArray) {
     const flatProducts = dataArray.flatMap((item) => item.lstproduct);
 
@@ -98,9 +98,16 @@ const ProductQtyChart = ({
         }));
         setSellData(result_export)
 
-        const result_table = Object.entries(calculateTotal).map(([pipeline, { totalSales, qty, unitShortName }]) => ({
+        let result_table = Object.entries(calculateTotal).map(([pipeline, { totalSales, qty, unitShortName }]) => ({
           "ProductName": pipeline, "Sales": totalSales, "Quantity": `${qty} ${unitShortName}`,
         }));
+        const salesTotal = result_export.reduce((total, item) => total + item.totalSale, 0).toFixed(2);
+        const qtyTotal = result_export.reduce(
+          (total, item) => total + item.totalQty,
+          0
+        );
+        result_table.push({"ProductName": t("Total"), "Sales": `${salesTotal}`, "Quantity": `${qtyTotal}`})
+
         setTableData(result_table)
 
 
@@ -165,7 +172,7 @@ const ProductQtyChart = ({
     //   });
     // }
 
-  }, [selectedRange, selectedOffice, isAdmin,alldata]);
+  }, [selectedRange, selectedOffice, isAdmin, alldata]);
 
   const toggleLegend = () => {
     if (sellData.length > 0)
@@ -248,14 +255,14 @@ const ProductQtyChart = ({
         center: ["50%", "50%"],
         roseType: "radius",
         selectedMode: "single",
-        
+
         avoidLabelOverlap: true,
         label: {
-          show: chartData.length<=10?true:false,
-          color:themeMode === "dark" ? "#ffffff" : "#111111"
+          show: chartData.length <= 10 ? true : false,
+          color: themeMode === "dark" ? "#ffffff" : "#111111"
           // position: "center",
         },
-        
+
         emphasis: {
           label: {
             show: true,
@@ -300,12 +307,13 @@ const ProductQtyChart = ({
   };
 
   const exportToExcel = async () => {
+    const id = toast.loading("Please wait...")
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
     const ExcelJS = await import('exceljs');
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Data");
-  
+
     // Fetch the image file (replace "logo.png" with the correct path/URL)
     fetch(logo)
       .then((response) => response.blob())
@@ -313,19 +321,19 @@ const ProductQtyChart = ({
         const fileReader = new FileReader();
         fileReader.onload = async function () {
           const imageBase64 = fileReader.result;
-  
+
           // Add the image to the worksheet
           const logoImage = workbook.addImage({
             base64: imageBase64,
             extension: "png",
           });
-  
+
           // Set the image position and size with padding
           worksheet.addImage(logoImage, {
             tl: { col: 0, row: 0 }, // Adjusted offset values for padding
             ext: { width: 100, height: 70 },
           });
-  
+
           // Add extra header - Product Wise Summary Data
           const extraHeaderCell = worksheet.getCell("A2"); // Shifted down by one row
           extraHeaderCell.value = t("Product Wise Summary Data");
@@ -339,7 +347,7 @@ const ProductQtyChart = ({
             horizontal: "center",
           };
           worksheet.mergeCells("A2:C2"); // Shifted down by one row
-  
+
           // Add period - startDate to endDate
           const periodCell = worksheet.getCell("A3"); // Shifted down by two rows
           periodCell.value = `${t("Period")}: ${startDate} ${t("to")} ${endDate}`;
@@ -350,20 +358,20 @@ const ProductQtyChart = ({
           };
           periodCell.alignment = { horizontal: "center" }; // Center alignment
           worksheet.mergeCells("A3:C3"); // Shifted down by two rows
-  
+
           // Set column widths
           worksheet.getColumn(1).width = 50;
           worksheet.getColumn(2).width = 15;
-  
+
           // Add headers
           const headerRow = worksheet.addRow([t("Product Name"), t("Quantity"), t("Total Sales")]);
-  
+
           headerRow.font = {
             bold: true,
             color: { argb: "000000" }, // Black color
             size: 12,
           };
-  
+
           // Apply underline and border style to each cell
           headerRow.eachCell((cell) => {
             cell.font = {
@@ -375,7 +383,7 @@ const ProductQtyChart = ({
               bottom: { style: "thin", color: { argb: "000000" } }, // Black color
             };
           });
-  
+
           // Add data rows
           sellData.forEach((item) => {
             worksheet.addRow([
@@ -384,86 +392,110 @@ const ProductQtyChart = ({
               `₹${item.totalSale}`,
             ]); // Add "₹" symbol before the totalSale value
           });
-  
-           // Generate a unique filename
-           const uniqueIdentifier = Date.now();
-           const fileName = `${uniqueIdentifier}_product_wise_summary_data.xlsx`;
-  
+          const totalRow = worksheet.addRow([t("Total"), "", ""]);
+      totalRow.font = {
+        bold: true,
+        color: { argb: "000000" }, // Black color
+        size: 12,
+      };
+
+      // Calculate total values
+      const totalSales = sellData.reduce((total, item) => total + item.totalSale, 0);
+      const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
+
+      // Set total values in the total row
+      const totalSalesCell = worksheet.getCell(`B${totalRow.number}`);
+      totalSalesCell.value = `${totalQty.toFixed(2)}`;
+      totalSalesCell.alignment = { horizontal: "right" }; // Align to the right
+
+      const totalExpenseCell = worksheet.getCell(`C${totalRow.number}`);
+      totalExpenseCell.value = `₹${totalSales.toFixed(2)}`;
+      totalExpenseCell.alignment = { horizontal: "right" }; 
+
+          // Generate a unique filename
+          const uniqueIdentifier = Date.now();
+          const fileName = `${uniqueIdentifier}_product_wise_summary_data.xlsx`;
+
           // Save the workbook
           workbook.xlsx.writeBuffer().then(async (buffer) => {
             // Create a FormData object to send the Blob to the server
             const formData = new FormData();
             formData.append("file", new Blob([buffer]), fileName);
-  
+
             // Send FormData to the server using axios or fetch
             try {
               const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
+              if (response.status == 200)
+                toast.update(id, { render: "Download Starting...", type: "success", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
+              else
+                toast.update(id, { render: "Download Failed !", type: "error", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
               const excelFileUrl = response.data.url; // Assuming the API returns the file URL
-              window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`)
+              window.location.href=`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`
 
             } catch (error) {
               console.error("Error saving Excel file:", error);
             }
           });
         };
-  
+
         fileReader.readAsDataURL(blob);
       });
   };
 
 
   const exportToPDF = async () => {
+    const id = toast.loading("Please wait...")
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-  
+
     // Get the 'lang' parameter from the URL
     const urlParams = new URLSearchParams(window.location.search);
     const lang = urlParams.get('lang');
-  
+
     const fontBytes = await axios.get(font, { responseType: 'arraybuffer' });
     const fontBase64 = arrayBufferToBase64(fontBytes.data);
-  
+
     const fontBytes2 = await axios.get(font2, { responseType: 'arraybuffer' });
     const fontBase642 = arrayBufferToBase64(fontBytes2.data);
-  
+
     import('jspdf').then(async module => {
       let jsPDF = module.default
       const doc = new jsPDF();
-  
+
       // Add font to PDF
       doc.addFileToVFS('NotoSansBengali.ttf', fontBase64);
       doc.addFont('NotoSansBengali.ttf', 'NotoSansBengali', 'normal');
       doc.setFont('NotoSansBengali');
-  
+
       doc.addFileToVFS('NotoSansDevanagari.ttf', fontBase642);
       doc.addFont('NotoSansDevanagari.ttf', 'NotoSansDevanagari', 'normal');
       doc.setFont('NotoSansDevanagari');
-  
+
       // Set table headers
       const headers = [[t("Product Name"), t("Quantity"), t("Total Sale")]];
       const columnStyles = {
         1: { halign: "right" },
         2: { halign: "right" },
       };
-  
+
       const headerStyles = {
         fontSize: 12,
         fontStyle: "bold",
         halign: "center",
       };
-  
+
       // Set background colors
       const backgroundColors = {
         summaryHeader: "#3CB043", // Green color for Sales-Expense Summary header
         secondHeader: "#75AAF0", // Sky blue color for Date, Expense, Sales header
       };
-  
+
       // Add the image
       const imgData = logo; // Replace with the path or URL of your image file
       const imgWidth = 35;
       const imgHeight = 20;
       doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
-  
+
       // Add Sales-Expense Summary header
       const summaryHeader = [[t("Product Wise Summary Data")]];
       doc.autoTable({
@@ -480,7 +512,7 @@ const ProductQtyChart = ({
           fontStyle: 'bold'
         },
       });
-  
+
       const periodCell = [[`${t("Period")}: ${startDate} ${t("to")} ${endDate}`]];
       doc.autoTable({
         startY: 39.5,
@@ -499,14 +531,23 @@ const ProductQtyChart = ({
           fontStyle: 'bold'
         },
       });
-  
+
       // Set table rows
-      const rows = sellData.map((item) => [
+      let rows = sellData.map((item) => [
         item.productName,
         `${item.totalQty} ${item.unit}`,
         item.totalSale.toFixed(2),
       ]);
-  
+      // Calculate total values
+      const totalSales = sellData.reduce((total, item) => total + item.totalSale, 0);
+      const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
+
+     rows.push([
+       t("Total"),
+       `${totalQty.toFixed(2)}`,
+       `${totalSales.toFixed(2)}`,
+     ]);
+
       // AutoTable configuration
       const tableConfig = {
         startY: doc.autoTable.previous.finalY + 1,
@@ -523,28 +564,33 @@ const ProductQtyChart = ({
           fontStyle: 'bold'
         },
       };
-  
+       
+
       // Add table to the PDF document
       doc.autoTable(tableConfig);
 
-      
-  
+
+
       // Generate a unique filename
       const uniqueIdentifier = Date.now();
       const fileName = `${uniqueIdentifier}_product_wise_summary_data.pdf`;
-  
+
       // Generate the Blob from the PDF data
       const pdfBlob = doc.output('blob');
-  
+
       // Create a FormData object to send the Blob to the server
       const formData = new FormData();
       formData.append("file", pdfBlob, fileName);
-  
+
       // Send FormData to the server using axios or fetch
       try {
         const response = await axios.post(`${import.meta.env.VITE_API_URL_1}/api/uploader`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); // Replace with your API endpoint
-        const pdfFileUrl =await response.data.url; // Assuming the API returns the file URL
-        window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`)
+        if (response.status==200)
+        toast.update(id, { render: "Download Starting...", type: "success", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+      else
+        toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+        const pdfFileUrl = await response.data.url; // Assuming the API returns the file URL
+        window.location.href=`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`
       } catch (error) {
         console.error("Error saving PDF file:", error);
       }
@@ -569,13 +615,13 @@ const ProductQtyChart = ({
       if (legendButtonRef.current && !legendButtonRef.current.contains(event.target)) {
         setShowLegend(false);
       }
-  
-      
+
+
     };
-  
+
     // Add the click event listener to the document
     document.addEventListener("click", handleClickOutsideIconContainer);
-  
+
     // Clean up the event listener when the component unmounts
     return () => {
       document.removeEventListener("click", handleClickOutsideIconContainer);
@@ -593,7 +639,10 @@ const ProductQtyChart = ({
         className={`${css.chartContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
           }`}
       >
-
+       <ToastContainer
+      position="top-center"
+      theme={themeMode}
+      />
         <div className="container-fluid" >
           <div className="d-flex w-100 g-0 align-items-center justify-content-between">
             <button
@@ -606,38 +655,38 @@ const ProductQtyChart = ({
                 alt="Code Block Icon"
                 className={css.codeBlockIcon}
                 title="Legends"
-                style={{ filter: showLegend||sellData.length===0 ? "opacity(0.4)" : "opacity(1)", transition: "all .25s ease-in-out" }}
+                style={{ filter: showLegend || sellData.length === 0 ? "opacity(0.4)" : "opacity(1)", transition: "all .25s ease-in-out" }}
               />{" "}
 
             </button>
             <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
-            }`} >{t("Product Quantity")}</div>
+              }`} >{t("Product Wise Qty")}</div>
             <div title='Export Options' className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
               {/* Data grid icon */}
-          
-                <div
-                  className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
-                    } px-2 py-1`}
 
-                  onClick={handleIconClick}
-                >
-                  {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
-                </div> 
+              <div
+                className={`${css.icon} ${themeMode === "dark" ? css.darkMode : css.lightMode
+                  } px-2 py-1`}
+
+                onClick={handleIconClick}
+              >
+                {showExportOptions ? <FaXmark style={{ fontSize: "1.1rem" }} /> : <FaListUl style={{ fontSize: "1.1rem" }} />}
+              </div>
               {showExportOptions && (
                 <div
                   className={`${css.exportOptions} ${themeMode === "dark" ? css.darkMode : css.lightMode
                     }`}
                   ref={exportOptionsRef}
                 >
-                   {!tableStatus ?
-                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                  <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
-                  <span>{t("View Table")}</span>
-                </div>:
-                <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                  <FaChartPie style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
-                  <span>{t("View Graph")}</span>
-                </div>}
+                  {!tableStatus ?
+                    <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                      <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
+                      <span>{t("View Table")}</span>
+                    </div> :
+                    <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
+                      <FaChartPie style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
+                      <span>{t("View Graph")}</span>
+                    </div>}
                   <div className={css.exportOption} onClick={exportToExcel}>
                     <FaFileExcel style={{ fontSize: "1.1rem", color: "green" }} />
                     <span>{t("Export to Excel")}</span>
@@ -654,12 +703,12 @@ const ProductQtyChart = ({
         </div>
         {isLoading && (
           <div className={css.NoDataOverlay}>
-          <img src={loading} alt="Loading..." width={50} height={50}/>
-        </div>
+            <img src={loading} alt="Loading..." width={50} height={50} />
+          </div>
         )}
-         {tableData.length==0 && !tableStatus && !isLoading?<div className={`${css.NoDataOverlay} fs-5`}>
-         {t("No Data Found")}
-      </div>:''}
+        {tableData.length == 0 && !tableStatus && !isLoading ? <div className={`${css.NoDataOverlay} fs-5`}>
+          {t("No Data Found")}
+        </div> : ''}
 
 
 
@@ -675,35 +724,35 @@ const ProductQtyChart = ({
           className={css.piechart}
         // className={themeMode === "dark" ? css.darkMode : css.lightMode}
         /> :
-        <div className="container-fluid mt-2 table-responsive" style={{ height: "291px" }}>
-        <table className={`table  ${themeMode == 'dark' ? 'table-dark' : ''}`}>
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">{t("Product")}</th>
-              <th scope="col">{t("Quantity")}</th>
-              <th scope="col">{t("Sales")}(₹)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableData.map((item, index) => {
-              return (
-                <tr key={item.ProductName}>
-                  <th scope="row">{index + 1}</th>
-                  <td>{item.ProductName}</td>
-                  <td>{item.Quantity}</td>
-                  <td>{parseFloat(item.Sales).toFixed(2)}</td>
+          <div className="container-fluid mt-2 table-responsive" style={{ height: "291px" }}>
+            <table className={`table  ${themeMode == 'dark' ? 'table-dark' : ''}`}>
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">{t("Product")}</th>
+                  <th scope="col">{t("Quantity")}</th>
+                  <th scope="col">{t("Sales")}(₹)</th>
                 </tr>
-              )
-            })}
+              </thead>
+              <tbody>
+                {tableData.map((item, index) => {
+                  return (
+                    <tr key={item.ProductName}>
+                      <th scope="row">{index + 1}</th>
+                      <td>{item.ProductName}</td>
+                      <td>{item.Quantity}</td>
+                      <td>{parseFloat(item.Sales).toFixed(2)}</td>
+                    </tr>
+                  )
+                })}
 
-          </tbody>
-        </table>
-      </div>
+              </tbody>
+            </table>
+          </div>
         }
-      
 
-    </div >
+
+      </div >
     </>
   );
 };
