@@ -450,7 +450,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
           else
             toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
           const excelFileUrl = response.data.url; // Assuming the API returns the file URL
-          window.location.href=`${import.meta.env.VITE_API_URL_1}/static/${excelFileUrl}`
+          window.location.href=`${import.meta.env.VITE_API_URL_1}/static/downloads/${excelFileUrl}`
         } catch (error) {
           console.error("Error saving Excel file:", error);
         }
@@ -608,7 +608,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       else
         toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
         const pdfFileUrl = await response.data.url; // Assuming the API returns the file URL
-        window.location.href=`${import.meta.env.VITE_API_URL_1}/static/${pdfFileUrl}`
+        window.location.href=`${import.meta.env.VITE_API_URL_1}/static/downloads/${pdfFileUrl}`
       } catch (error) {
         console.error('Error saving PDF file:', error);
       }
