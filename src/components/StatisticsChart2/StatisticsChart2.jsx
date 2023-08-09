@@ -244,7 +244,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
           },
         })),
         label: {
-          show: chartData.length <= 5 ? true : false,
+          show: true,
           position: 'right',
           color: themeMode === "dark" ? "#ffffff" : "#000000",
 
