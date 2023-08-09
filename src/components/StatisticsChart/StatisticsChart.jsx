@@ -105,7 +105,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
   // ).toFixed(2);
   // console.log(chartData)
   //Find the average Sales of chartData if sales>0
-  const averageSales = (chartData.filter((item) => item.totalIncome > 0).reduce((total, item) => total + item.totalIncome, 0) / chartData.filter((item) => item.totalIncome > 0).length).toFixed(0);
+  const averageSales = (chartData.filter((item) => item.totalIncome > 0).reduce((total, item) => total + item.totalIncome, 0) / chartData.length).toFixed(0);
 
 
 
@@ -768,7 +768,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
               {tableData.map((item, index) => {
                 return (
                   <tr key={item.requestedDate}>
-                    <th scope="row">{index + 1}</th>
+                    <th scope="row">{tableData.length-1===index?'':index + 1}</th>
                     <td>{item.requestedDate}</td>
                     <td>{parseFloat(item.sales).toFixed(2)}</td>
                     <td>{parseFloat(item.expense).toFixed(2)}</td>

@@ -812,7 +812,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
               {tableData.map((item, index) => {
                 return (
                   <tr key={item.officeName}>
-                    <th scope="row">{index + 1}</th>
+                    <th scope="row">{tableData.length-1===index?'':index + 1}</th>
                     <td>{item.officeName}</td>
                     <td>{parseFloat(item.sales).toFixed(2)}</td>
                   </tr>

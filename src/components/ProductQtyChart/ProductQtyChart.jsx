@@ -404,9 +404,9 @@ const ProductQtyChart = ({
       const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
 
       // Set total values in the total row
-      const totalSalesCell = worksheet.getCell(`B${totalRow.number}`);
-      totalSalesCell.value = `${totalQty.toFixed(2)}`;
-      totalSalesCell.alignment = { horizontal: "right" }; // Align to the right
+      // const totalSalesCell = worksheet.getCell(`B${totalRow.number}`);
+      // totalSalesCell.value = `${totalQty.toFixed(2)}`;
+      // totalSalesCell.alignment = { horizontal: "right" }; // Align to the right
 
       const totalExpenseCell = worksheet.getCell(`C${totalRow.number}`);
       totalExpenseCell.value = `₹${totalSales.toFixed(2)}`;
@@ -544,7 +544,7 @@ const ProductQtyChart = ({
 
      rows.push([
        t("Total"),
-       `${totalQty.toFixed(2)}`,
+       ``,
        `${totalSales.toFixed(2)}`,
      ]);
 
@@ -738,9 +738,9 @@ const ProductQtyChart = ({
                 {tableData.map((item, index) => {
                   return (
                     <tr key={item.ProductName}>
-                      <th scope="row">{index + 1}</th>
+                      <th scope="row">{tableData.length-1===index?'':index + 1}</th>
                       <td>{item.ProductName}</td>
-                      <td>{item.Quantity}</td>
+                      <td>{tableData.length-1===index?'':item.Quantity}</td>
                       <td>{parseFloat(item.Sales).toFixed(2)}</td>
                     </tr>
                   )
