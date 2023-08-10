@@ -56,7 +56,8 @@
     "Rows": "সারি",
     "Product Wise Summary Data": "পণ্য ভিত্তিক সংক্ষিপ্ত উপাদান",
     "Total Sale": "মোট বিক্রি",
-    "Product Wise Sale": "পণ্য অনুযায়ী বিক্রি",
-    "Product Wise Qty": "পণ্য অনুযায়ী পরিমাণ",
+    "Product Wise": "পণ্য অনুযায়ী",
+    "Sale":"বিক্রি",
+    "Qty": "পরিমাণ",
     "of": "এর"
 }

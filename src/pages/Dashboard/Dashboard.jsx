@@ -22,7 +22,7 @@ const Dashboard = () => {
   if (initialThemeMode === "light") {
     //change css variable --rs-body
     document.documentElement.style.setProperty("--rs-body", "rgb(210 210 210)");
-    document.documentElement.style.setProperty("--text-color", "#111111");
+    document.documentElement.style.setProperty("--text-color", "#282829d4");
     document.documentElement.style.setProperty("--option-color", "white");
     document.documentElement.style.setProperty("--backgroundOverlay", "rgb(249 249 249 / 81%)");
     document.documentElement.style.setProperty("--bs-table-bg", "#ffffff00");

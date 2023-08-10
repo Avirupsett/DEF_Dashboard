@@ -11,6 +11,7 @@ import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 const OrdersPieChart = ({
   themeMode,
@@ -18,9 +19,11 @@ const OrdersPieChart = ({
   selectedOffice,
   isAdmin,
   alldata,
-  isLoading
+  isLoading,
+  officeName
 }) => {
   const [sellData, setSellData] = useState([]);
+  const [chartData2, setChartData2] = useState([])
   const [chartData, setChartData] = useState([])
   const [showExportOptions, setShowExportOptions] = useState(false);
   const iconContainerRef = useRef(null);
@@ -33,7 +36,7 @@ const OrdersPieChart = ({
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [tableData, setTableData] = useState([])
   const [tableStatus, setTableStatus] = useState(false)
-
+  const [alignment, setAlignment] = useState('Sale');
 
 
   function calculateTotalSales(dataArray) {
@@ -94,6 +97,16 @@ const OrdersPieChart = ({
         }));
 
         setChartData(result);
+
+        const result2 = Object.entries(calculateTotal).map(([pipeline, { qty, color }]) => ({
+          value: qty,
+          name: pipeline,
+          itemStyle: {
+            color: color,
+          },
+        }));
+
+        setChartData2(result2);
         const result_export = Object.entries(calculateTotal).map(([pipeline, { totalSales, color, qty, unitShortName }]) => ({
           "productName": pipeline, "totalSale": totalSales, "color": color, "totalQty": qty, "unit": unitShortName
         }));
@@ -107,7 +120,7 @@ const OrdersPieChart = ({
           (total, item) => total + item.totalQty,
           0
         );
-        result_table.push({"ProductName": t("Total"), "Sales": `${salesTotal}`, "Quantity": `${qtyTotal}`})
+        result_table.push({ "ProductName": t("Total"), "Sales": `${salesTotal}`, "Quantity": `${qtyTotal}` })
         setTableData(result_table)
 
 
@@ -202,7 +215,7 @@ const OrdersPieChart = ({
 
     tooltip: {
       trigger: "item",
-      formatter: `<b>{b}</b><br><b>${t("Total Sales")}:</b> {c}`,
+      formatter: alignment==='Sale'?`<b>{b}</b><br><b>${t("Total Sales")}:</b> {c}`:`<b>{b}</b><br><b>${t("Total Qty")}:</b> {c}`,
       textStyle: {
         fontSize: window.innerWidth <= 768 ? 10 : 14,
       },
@@ -251,7 +264,8 @@ const OrdersPieChart = ({
       {
         name: "Product Sales",
         type: "pie",
-        radius: ["40%", "65%"],
+        radius: alignment==='Sale'?["40%", "65%"]:["35%", "70%"],
+        roseType: alignment==='Sale'?"":"radius",
         center: ["50%", "50%"],
         selectedMode: "single",
         avoidLabelOverlap: true,
@@ -268,7 +282,7 @@ const OrdersPieChart = ({
             fontWeight: "bold",
           }
         },
-        data: chartData.length > 0 ? chartData : [],
+        data:alignment==='Sale'?(chartData.length > 0 ? chartData : []):(chartData2.length > 0 ? chartData2 : []),
 
 
         // labelLine: {
@@ -301,7 +315,7 @@ const OrdersPieChart = ({
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    return `${day}-${month}-${year}`;
   };
 
   const exportToExcel = async () => {
@@ -329,12 +343,12 @@ const OrdersPieChart = ({
           // Set the image position and size with padding
           worksheet.addImage(logoImage, {
             tl: { col: 0, row: 0 }, // Adjusted offset values for padding
-            ext: { width: 100, height: 70 },
+            ext: { width: 100, height: 60 },
           });
 
           // Add extra header - Product Wise Summary Data
-          const extraHeaderCell = worksheet.getCell("A2"); // Shifted down by one row
-          extraHeaderCell.value = t("Product Wise Summary Data");
+          const extraHeaderCell = worksheet.getCell("A1"); // Shifted down by one row
+          extraHeaderCell.value = `${t("Product Wise Summary Data")} (${officeName})`;
           extraHeaderCell.font = {
             bold: true,
             color: { argb: "000000" }, // Black color
@@ -344,10 +358,10 @@ const OrdersPieChart = ({
             vertical: "middle",
             horizontal: "center",
           };
-          worksheet.mergeCells("A2:C2"); // Shifted down by one row
+          worksheet.mergeCells("A1:D1"); // Shifted down by one row
 
           // Add period - startDate to endDate
-          const periodCell = worksheet.getCell("A3"); // Shifted down by two rows
+          const periodCell = worksheet.getCell("A2"); // Shifted down by two rows
           periodCell.value = `${t("Period")}: ${startDate} ${t("to")} ${endDate}`;
           periodCell.font = {
             bold: true,
@@ -355,14 +369,16 @@ const OrdersPieChart = ({
             size: 12,
           };
           periodCell.alignment = { horizontal: "center" }; // Center alignment
-          worksheet.mergeCells("A3:C3"); // Shifted down by two rows
+          worksheet.mergeCells("A2:D2"); // Shifted down by two rows
 
           // Set column widths
-          worksheet.getColumn(1).width = 50;
-          worksheet.getColumn(2).width = 15;
+          worksheet.getColumn(1).width = 15;
+          worksheet.getColumn(2).width = 50;
+          worksheet.getColumn(3).width = 15;
+          worksheet.getColumn(4).width = 15;
 
           // Add headers
-          const headerRow = worksheet.addRow([t("Product Name"), t("Quantity"), t("Total Sales")]);
+          const headerRow = worksheet.addRow([ t("#") ,t("Product Name"), t("Quantity"), t("Total Sales")]);
 
           headerRow.font = {
             bold: true,
@@ -383,14 +399,23 @@ const OrdersPieChart = ({
           });
 
           // Add data rows
-          sellData.forEach((item) => {
-            worksheet.addRow([
+          sellData.forEach((item, index) => {
+            const row = worksheet.addRow([
+              index + 1,
               item.productName,
               `${item.totalQty} ${item.unit}`,
-              `₹${item.totalSale}`,
+              item.totalSale,
             ]); // Add "₹" symbol before the totalSale value
+
+            // Align the serial number to the left
+            row.getCell(1).alignment = { horizontal: "left" };
+            row.getCell(2).alignment = { horizontal: "left" };
+            row.getCell(3).alignment = { horizontal: "right" };
+            row.getCell(4).alignment = { horizontal: "right" };
           });
-          const totalRow = worksheet.addRow([t("Total"), "", ""]);
+
+
+          const totalRow = worksheet.addRow([ "",t("Total"), "", ""]);
       totalRow.font = {
         bold: true,
         color: { argb: "000000" }, // Black color
@@ -406,13 +431,13 @@ const OrdersPieChart = ({
       // totalSalesCell.value = `${totalQty.toFixed(2)}`;
       // totalSalesCell.alignment = { horizontal: "right" }; // Align to the right
 
-      const totalExpenseCell = worksheet.getCell(`C${totalRow.number}`);
-      totalExpenseCell.value = `₹${totalSales.toFixed(2)}`;
+      const totalExpenseCell = worksheet.getCell(`D${totalRow.number}`);
+      totalExpenseCell.value = `₹ ${totalSales.toFixed(2)}`;
       totalExpenseCell.alignment = { horizontal: "right" }; 
 
           // Generate a unique filename
           const uniqueIdentifier = Date.now();
-          const fileName = `${uniqueIdentifier}_product_wise_summary_data.xlsx`;
+          const fileName = `${uniqueIdentifier}product_wise_summary_${officeName}_${startDate}_${endDate}.xlsx`;
 
           // Save the workbook
           workbook.xlsx.writeBuffer().then(async (buffer) => {
@@ -428,7 +453,7 @@ const OrdersPieChart = ({
               else
                 toast.update(id, { render: "Download Failed !", type: "error", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
               const excelFileUrl = response.data.url; // Assuming the API returns the file URL
-              window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/downloads/${excelFileUrl}`)
+              window.location.href=`${import.meta.env.VITE_API_URL_1}/static/downloads/${excelFileUrl}`
 
             } catch (error) {
               console.error("Error saving Excel file:", error);
@@ -470,10 +495,13 @@ const OrdersPieChart = ({
       doc.setFont('NotoSansDevanagari');
 
       // Set table headers
-      const headers = [[t("Product Name"), t("Quantity"), t("Total Sale")]];
+      const headers = [[t("#"), t("Product Name"), t("Quantity"), t("Total Sale")]];
       const columnStyles = {
-        1: { halign: "right" },
-        2: { halign: "right" },
+        0: { halign: "center" }, 
+        1: { halign: "center" }, 
+        2: { halign: "center" }, 
+        3: { halign: "center" }, 
+        
       };
 
       const headerStyles = {
@@ -495,7 +523,7 @@ const OrdersPieChart = ({
       doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
 
       // Add Sales-Expense Summary header
-      const summaryHeader = [[t("Product Wise Summary Data")]];
+      const summaryHeader = [[`${t("Product Wise Summary Data")} (${officeName})`]];
       doc.autoTable({
         head: summaryHeader,
         body: [],
@@ -531,19 +559,23 @@ const OrdersPieChart = ({
       });
 
       // Set table rows
-      let rows = sellData.map((item) => [
+      let rows = sellData.map((item, index) => [
+        index + 1,
         item.productName,
         `${item.totalQty} ${item.unit}`,
-        item.totalSale.toFixed(2),
+        `₹ ${item.totalSale.toFixed(2)}`,
       ]);
+
+
       // Calculate total values
       const totalSales = sellData.reduce((total, item) => total + item.totalSale, 0);
       const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
 
      rows.push([
+      ``,
        t("Total"),
        ``,
-       `${totalSales.toFixed(2)}`,
+       `₹ ${totalSales.toFixed(2)}`,
      ]);
 
       // AutoTable configuration
@@ -571,7 +603,7 @@ const OrdersPieChart = ({
 
       // Generate a unique filename
       const uniqueIdentifier = Date.now();
-      const fileName = `${uniqueIdentifier}_product_wise_summary_data.pdf`;
+      const fileName = `${uniqueIdentifier}product_wise_summary_${officeName}_${startDate}_${endDate}.pdf`;
 
       // Generate the Blob from the PDF data
       const pdfBlob = doc.output('blob');
@@ -588,7 +620,7 @@ const OrdersPieChart = ({
       else
         toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
         const pdfFileUrl = await response.data.url; // Assuming the API returns the file URL
-        window.location.replace(`${import.meta.env.VITE_API_URL_1}/static/downloads/${pdfFileUrl}`)
+        window.location.href=`${import.meta.env.VITE_API_URL_1}/static/downloads/${pdfFileUrl}`
       } catch (error) {
         console.error("Error saving PDF file:", error);
       }
@@ -628,6 +660,13 @@ const OrdersPieChart = ({
     setShowLegend(false)
     setShowExportOptions(!showExportOptions);
   };
+  
+
+  const handleChange = (event, newAlignment) => {
+    if (newAlignment !== null) {
+    setAlignment(newAlignment);
+    }
+  };
 
   return (
     <>
@@ -635,9 +674,9 @@ const OrdersPieChart = ({
         className={`${css.chartContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
           }`}
       ><ToastContainer
-      position="top-center"
-      theme={themeMode}
-      />
+          position="top-center"
+          theme={themeMode}
+        />
 
         <div className="container-fluid" >
           <div className="d-flex w-100 g-0 align-items-center justify-content-between">
@@ -655,8 +694,22 @@ const OrdersPieChart = ({
               />{" "}
 
             </button>
-            <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
-              }`}>{t("Product Wise Sale")}</div>
+            <div className='d-flex align-items-center'>
+            <div className={`fw-bold me-2 fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
+              }`}>{t("Product")}</div>
+            <ToggleButtonGroup
+              size="small"
+              color="primary"
+              value={alignment}
+              exclusive
+              onChange={handleChange}
+              aria-label="Platform"
+              style={{fontFamily:`"Public Sans", sans-serif !important`}}
+            >
+              <ToggleButton style={{color:alignment=='Sale'?'':`var(--text-color)`}} className={`fw-bold fs-${window.innerWidth <= 1300 ? 7 : 6}`} value="Sale">{t("Sale")}</ToggleButton>
+              <ToggleButton style={{color:alignment=='Qty'?'':`var(--text-color)`}} className={`fw-bold fs-${window.innerWidth <= 1300 ? 7 : 6}`} value="Qty">{t("Qty")}</ToggleButton>
+            </ToggleButtonGroup>
+            </div>
             <div title='Export Options' className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
               {/* Data grid icon */}
 
@@ -731,9 +784,9 @@ const OrdersPieChart = ({
               {tableData.map((item, index) => {
                 return (
                   <tr key={item.ProductName}>
-                    <th scope="row">{tableData.length-1===index?'':index + 1}</th>
+                    <th scope="row">{tableData.length - 1 === index ? '' : index + 1}</th>
                     <td>{item.ProductName}</td>
-                    <td>{tableData.length-1===index?'':item.Quantity}</td>
+                    <td>{tableData.length - 1 === index ? '' : item.Quantity}</td>
                     <td>{parseFloat(item.Sales).toFixed(2)}</td>
                   </tr>
                 )

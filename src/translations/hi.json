@@ -57,7 +57,8 @@
     "Rows": "पंक्तियाँ",
     "Product Wise Summary Data": "उत्पाद वार संक्षिप्त आंकड़े",
     "Total Sale": "कुल बिक्री",
-    "Product Wise Sale": "उत्पाद वार बिक्री",
-    "Product Wise Qty": "उत्पाद वार मात्रा",
+    "Product Wise": "उत्पाद वार",
+    "Sale":"बिक्री",
+    "Qty": "मात्रा",
     "of": "की"
 }

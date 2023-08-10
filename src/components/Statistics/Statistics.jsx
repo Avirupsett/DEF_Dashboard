@@ -15,7 +15,7 @@ import fetchSalesData from './FetchSalesData';
 const StatisticsChart = React.lazy(() => import('../StatisticsChart/StatisticsChart'));
 const StatisticsChart2 = React.lazy(() => import('../StatisticsChart2/StatisticsChart2'));
 const OrdersPieChart = React.lazy(() => import('../OrdersPieChart/OrdersPieChart'));
-const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
+// const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
 
 
 const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }) => {
@@ -411,21 +411,21 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
           <div className='col-md-12 col-lg-8'>
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={trimName(selectedOfficeName, 10)}/>
+              <StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName}/>
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-4'>
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <OrdersPieChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} />
+              <OrdersPieChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName}/>
             </Suspense>
           </div>
 
-          <div className='col-md-12 col-lg-4 mt-2' >
+          {/* <div className='col-md-12 col-lg-4 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
               <ProductQtyChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} />
             </Suspense>
-          </div>
-          <div className='col-md-12 col-lg-8 mt-2' >
+          </div> */}
+          <div className='col-md-12 col-lg-12 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
               <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} setSelectedOfficeName={setOfficeName} selectedOfficeNameLocal={selectedOfficeName} setSelectedOfficeNameLocal={setSelectedOfficeName} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue} />
             </Suspense>

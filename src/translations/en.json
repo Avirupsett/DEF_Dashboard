@@ -53,7 +53,8 @@
     "No Data Found":"No Data Found",
     "Rows":"Rows",
     "Total Sale": "Total Sale",
-    "Product Wise Sale":"Product Wise Sale",
-    "Product Wise Qty": "Product Wise Qty",
+    "Product Wise":"Product Wise",
+    "Sale":"Sale",
+    "Qty": "Qty",
     "of":"of"
 }

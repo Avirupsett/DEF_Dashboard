@@ -300,7 +300,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
 
     // Add extra header - Sales-Expense Summary
     const extraHeaderCell = worksheet.getCell("A1");
-    extraHeaderCell.value = t("Total Sales by Business Entity");
+    extraHeaderCell.value = `${t("Sales")} ${t("of")} ${trimName(selectedOfficeNameLocal, 10)}`;
     extraHeaderCell.font = {
       bold: true,
       color: { argb: "000000" }, // Black color
@@ -318,24 +318,42 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       size: 12,
     };
     periodCell.alignment = { horizontal: "center" }; // Center alignment
-    worksheet.mergeCells("A2:B2");
+    worksheet.mergeCells("A2:C2");
 
     // Set column widths
-    worksheet.getColumn(1).width = 50;
-    worksheet.getColumn(2).width = 15;
+    worksheet.getColumn(1).width = 15;
+    worksheet.getColumn(2).width = 50;
     worksheet.getColumn(3).width = 15;
 
     // Add headers
-    const headerRow = worksheet.addRow([t("Office Name"), t("Sales")]);
-    headerRow.font = { bold: true };
+    const headerRow = worksheet.addRow([ t("#"), t("Office Name"), t("Sales")]);
+    headerRow.font = { bold: true};
 
+    headerRow.eachCell((cell) => {
+      cell.font = {
+        bold: true,
+        color: { argb: "000000" }, // Black color
+        size: 12,
+      };
+      cell.border = {
+        bottom: { style: "thin", color: { argb: "000000" } }, // Black color
+      };
+    });
+
+    
     // Add data rows
-    chartData.forEach((item) => {
-      worksheet.addRow([item.officeName, item.sales]);
+    chartData.forEach((item, index) => {
+      const row = worksheet.addRow([index + 1, item.officeName, item.sales]);
+
+      // Align the serial number to the left
+      row.getCell(1).alignment = { horizontal: "left" };
+      row.getCell(2).alignment = { horizontal: "left" };
+      row.getCell(3).alignment = { horizontal: "right" };
+      
     });
 
     // Add the total row
-    const totalRow = worksheet.addRow([t("Total"), ""]);
+    const totalRow = worksheet.addRow([``,t("Total"), ""]);
     totalRow.font = {
       bold: true,
       color: { argb: "000000" }, // Black color
@@ -346,8 +364,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
     const totalSales = chartData.reduce((sales, item) => sales + parseFloat(item.sales), 0);
 
     // Set total value in the total row
-    const totalSalesCell = worksheet.getCell(`B${totalRow.number}`);
-    totalSalesCell.value = `₹${totalSales}`;
+    const totalSalesCell = worksheet.getCell(`C${totalRow.number}`);
+    totalSalesCell.value = `₹ ${totalSales}`;
     totalSalesCell.numFmt = "0.00";
     totalSalesCell.alignment = { horizontal: "right" };
 
@@ -363,7 +381,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
 
     // Create a FormData object to send the Blob to the server
     const formData = new FormData();
-    formData.append("file", excelBlob, `${uniqueIdentifier}_sales_by_office.xlsx`);
+    formData.append("file", excelBlob, `${uniqueIdentifier}sales_of_${selectedOfficeNameLocal}_${startDate}_${endDate}.xlsx`);
 
     // Send FormData to the server using axios or fetch
     try {
@@ -429,7 +447,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       doc.setFont('NotoSansDevanagari');
   
       // Add Sales-Expense Summary header
-      const summaryHeader = [[t("Total Sales by Business Entity")]];
+      const summaryHeader = [[`${t("Sales")} ${t("of")} ${trimName(selectedOfficeNameLocal, 10)}`]];
       doc.autoTable({
         startY: 27,
         head: summaryHeader,
@@ -468,9 +486,10 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       });
   
       // Convert chart data to table format
-      const tableData = chartData.map((item) => [
+      const tableData = chartData.map((item, index) => [
+        index + 1,
         item.officeName,
-        item.sales
+        `₹ ${item.sales}`
       ]);
   
       // Calculate total sales
@@ -480,13 +499,14 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       );
   
       // Add total row
-      tableData.push([t("Total"), `${totalSales.toFixed(2)}`]);
+      tableData.push([ ``,t("Total"), `₹ ${totalSales.toFixed(2)}`]);
   
       // Set table headers
-      const headers = [t("Office Name"), t("Sales")];
+      const headers = [t("#"), t("Office Name"), t("Sales")];
       const columnStyles = {
-        1: { halign: "right" }, // Align Sales column to center
-        2: { halign: "right" }, // Align Expense column to center
+        0: { halign: "center" }, // Align Sales column to center
+        1: { halign: "center" }, // Align Sales column to center
+        2: { halign: "center" }, // Align Expense column to center
       };
   
       // Set header styles
@@ -497,6 +517,14 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         fillColor: "#75AAF0", // Sky blue color for Office Name, Sales header
         textColor: "#FFFFFF", // White color
       };
+
+            // Define column widths
+      const columnWidths = {
+        0: 5, // Width for the serial number column (#)
+        1: 25, // Width for the Date column
+        2: 25, // Width for the Sales column
+        3: 25, // Width for the Expense column
+      };
   
       // Add table to PDF
       doc.autoTable(headers, tableData, {
@@ -506,6 +534,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         styles: {
           font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
         },
+        columnWidth: 'wrap', // Set the default column width behavior to 'wrap'
+        columnWidths: columnWidths, // Apply specific column widths
       });
   
       // Generate a unique identifier
@@ -516,7 +546,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
   
       // Create a FormData object to send the Blob to the server
       const formData = new FormData();
-      formData.append("file", pdfBlob, `${uniqueIdentifier}_total_sales_by_office.pdf`);
+      formData.append("file", pdfBlob, `${uniqueIdentifier}sales_of_${selectedOfficeNameLocal}_${startDate}_${endDate}.pdf`);
   
       // Send FormData to the server using axios or fetch
       try {
@@ -687,7 +717,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${day}-${month}-${year}`;
   };
   const trimName = (name, maxLength) => {
     if (window.innerWidth > 500) {

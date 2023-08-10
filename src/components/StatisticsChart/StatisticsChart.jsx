@@ -68,7 +68,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
 
       if (Array.isArray(data.graph1)) {
         const filteredData = data.graph1.map((item) => ({
-          requestedDate: item.requestedDate,
+          requestedDate: formatDate(new Date(item.requestedDate)),
           sales: item.totalIncome,
           expense: item.totalExpense,
         }));
@@ -347,14 +347,14 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
 
       // Add extra header - Sales-Expense Summary
       const extraHeaderCell = worksheet.getCell("A1");
-      extraHeaderCell.value = t("Sales-Expense Summary");
+      extraHeaderCell.value = `${t("Sales-Expense Summary")} (${officeName})`;
       extraHeaderCell.font = {
         bold: true,
         color: { argb: "000000" }, // Black color
         size: 14,
       };
       extraHeaderCell.alignment = { vertical: "middle", horizontal: "center" };
-      worksheet.mergeCells("A1:C1");
+      worksheet.mergeCells("A1:D1");
 
       // Add period - startDate to endDate
       const periodCell = worksheet.getCell("A2");
@@ -365,15 +365,15 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         size: 12,
       };
       periodCell.alignment = { horizontal: "center" }; // Center alignment
-      worksheet.mergeCells("A2:C2");
+      worksheet.mergeCells("A2:D2");
 
       // Set column widths
-      worksheet.getColumn(1).width = 50;
-      worksheet.getColumn(2).width = 15;
+      worksheet.getColumn(1).width = 15;
+      worksheet.getColumn(2).width = 50;
       worksheet.getColumn(3).width = 15;
 
       // Add headers
-      const headerRow = worksheet.addRow([t("Date"), t("Sales"), t("Expense")]);
+      const headerRow = worksheet.addRow([t("#"), t("Date"), t("Sales"), t("Expense")]);
       headerRow.font = {
         bold: true,
         color: { argb: "000000" }, // Black color
@@ -396,9 +396,10 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       const filteredData = chartData.filter((item) => item.totalIncome !== 0 || item.totalExpense !== 0);
 
       // Add data rows
-      filteredData.forEach((item) => {
+      filteredData.forEach((item, index) => {
         const row = worksheet.addRow([
-          item.requestedDate, // Convert to a Date object
+          index + 1,
+          formatDate(new Date(item.requestedDate)), // Convert to a Date object
           Number(item.totalIncome), // Convert to a Number
           Number(item.totalExpense), // Convert to a Number
         ]);
@@ -406,10 +407,16 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         // Set the number format for sales and expense columns
         row.getCell(2).numFmt = "0.00"; // Sales
         row.getCell(3).numFmt = "0.00"; // Expense
+
+        // Align the serial number to the left
+      row.getCell(1).alignment = { horizontal: "left" };
+      row.getCell(2).alignment = { horizontal: "left" };
+      row.getCell(3).alignment = { horizontal: "right" };
+      row.getCell(4).alignment = { horizontal: "right" };
       });
 
       // Add the total row
-      const totalRow = worksheet.addRow([t("Total"), "", ""]);
+      const totalRow = worksheet.addRow(["",t("Total"), "", ""]);
       totalRow.font = {
         bold: true,
         color: { argb: "000000" }, // Black color
@@ -421,12 +428,12 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       const totalExpense = filteredData.reduce((total, item) => total + item.totalExpense, 0);
 
       // Set total values in the total row
-      const totalSalesCell = worksheet.getCell(`B${totalRow.number}`);
-      totalSalesCell.value = `₹${totalSales.toFixed(2)}`;
+      const totalSalesCell = worksheet.getCell(`C${totalRow.number}`);
+      totalSalesCell.value = `₹ ${totalSales.toFixed(2)}`;
       totalSalesCell.alignment = { horizontal: "right" }; // Align to the right
 
-      const totalExpenseCell = worksheet.getCell(`C${totalRow.number}`);
-      totalExpenseCell.value = `₹${totalExpense.toFixed(2)}`;
+      const totalExpenseCell = worksheet.getCell(`D${totalRow.number}`);
+      totalExpenseCell.value = `₹ ${totalExpense.toFixed(2)}`;
       totalExpenseCell.alignment = { horizontal: "right" }; // Align to the right
 
 
@@ -438,7 +445,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
 
         // Create a FormData object to send the Blob to the server
         const formData = new FormData();
-        formData.append("file", excelBlob, `${Date.now()}_sales-expense.xlsx`);
+        formData.append("file", excelBlob, `${Date.now()}sales-expense_${officeName}_${startDate}_${endDate}.xlsx`);
 
         // Send FormData to the server using axios or fetch
         try {
@@ -497,7 +504,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
 
       // Add Sales-Expense Summary header
-      const summaryHeader = [[t("Sales-Expense Summary")]];
+      const summaryHeader = [[`${t("Sales-Expense Summary")} (${officeName})`]];
       doc.autoTable({
         startY: 27,
         head: summaryHeader,
@@ -539,12 +546,15 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         (item) => item.totalIncome !== 0 || item.totalExpense !== 0
       );
 
-      // Convert filtered chart data to table format
-      const tableData = filteredData.map((item) => [
-        item.requestedDate,
-        item.totalIncome.toFixed(2),
-        item.totalExpense.toFixed(2),
+            // Convert filtered chart data to table format
+      const tableData = filteredData.map((item, index) => [
+        index + 1, // Serial number starting from 1
+        formatDate(new Date(item.requestedDate)),
+        `₹ ${item.totalIncome.toFixed(2)}`, // Add ₹ symbol before totalIncome
+        `₹ ${item.totalExpense.toFixed(2)}`, // Add ₹ symbol before totalExpense
+        
       ]);
+
 
       // Calculate totals
       const salesTotal = filteredData.reduce((total, item) => total + item.totalIncome, 0);
@@ -556,17 +566,20 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       // Add totals row if there are non-zero values
       if (salesTotal !== 0 || expenseTotal !== 0) {
         tableData.push([
-          t("Total"),
-          `${salesTotal.toFixed(2)}`,
-          `${expenseTotal.toFixed(2)}`,
+          '', // Empty cell for serial number column
+          t("Total"), // Label for the total row
+          `₹ ${salesTotal.toFixed(2)}`, // Add ₹ symbol before salesTotal
+          `₹ ${expenseTotal.toFixed(2)}`, // Add ₹ symbol before expenseTotal
         ]);
       }
 
-      // Set table headers
-      const headers = [t("Date"), t("Sales"), t("Expense")];
+            // Add serial number header
+      const headers = [t("#"), t("Date"), t("Sales"), t("Expense")];
       const columnStyles = {
-        1: { halign: "right" }, // Align Sales column to center
-        2: { halign: "right" }, // Align Expense column to center
+        0: { halign: "center" }, // Align serial number column to center
+        1: { halign: "center" }, // Align Date column to center
+        2: { halign: "center" }, // Align Sales column to center
+        3: { halign: "center" }, // Align Expense column to center
       };
 
       // Set header styles
@@ -578,15 +591,25 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         textColor: "#FFFFFF", // White color
       };
 
+          // Define column widths
+    const columnWidths = {
+      0: 5, // Width for the serial number column (#)
+      1: 25, // Width for the Date column
+      2: 25, // Width for the Sales column
+      3: 25, // Width for the Expense column
+    };
+
       // Add table to PDF
-      doc.autoTable(headers, tableData, {
-        startY: 45, // Start below the header and period
-        headStyles: headerStyles,
-        columnStyles: columnStyles,
-        styles: {
-          font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
-        }
-      });
+doc.autoTable(headers, tableData, {
+  startY: 45, // Start below the header and period
+  headStyles: headerStyles,
+  columnStyles: columnStyles,
+  styles: {
+    font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
+  },
+  columnWidth: 'wrap', // Set the default column width behavior to 'wrap'
+  columnWidths: columnWidths, // Apply specific column widths
+});
 
       // Generate a unique identifier
       const uniqueIdentifier = Date.now(); // You can use any unique value generation logic
@@ -598,7 +621,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
 
       // Create a FormData object to send the Blob to the server
       const formData = new FormData();
-      formData.append('file', pdfBlob, `${uniqueIdentifier}_sales-expense.pdf`);
+      formData.append('file', pdfBlob, `${uniqueIdentifier}sales-expense_${officeName}_${startDate}_${endDate}.pdf`);
 
       // Send FormData to the server using axios or fetch
       try {
@@ -658,12 +681,22 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${day}-${month}-${year}`;
   };
   const handleTableClick = () => {
     setTableStatus(!tableStatus); setShowExportOptions(false)
   }
-
+  const trimName = (name, maxLength) => {
+    if (window.innerWidth > 500) {
+      return name; // For larger screens, show the full name without truncation
+    } else {
+      if (name.length <= maxLength) {
+        return name;
+      } else {
+        return name.substring(0, maxLength) + '...';
+      }
+    }
+  };
 
   return (
 
@@ -678,7 +711,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       <div className="container-fluid" >
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
           <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
-            }`} >{t("Sales-Expense")} {t("of")} {officeName}</div>
+            }`} >{t("Sales-Expense")} {t("of")} {trimName(officeName,10)}</div>
           {/* <div className={css.exportOption}
             onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
             <FaTable style={{ fontSize: "1.1rem", color: "#0d6efd" }} />
