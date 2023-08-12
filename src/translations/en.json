@@ -56,5 +56,11 @@
     "Product Wise":"Product Wise",
     "Sale":"Sale",
     "Qty": "Qty",
-    "of":"of"
+    "of":"of",
+    "Top Customers":"Top Customers",
+    "Name":"Name",
+    "Mobile":"Mobile",
+    "Vehicle":"Vehicle",
+    "Top":"Top",
+    "Visit":"Visit"
 }

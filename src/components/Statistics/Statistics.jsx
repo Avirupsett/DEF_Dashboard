@@ -15,6 +15,7 @@ import fetchSalesData from './FetchSalesData';
 const StatisticsChart = React.lazy(() => import('../StatisticsChart/StatisticsChart'));
 const StatisticsChart2 = React.lazy(() => import('../StatisticsChart2/StatisticsChart2'));
 const OrdersPieChart = React.lazy(() => import('../OrdersPieChart/OrdersPieChart'));
+const SalesCustomer = React.lazy(()=>import('../SalesCustomer/SalesCustomer'))
 // const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
 
 
@@ -106,7 +107,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
   const [wholesales, setWholesales] = useState([])
   const [retails, setRetails] = useState([])
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [filterOn, setFilterOn] = useState(false)
+  const [filterOn, setFilterOn] = useState(true)
   const [officeName, setOfficeName] = useState("")
   const [alldata, setAlldata] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -420,13 +421,13 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
             </Suspense>
           </div>
 
-          {/* <div className='col-md-12 col-lg-4 mt-2' >
-            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <ProductQtyChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} />
+           <div className='col-md-12 col-lg-6 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+              <SalesCustomer selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName}/>
             </Suspense>
-          </div> */}
-          <div className='col-md-12 col-lg-12 mt-2' >
-            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
+          </div> 
+          <div className='col-md-12 col-lg-6 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
               <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} setSelectedOfficeName={setOfficeName} selectedOfficeNameLocal={selectedOfficeName} setSelectedOfficeNameLocal={setSelectedOfficeName} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue} />
             </Suspense>
           </div>

@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
 import axios from "axios";
 import 'jspdf-autotable';
-import css from './OrdersPieChart.module.css';
-import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartPie } from "react-icons/fa6";
+import css from './SalesCustomer.module.css';
+import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartColumn } from "react-icons/fa6";
 import logo from "/assets/logo.png";
 import { useTranslation } from 'react-i18next';
 import loading from '/assets/loading.gif';
@@ -11,24 +11,22 @@ import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ThemeProvider, ToggleButton, ToggleButtonGroup, createTheme } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme } from '@mui/material';
 
-const OrdersPieChart = ({
+const SalesCustomer = ({
   themeMode,
   selectedRange,
   selectedOffice,
   isAdmin,
-  alldata,
-  isLoading,
   officeName
 }) => {
-  const [sellData, setSellData] = useState([]);
-  const [chartData2, setChartData2] = useState([])
+
   const [chartData, setChartData] = useState([])
   const [showExportOptions, setShowExportOptions] = useState(false);
   const iconContainerRef = useRef(null);
   const exportOptionsRef = useRef(null);
   const legendButtonRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true)
   const { t } = useTranslation();
 
 
@@ -36,266 +34,173 @@ const OrdersPieChart = ({
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [tableData, setTableData] = useState([])
   const [tableStatus, setTableStatus] = useState(false)
-  const [alignment, setAlignment] = useState('Sale');
+  const [alignment, setAlignment] = useState('Name');
+  const [chartByName, setChartByName] = useState([])
+  const [chartByMobile, setChartByMobile] = useState([])
+  const [chartByVehicle, setChartByVehicle] = useState([])
+  const [topSelect, setTopSelect] = useState(window.innerWidth>500?10:5)
 
 
-  function calculateTotalSales(dataArray) {
-    const flatProducts = dataArray.flatMap((item) => item.lstproduct);
-
-    const totalSalesByProduct = flatProducts.reduce((result, product) => {
-      const { productName, totalSales, qty, color, unitShortName } = product;
-
-      if (totalSales !== 0) {
-        if (result[productName]) {
-          result[productName].totalSales += totalSales;
-          result[productName].qty += qty;
-        } else {
-          result[productName] = {
-            totalSales,
-            qty,
-            color, unitShortName
-          };
-        }
-      }
-
-      return result;
-    }, {});
-
-    return totalSalesByProduct;
-  }
-
-
-  // useEffect(() => {
-  //   // Function to update the window width state on window resize
-  //   const handleWindowResize = () => {
-  //     setWindowWidth(window.innerWidth);
-  //   };
-
-  //   // Add a window resize event listener
-  //   window.addEventListener("resize", handleWindowResize);
-
-  //   // Clean up the event listener when the component unmounts
-  //   return () => {
-  //     window.removeEventListener("resize", handleWindowResize);
-  //   };
-  // }, []);
 
   useEffect(() => {
-    // setIsLoading(true)
-    const startDate = formatDate(selectedRange[0]);
-    const endDate = formatDate(selectedRange[1]);
+
+    const startDate = formatDate2(selectedRange[0]);
+    const endDate = formatDate2(selectedRange[1]);
     if (startDate && endDate && selectedOffice) {
-      if (alldata.graph2) {
-        const calculateTotal = calculateTotalSales(alldata.graph2)
+      setIsLoading(true)
+      axios
+        .get(
+          `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_customer/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
+        )
+        .then((response) => {
+          const data = response.data;
 
-        const result = Object.entries(calculateTotal).map(([pipeline, { totalSales, color }]) => ({
-          value: totalSales,
-          name: pipeline,
-          itemStyle: {
-            color: color,
-          },
-        }));
+          const byName = data.byName;
+          const byMobile = data.byMobile;
+          const byVehicle = data.byVehicle
+          setChartByMobile(byMobile)
+          setChartByVehicle(byVehicle)
+          setChartByName(byName)
+          
 
-        setChartData(result);
-
-        const result2 = Object.entries(calculateTotal).map(([pipeline, { qty, color }]) => ({
-          value: qty,
-          name: pipeline,
-          itemStyle: {
-            color: color,
-          },
-        }));
-
-        setChartData2(result2);
-        const result_export = Object.entries(calculateTotal).map(([pipeline, { totalSales, color, qty, unitShortName }]) => ({
-          "productName": pipeline, "totalSale": totalSales, "color": color, "totalQty": qty, "unit": unitShortName
-        }));
-        setSellData(result_export)
-
-        const result_table = Object.entries(calculateTotal).map(([pipeline, { totalSales, qty, unitShortName }]) => ({
-          "ProductName": pipeline, "Sales": totalSales, "Quantity": `${qty} ${unitShortName}`,
-        }));
-        const salesTotal = result_export.reduce((total, item) => total + item.totalSale, 0).toFixed(2);
-        const qtyTotal = result_export.reduce(
-          (total, item) => total + item.totalQty,
-          0
-        );
-        result_table.push({ "ProductName": t("Total"), "Sales": `${salesTotal}`, "Quantity": `${qtyTotal}` })
-        setTableData(result_table)
+        }
 
 
-      }
+        )
+        .catch((error) => {
+          //     // setSellData([])
+          console.log("Error fetching data:", error);
+        }).finally(() => {
+          setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
+        });
+
     }
 
-    // axios
-    //   .get(
-    //     `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
-    //   )
-    //   .then((response) => {
-    //     const data = response.data;
-    //     const graph2Data = data.graph2;
-
-    //     let result = {}
-    //     let colorlist = {}
-    //     let qtylist = {}
-    //     let unitname = {}
-    //     graph2Data.forEach((item) => {
-    //       const { lstproduct } = item;
-
-    //       lstproduct.forEach((product) => {
-    //         let { productName, totalSales, color, qty, unitShortName } = product;
-    //         if (totalSales !== 0) {
-    //           if (result[productName]) {
-    //             result[productName] += totalSales;
-    //             qtylist[productName] += qty
-    //           } else {
-    //             result[productName] = totalSales;
-    //             colorlist[productName] = color
-    //             qtylist[productName] = qty
-    //             unitname[productName] = unitShortName
-
-    //           }
-    //         }
-    //       }
-    //       )
-
-    //     }
-    //     )
-
-    //     if (result) {
-    //       let temp = []
-    //       let tabletemp = []
-    //       for (let key in result) {
-    //         temp.push({ "productName": key, "totalSale": result[key], "color": colorlist[key], "totalQty": qtylist[key], "unit": unitname[key] })
-    //         tabletemp.push({ "Product Name": key, "Sales": result[key], "Quantity": `${qtylist[key]} ${unitname[key]}` })
-    //       }
-    //       setTableData(tabletemp)
-    //       setSellData(temp)
-    //     }
-
-
-    //   })
-    //   .catch((error) => {
-    //     // setSellData([])
-    //     // console.error("Error fetching data:", error);
-    //   }).finally(() => {
-    //     setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
-    //   });
-    // }
-
-
-  }, [selectedRange, selectedOffice, isAdmin, alldata]);
-
-  const toggleLegend = () => {
-    if (sellData.length > 0) {
-      setShowLegend(!showLegend);
-      setShowExportOptions(false);
-      setTableStatus(false)
-    }; // Toggle the state for showLegend
-    // Toggle the state for showScrollbar
-  };
-
-  // const colors = [
-  //   "#009AEE",
-  //   "#FFD700",
-  //   "#FF7F50",
-  //   "#ADFF2F",
-  //   "#40E0D0",
-  //   "#FF00FF",
-  //   "#FF1493",
-  //   "#228B22",
-  //   "#FF4500",
-  //   "#4682B4",
-  //   // Add more colors as needed
-  // ];
+  }, [selectedRange, selectedOffice, isAdmin]);
 
 
 
   const option = {
-
+    title: {
+      textStyle: {
+        color: themeMode === "dark" ? "#ffffff" : "#000000",
+        fontSize: window.innerWidth <= 768 ? 18 : 25,
+      },
+    },
     tooltip: {
-      trigger: "item",
-      formatter: alignment === 'Sale' ? `<b>{b}</b><br><b>${t("Total Sales")}:</b> {c}` : `<b>{b}</b><br><b>${t("Total Qty")}:</b> {c}`,
+      trigger: 'axis',
       textStyle: {
         fontSize: window.innerWidth <= 768 ? 10 : 14,
       },
     },
-    legend: {
-      orient: "vertical",
-      backgroundColor: themeMode === "dark" ? "#111111df" : "rgb(249 249 249 / 97%)",
-      // shadowBlur: 2,
-      left: "8px",
-      top: "0",
-      borderRadius: 7,
-      padding: 10,
-      show: showLegend,
-      shadowColor: "#ececec",
-      borderColor: "rgba(57, 50, 50, 0.7)",
-      borderWidth: 1,
 
-      itemGap: 10, // Adjust the itemGap to create a gap
+    legend: {
+      data: [t('Visit'), t('Sales')],
+      bottom: 0,
       textStyle: {
         color: themeMode === "dark" ? "#ffffff" : "#000000",
-        fontSize: window.innerWidth <= 1496 ? 12 : 14,
-        padding: 4
-      },
-
-      type: "scroll", // Set the type of scrollbar (can be 'scroll' or 'slider')
-      // You can also adjust other scrollbar properties here if needed
-      scroll: {
-        show: true,
-        orient: "horizontal", // Scroll orientation (can be 'vertical' or 'horizontal')
-      },
+        fontSize: window.innerWidth <= 768 ? 10 : 12,
+      }
     },
-
-    graphic: {
-      type: "text",
-      left: "center",
-      top: "2%",
-      style: {
-        // text: "Product Volume",
-        fill: themeMode === "dark" ? "#ffffff" : "#000000",
-        fontSize: window.innerWidth <= 1496 ? 16 : 18,
-        fontWeight: "bold",
-
-      },
+    grid: {
+      left: window.innerWidth <= 768 ? '9%' : '4%',
+      right: "4%",
+      top: "15%",
+      bottom: "10%",
+      containLabel: chartData.length > 0 ? true : false,
     },
+    xAxis: [
+      {
+        type: 'category',
+        data: chartData.map((item) => item.filterName),
+        axisPointer: {
+          type: 'shadow'
+        },
+
+        axisLine: {
+          lineStyle: {
+            color: themeMode === "dark" ? "#ffffff" : "#000000",
+          },
+        },
+        axisLabel: {
+          color: themeMode === "dark" ? "#ffffff" : "#000000",
+          rotate: 45,
+          fontSize: 11,
+          formatter: (value) => {
+            // Custom logic to make labels shorter, e.g., show only the first 10 characters
+            return value.length > 10 ? value.substring(0, 10) + "..." : value
+          },
+        },
+      }
+    ],
+    yAxis: [
+      {
+        type: 'value',
+        name: t('Visit'),
+        min: 0,
+        // max: 250,
+        // interval: 5,
+        // axisLabel: {
+        //   formatter: '{value} ml'
+        // },
+        axisLine: {
+          lineStyle: {
+            color: themeMode === "dark" ? "#ffffff" : "#000000",
+          },
+        },
+        axisLabel: {
+          color: themeMode === "dark" ? "#ffffff" : "#000000",
+        },
+      },
+      {
+        type: 'value',
+        name: t('Sales'),
+        min: 0,
+        // interval: 5000,
+        axisLine: {
+          lineStyle: {
+            color: themeMode === "dark" ? "#ffffff" : "#000000",
+          },
+        },
+        axisLabel: {
+          color: themeMode === "dark" ? "#ffffff" : "#000000",
+          formatter: (value) => {
+            if (value >= 1000) {
+              return (value / 1000) + "k";
+            } else {
+              return value;
+            }
+          },
+        },
+        // axisLabel: {
+        //   formatter: '{value} °C'
+        // }
+      }
+    ],
     series: [
       {
-        name: "Product Sales",
-        type: "pie",
-        radius: alignment === 'Sale' ? ["40%", "65%"] : ["35%", "70%"],
-        roseType: alignment === 'Sale' ? "" : "radius",
-        center: ["50%", "50%"],
-        selectedMode: "single",
-        avoidLabelOverlap: true,
-        label: {
-          show: chartData.length <= 10 ? true : false,
-          color: themeMode === "dark" ? "#ffffff" : "#111111"
-          // position: "center",
-        },
+        name: t('Visit'),
+        type: 'bar',
+        barWidth: "35%",
+        data: chartData.map((item) => item.count),
+        itemStyle:{
 
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: 9,
-            fontWeight: "bold",
+          normal:{
+            barBorderRadius:[10,10,0,0]
           }
-        },
-        data: alignment === 'Sale' ? (chartData.length > 0 ? chartData : []) : (chartData2.length > 0 ? chartData2 : []),
-
-
-        // labelLine: {
-        //   length: 30,
-        //   length2: 10,
-        // },
-        itemStyle: {
-          borderWidth: 2, // Set the border width
-          borderColor: '#ffffff00',
-          borderRadius: 4 // Set the border color
-        },
+        }
       },
-    ],
+
+      {
+        name: t('Sales'),
+        type: 'line',
+        yAxisIndex: 1,
+        data: chartData.map((item) => item.total),
+        markPoint: {
+          data: chartData.map((item, index) => { return { "value": item.total >= 1000 ? parseInt(item.total / 1000) + "k" : item.total, xAxis: index, yAxis: item.total } })
+        }
+      }
+    ]
   };
 
   const arrayBufferToBase64 = (buffer) => {
@@ -316,6 +221,16 @@ const OrdersPieChart = ({
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${day}-${month}-${year}`;
+  };
+  const formatDate2 = (date) => {
+    if (!date) {
+      return ""; // Return an empty string or a default date string
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   const exportToExcel = async () => {
@@ -348,7 +263,7 @@ const OrdersPieChart = ({
 
           // Add extra header - Product Wise Summary Data
           const extraHeaderCell = worksheet.getCell("A1"); // Shifted down by one row
-          extraHeaderCell.value = `${t("Product Wise Summary Data")} (${officeName})`;
+          extraHeaderCell.value = `${t("Top Customers Summary Data")} (${officeName})`;
           extraHeaderCell.font = {
             bold: true,
             color: { argb: "000000" }, // Black color
@@ -378,7 +293,7 @@ const OrdersPieChart = ({
           worksheet.getColumn(4).width = 15;
 
           // Add headers
-          const headerRow = worksheet.addRow([t("#"), t("Product Name"), t("Quantity"), t("Total Sales")]);
+          const headerRow = worksheet.addRow([t("#"), t(alignment), t("Visit"), t("Sales")]);
 
           headerRow.font = {
             bold: true,
@@ -399,12 +314,12 @@ const OrdersPieChart = ({
           });
 
           // Add data rows
-          sellData.forEach((item, index) => {
+          chartData.forEach((item, index) => {
             const row = worksheet.addRow([
               index + 1,
-              item.productName,
-              `${item.totalQty} ${item.unit}`,
-              item.totalSale,
+              item.filterName,
+              item.count,
+              item.total,
             ]); // Add "₹" symbol before the totalSale value
 
             // Align the serial number to the left
@@ -423,13 +338,13 @@ const OrdersPieChart = ({
           };
 
           // Calculate total values
-          const totalSales = sellData.reduce((total, item) => total + item.totalSale, 0);
-          const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
+          const totalSales = chartData.reduce((total, item) => total + item.total, 0);
+          const totalVisit = chartData.reduce((total, item) => total + item.count, 0); 
 
           // Set total values in the total row
-          // const totalSalesCell = worksheet.getCell(`B${totalRow.number}`);
-          // totalSalesCell.value = `${totalQty.toFixed(2)}`;
-          // totalSalesCell.alignment = { horizontal: "right" }; // Align to the right
+          const totalSalesCell = worksheet.getCell(`C${totalRow.number}`);
+          totalSalesCell.value = `${totalVisit}`;
+          totalSalesCell.alignment = { horizontal: "right" }; // Align to the right
 
           const totalExpenseCell = worksheet.getCell(`D${totalRow.number}`);
           totalExpenseCell.value = `₹ ${totalSales.toFixed(2)}`;
@@ -437,7 +352,7 @@ const OrdersPieChart = ({
 
           // Generate a unique filename
           const uniqueIdentifier = Date.now();
-          const fileName = `${uniqueIdentifier}product_wise_summary_${officeName}_${startDate}_${endDate}.xlsx`;
+          const fileName = `${uniqueIdentifier}Top_Customers_Summary_by${alignment}_${officeName}_${startDate}_${endDate}.xlsx`;
 
           // Save the workbook
           workbook.xlsx.writeBuffer().then(async (buffer) => {
@@ -495,7 +410,7 @@ const OrdersPieChart = ({
       doc.setFont('NotoSansDevanagari');
 
       // Set table headers
-      const headers = [[t("#"), t("Product Name"), t("Quantity"), t("Total Sale")]];
+      const headers = [[t("#"), t(alignment), t("Visit"), t("Sales")]];
       const columnStyles = {
         0: { halign: "center" },
         1: { halign: "center" },
@@ -523,7 +438,7 @@ const OrdersPieChart = ({
       doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
 
       // Add Sales-Expense Summary header
-      const summaryHeader = [[`${t("Product Wise Summary Data")} (${officeName})`]];
+      const summaryHeader = [[`${t("Top Customers Summary Data")} (${officeName})`]];
       doc.autoTable({
         head: summaryHeader,
         body: [],
@@ -559,22 +474,22 @@ const OrdersPieChart = ({
       });
 
       // Set table rows
-      let rows = sellData.map((item, index) => [
+      let rows = chartData.map((item, index) => [
         index + 1,
-        item.productName,
-        `${item.totalQty} ${item.unit}`,
-        `₹ ${item.totalSale.toFixed(2)}`,
+        item.filterName,
+        `${item.count}`,
+        `₹ ${parseFloat(item.total).toFixed(2)}`,
       ]);
 
 
       // Calculate total values
-      const totalSales = sellData.reduce((total, item) => total + item.totalSale, 0);
-      const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
+      const totalSales = chartData.reduce((total, item) => total + item.total, 0);
+      const totalVisit = chartData.reduce((total, item) => total + item.count, 0);
 
       rows.push([
         ``,
         t("Total"),
-        ``,
+        totalVisit,
         `₹ ${totalSales.toFixed(2)}`,
       ]);
 
@@ -603,7 +518,7 @@ const OrdersPieChart = ({
 
       // Generate a unique filename
       const uniqueIdentifier = Date.now();
-      const fileName = `${uniqueIdentifier}product_wise_summary_${officeName}_${startDate}_${endDate}.pdf`;
+      const fileName = `${uniqueIdentifier}Top_Customerss_Summary_by${alignment}_${officeName}_${startDate}_${endDate}.pdf`;
 
       // Generate the Blob from the PDF data
       const pdfBlob = doc.output('blob');
@@ -661,12 +576,61 @@ const OrdersPieChart = ({
     setShowExportOptions(!showExportOptions);
   };
 
+useEffect(() => {
+  handleChangeTop(topSelect)
 
-  const handleChange = (event, newAlignment) => {
-    if (newAlignment !== null) {
-      setAlignment(newAlignment);
-    }
+}, [alignment, topSelect,chartByName,chartByMobile,chartByVehicle])
+
+  const handleChangeCustomer = (event) => {
+    setAlignment(event.target.value);
   };
+
+  const handleChangeTop = (value) => {
+    if(value===10){
+      if (alignment === "Name") {
+        setChartData(chartByName)
+        setTableData([...chartByName, { "filterName": t("Total"), "total": chartByName.reduce((a, b) => a + b.total, 0), "count": chartByName.reduce((a, b) => a + b.count, 0) }])
+      }
+      else if (alignment === "Mobile") {
+        setChartData(chartByMobile)
+        setTableData([...chartByMobile, { "filterName": t("Total"), "total": chartByMobile.reduce((a, b) => a + b.total, 0), "count": chartByMobile.reduce((a, b) => a + b.count, 0) }])
+      }
+      else if (alignment === "Vehicle") {
+        setChartData(chartByVehicle)
+        setTableData([...chartByVehicle, { "filterName": t("Total"), "total": chartByVehicle.reduce((a, b) => a + b.total, 0), "count": chartByVehicle.reduce((a, b) => a + b.count, 0) }])
+      }
+    }else{
+      if (alignment === "Name") {
+      let reversedData = chartByName.slice().reverse();
+  
+      let last5Elements = reversedData.slice(0, 5).map(item => {
+        return item; 
+      });
+      setChartData(last5Elements.slice().reverse())
+      setTableData([...last5Elements.slice().reverse(), { "filterName": t("Total"), "total": last5Elements.slice().reverse().reduce((a, b) => a + b.total, 0), "count": last5Elements.slice().reverse().reduce((a, b) => a + b.count, 0) }])
+    }
+    else if (alignment === "Mobile") {
+      let reversedData = chartByMobile.slice().reverse();
+  
+      let last5Elements = reversedData.slice(0, 5).map(item => {
+        return item; 
+      });
+      setChartData(last5Elements.slice().reverse())
+      setTableData([...last5Elements.slice().reverse(), { "filterName": t("Total"), "total": last5Elements.slice().reverse().reduce((a, b) => a + b.total, 0), "count": last5Elements.slice().reverse().reduce((a, b) => a + b.count, 0) }])
+    }
+    else if (alignment === "Vehicle") {
+      let reversedData = chartByVehicle.slice().reverse();
+  
+      let last5Elements = reversedData.slice(0, 5).map(item => {
+        return item; 
+      });
+      setChartData(last5Elements.slice().reverse())
+      setTableData([...last5Elements.slice().reverse(), { "filterName": t("Total"), "total": last5Elements.slice().reverse().reduce((a, b) => a + b.total, 0), "count": last5Elements.slice().reverse().reduce((a, b) => a + b.count, 0) }])
+    }
+    }
+
+  }
+
   const theme = createTheme({
     typography: {
       button: {
@@ -686,37 +650,44 @@ const OrdersPieChart = ({
         />
 
         <div className="container-fluid" >
-          <div className="d-flex w-100 g-0 align-items-center justify-content-between">
-            <button
-              className={css.legendButton}
-              onClick={toggleLegend} // Call the toggleLegend function when the button is clicked
-              ref={legendButtonRef}
-            >
-              <img
-                src={import.meta.env.VITE_LEGEND_LOGO}
-                alt="Code Block Icon"
-                className={css.codeBlockIcon}
-                title="Legends"
-                style={{ filter: showLegend || sellData.length === 0 ? "opacity(0.4)" : "opacity(1)", transition: "all .25s ease-in-out" }}
-              />{" "}
-
-            </button>
+          <div className="d-flex w-100 g-0 align-items-start justify-content-between">
             <div className='d-flex align-items-center'>
               <div className={`fw-bold me-2 fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
-                }`}>{t("Product")}</div>
+                }`}>{t("")}</div>
               <ThemeProvider theme={theme}>
-                <ToggleButtonGroup
-                  size="small"
-                  color="primary"
-                  value={alignment}
-                  exclusive
-                  onChange={handleChange}
-                  aria-label="Platform"
-                  style={{ fontFamily: `"Public Sans", sans-serif !important` }}
-                >
-                  <ToggleButton style={{ color: alignment == 'Sale' ? '' : `var(--text-color)` }} className={`fw-bold fs-${window.innerWidth <= 1300 ? 7 : 6}`} value="Sale">{t("Sale")}</ToggleButton>
-                  <ToggleButton style={{ color: alignment == 'Qty' ? '' : `var(--text-color)` }} className={`fw-bold fs-${window.innerWidth <= 1300 ? 7 : 6}`} value="Qty">{t("Qty")}</ToggleButton>
-                </ToggleButtonGroup>
+
+
+                <FormControl sx={{ mx: 1, mt: 1, minWidth: 120 }} size="small">
+                  <InputLabel id="demo-simple-select-helper-label" style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }}>{t('Top Customers')}</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-standard-label"
+                    id="demo-simple-select-standard"
+                    displayEmpty
+                    value={alignment}
+                    onChange={handleChangeCustomer}
+                    style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }}
+                    // onChange={handleChange}
+                    label={t("Top Customers")}
+                  >
+                    <MenuItem style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }} value={"Name"}>{t("Name")}</MenuItem>
+                    <MenuItem style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }} value={"Mobile"}>{t("Mobile")}</MenuItem>
+                    <MenuItem style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }} value={"Vehicle"}>{t("Vehicle")}</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ mx: 1, mt: 1, minWidth: 100 }} size="small">
+                  <Select
+                    labelId="demo-simple-select-standard-label"
+                    id="demo-simple-select-standard"
+                    displayEmpty
+                    value={topSelect}
+                    style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }}
+                    onChange={(e) => {setTopSelect(e.target.value)}}
+
+                  >
+                    <MenuItem style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }} value={5}>{t('Top')} 5</MenuItem>
+                    <MenuItem style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }} value={10}>{t('Top')} 10</MenuItem>
+                  </Select>
+                </FormControl>
               </ThemeProvider>
             </div>
             <div title='Export Options' className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
@@ -742,7 +713,7 @@ const OrdersPieChart = ({
                       <span>{t("View Table")}</span>
                     </div> :
                     <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                      <FaChartPie style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
+                      <FaChartColumn style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
                       <span>{t("View Graph")}</span>
                     </div>}
                   <div className={css.exportOption} onClick={exportToExcel}>
@@ -769,34 +740,34 @@ const OrdersPieChart = ({
         </div> : ''}
 
         {!tableStatus ? <ReactECharts
-          key={sellData.length}
+          key={chartData.length}
           option={option}
           style={{
             // marginTop: window.innerWidth <= 1496 ? "-8%" : "-6%",
-            height: "297px",
+            height: "341px",
             width: "100%",
             maxWidth: "2300px",
           }}
           className={css.piechart}
         // className={themeMode === "dark" ? css.darkMode : css.lightMode}
-        /> : <div className="container-fluid mt-2 table-responsive" style={{ height: "289px" }}>
+        /> : <div className="container-fluid mt-2 table-responsive" style={{ height: "333px" }}>
           <table className={`table  ${themeMode == 'dark' ? 'table-dark' : ''}`}>
             <thead>
               <tr>
                 <th scope="col">#</th>
-                <th scope="col">{t("Product")}</th>
-                <th scope="col">{t("Quantity")}</th>
+                <th scope="col">{t(alignment)}</th>
+                <th scope="col">{t("Visit")}</th>
                 <th scope="col">{t("Sales")}(₹)</th>
               </tr>
             </thead>
             <tbody>
               {tableData.map((item, index) => {
                 return (
-                  <tr key={item.ProductName}>
+                  <tr key={item.filterName}>
                     <th scope="row">{tableData.length - 1 === index ? '' : index + 1}</th>
-                    <td>{item.ProductName}</td>
-                    <td>{tableData.length - 1 === index ? '' : item.Quantity}</td>
-                    <td>{parseFloat(item.Sales).toFixed(2)}</td>
+                    <td>{item.filterName}</td>
+                    <td>{item.count}</td>
+                    <td>{parseFloat(item.total).toFixed(2)}</td>
                   </tr>
                 )
               })}
@@ -813,4 +784,4 @@ const OrdersPieChart = ({
   );
 };
 
-export default OrdersPieChart;
+export default SalesCustomer;

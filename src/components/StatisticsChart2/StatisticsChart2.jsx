@@ -236,6 +236,12 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       {
         type: "bar",
         barWidth: "30%",
+        itemStyle:{
+
+          normal:{
+            barBorderRadius:[0,5,5,0]
+          }
+        },
         data: chartData.map((item, index) => ({
           value: item.sales,
           name: item.officeName,
@@ -820,7 +826,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         option={option}
         style={{
 
-          height: "300px",
+          height: "350px",
           width: "100%",
           maxWidth: "2300px",
         }}
@@ -829,7 +835,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         }}
         className={themeMode === "dark" ? css.darkMode : css.lightMode}
       /> :
-        <div className="container-fluid mt-2 table-responsive" style={{ height: "291px" }}>
+        <div className="container-fluid mt-2 table-responsive" style={{ height: "342px" }}>
           <table className={`table ${themeMode == 'dark' ? 'table-dark' : ''}`}>
             <thead>
               <tr>
