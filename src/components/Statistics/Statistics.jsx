@@ -423,7 +423,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
            <div className='col-md-12 col-lg-6 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <SalesCustomer selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName}/>
+              <SalesCustomer selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading}/>
             </Suspense>
           </div> 
           <div className='col-md-12 col-lg-6 mt-2' >

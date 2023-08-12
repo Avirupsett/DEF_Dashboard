@@ -18,7 +18,9 @@ const SalesCustomer = ({
   selectedRange,
   selectedOffice,
   isAdmin,
-  officeName
+  alldata,
+  officeName,
+  isLoading
 }) => {
 
   const [chartData, setChartData] = useState([])
@@ -26,7 +28,7 @@ const SalesCustomer = ({
   const iconContainerRef = useRef(null);
   const exportOptionsRef = useRef(null);
   const legendButtonRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(true)
+
   const { t } = useTranslation();
 
 
@@ -47,13 +49,8 @@ const SalesCustomer = ({
     const startDate = formatDate2(selectedRange[0]);
     const endDate = formatDate2(selectedRange[1]);
     if (startDate && endDate && selectedOffice) {
-      setIsLoading(true)
-      axios
-        .get(
-          `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_customer/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
-        )
-        .then((response) => {
-          const data = response.data;
+     
+          const data = alldata.graph4;
 
           const byName = data.byName;
           const byMobile = data.byMobile;
@@ -66,17 +63,11 @@ const SalesCustomer = ({
         }
 
 
-        )
-        .catch((error) => {
-          //     // setSellData([])
-          console.log("Error fetching data:", error);
-        }).finally(() => {
-          setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
-        });
+        
 
-    }
+    
 
-  }, [selectedRange, selectedOffice, isAdmin]);
+  }, [selectedRange, selectedOffice, isAdmin,alldata]);
 
 
 
@@ -138,6 +129,7 @@ const SalesCustomer = ({
         type: 'value',
         name: t('Visit'),
         min: 0,
+        minInterval:1,
         // max: 250,
         // interval: 5,
         // axisLabel: {
