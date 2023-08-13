@@ -40,7 +40,7 @@ const SalesCustomer = ({
   const [chartByName, setChartByName] = useState([])
   const [chartByMobile, setChartByMobile] = useState([])
   const [chartByVehicle, setChartByVehicle] = useState([])
-  const [topSelect, setTopSelect] = useState(window.innerWidth>500?10:5)
+  const [topSelect, setTopSelect] = useState(5)
 
 
 
@@ -48,8 +48,9 @@ const SalesCustomer = ({
 
     const startDate = formatDate2(selectedRange[0]);
     const endDate = formatDate2(selectedRange[1]);
-    if (startDate && endDate && selectedOffice) {
-     
+    if (startDate && endDate && selectedOffice ) {
+         if (alldata.graph4){
+          console.log(alldata)
           const data = alldata.graph4;
 
           const byName = data.byName;
@@ -59,7 +60,7 @@ const SalesCustomer = ({
           setChartByVehicle(byVehicle)
           setChartByName(byName)
           
-
+         }
         }
 
 
