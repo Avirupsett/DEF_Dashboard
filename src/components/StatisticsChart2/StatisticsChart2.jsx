@@ -237,10 +237,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         type: "bar",
         barWidth: "30%",
         itemStyle:{
-
-          normal:{
-            barBorderRadius:[0,5,5,0]
-          }
+        
+            borderRadius:[0,5,5,0]
         },
         data: chartData.map((item, index) => ({
           value: item.sales,
@@ -619,6 +617,17 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         // Show the reset button after the graph click event is triggered
         setShowResetButton(true);
         setShowPreviousButton(true);
+      }
+      else{
+        if(selectedOffice!==clickedOfficeId){
+        setOptionvalue({ state: true, Ovalue: clickedOfficeId})
+        // setSelectedOfficeName(clickedOfficeName)
+        setSelectedOfficeNameLocal(clickedOfficeName)
+        setSelectedOffice(clickedOfficeId);
+        setIsAdmin(0);
+        }
+        // setShowResetButton(true);
+        // setOfficeIdLocal(clickedOfficeId)
       }
     }
   };

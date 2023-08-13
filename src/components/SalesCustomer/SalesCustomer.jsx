@@ -177,9 +177,9 @@ const SalesCustomer = ({
         data: chartData.map((item) => item.count),
         itemStyle:{
 
-          normal:{
-            barBorderRadius:[10,10,0,0]
-          }
+         
+            borderRadius:[10,10,0,0]
+          
         }
       },
 
@@ -723,7 +723,7 @@ useEffect(() => {
           </div>
         </div>
         {isLoading && (
-          <div className={css.NoDataOverlay}>
+          <div className={css.loadingOverlay}>
             <img src={loading} alt="Loading..." width={50} height={50} />
           </div>
         )}
