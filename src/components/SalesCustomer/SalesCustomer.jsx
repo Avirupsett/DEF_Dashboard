@@ -50,7 +50,6 @@ const SalesCustomer = ({
     const endDate = formatDate2(selectedRange[1]);
     if (startDate && endDate && selectedOffice ) {
          if (alldata.graph4){
-          console.log(alldata)
           const data = alldata.graph4;
 
           const byName = data.byName;
