@@ -677,7 +677,7 @@ const OrdersPieChart = ({
 
   return (
     <>
-      <div
+      <div  ref={legendButtonRef}
         className={`${css.chartContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
           }`}
       ><ToastContainer
@@ -690,7 +690,7 @@ const OrdersPieChart = ({
             <button
               className={css.legendButton}
               onClick={toggleLegend} // Call the toggleLegend function when the button is clicked
-              ref={legendButtonRef}
+             
             >
               <img
                 src={import.meta.env.VITE_LEGEND_LOGO}

@@ -16,6 +16,8 @@ const StatisticsChart = React.lazy(() => import('../StatisticsChart/StatisticsCh
 const StatisticsChart2 = React.lazy(() => import('../StatisticsChart2/StatisticsChart2'));
 const OrdersPieChart = React.lazy(() => import('../OrdersPieChart/OrdersPieChart'));
 const SalesCustomer = React.lazy(()=>import('../SalesCustomer/SalesCustomer'))
+const SalesProductStacked = React.lazy(()=>import('../SalesProductStacked/SalesProductStacked'))
+const PaymentMode = React.lazy(()=>import('../PaymentMode/PaymentMode'))
 // const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
 
 
@@ -431,6 +433,16 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
               <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} setSelectedOfficeName={setOfficeName} selectedOfficeNameLocal={selectedOfficeName} setSelectedOfficeNameLocal={setSelectedOfficeName} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue} />
             </Suspense>
           </div>
+           <div className='col-md-12 col-lg-8 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+              <SalesProductStacked selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading}/>
+            </Suspense>
+          </div>
+          <div className='col-md-12 col-lg-4 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+              <PaymentMode selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading}/>
+            </Suspense>
+          </div> 
         </div>
         {/* {selectedOffice.length > 0 ? <div className='row'>
           <div className='col-md-12 col-lg-8'><StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} /></div>

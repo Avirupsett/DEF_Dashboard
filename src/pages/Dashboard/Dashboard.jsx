@@ -7,7 +7,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Statistics from "../../components/Statistics/Statistics";
 import { useTranslation } from "react-i18next";
 
-// const Statistics =React.lazy(()=>import("../../components/Statistics/Statistics"));
+// const Statistics =React.lazy(()=>import("../../components/Statistics/Statistics")); 
 const UserCard = React.lazy(() => import("./UserCard"));
 const OfficeCard = React.lazy(() => import("./OfficeCard"));
 const SalesCard = React.lazy(() => import("./SalesCard"));
@@ -16,7 +16,7 @@ const ExpenseCard = React.lazy(() => import("./ExpenseCard"));
 const Dashboard = () => {
 
   const urlParams = new URLSearchParams(window.location.search);
-  const initialThemeMode = urlParams.get("theme") || "light"; // Read theme mode from URL parameter
+  const initialThemeMode = urlParams.get("theme") || "light"; // Read theme mode from URL parameter jhjhjhjhjkkkhkhkhkkhkkkhkkkkkhkkk 
   const { t, i18n } = useTranslation();
 
   if (initialThemeMode === "light") {

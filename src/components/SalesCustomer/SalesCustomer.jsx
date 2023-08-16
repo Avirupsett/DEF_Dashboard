@@ -642,7 +642,7 @@ useEffect(() => {
         />
 
         <div className="container-fluid" >
-          <div className="d-flex w-100 g-0 align-items-start justify-content-between">
+          <div className="d-flex w-100 g-0 align-items-center justify-content-between">
             <div className='d-flex align-items-center'>
               <div className={`fw-bold me-2 fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
                 }`}>{t("")}</div>
