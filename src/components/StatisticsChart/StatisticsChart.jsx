@@ -94,7 +94,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       fetchData();
     }
 
-  }, [selectedRange, selectedOffice, isAdmin, alldata]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [alldata]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -144,14 +144,14 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
     },
     tooltip: {
       trigger: "axis",
-      formatter: function (params) {
-        var tooltip = `<b>${t("Date")}:</b> ` + params[0].name + "<br/>";
-        for (var i = 0; i < params.length; i++) {
-          tooltip +=
-            "<b>" + params[i].seriesName + ":</b> " + params[i].value + "<br/>";
-        }
-        return tooltip;
-      },
+      // formatter: function (params) {
+      //   var tooltip = `<b>${t("Date")}:</b> ` + params[0].value[0] + "<br/>";
+      //   for (var i = 0; i < params.length; i++) {
+      //     tooltip +=
+      //       "<b>" + params[i].seriesName + ":</b> " + params[i].value[1] + "<br/>";
+      //   }
+      //   return tooltip;
+      // },
       textStyle: {
         fontSize: window.innerWidth <= 768 ? 10 : 14,
       },
@@ -166,23 +166,29 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
       }
     },
     grid: {
-      left: window.innerWidth <= 768 ? '4%' : '4%',
+      left: '4%' ,
       right: "3%",
       top: "10%",
       bottom: chartData.length > 0 ? "15%" : "20%",
       containLabel: chartData.length > 0 ? true : false,
     },
     xAxis: {
-      type: "category",
-      name:  "",
+      type: "time",
+      axisPointer: {
+        label:  {
+          formatter: function(params) {
+            let oT = new Date(params.value);
+            return formatDate(oT);
+          },
+       },},
       nameLocation: "middle",
       nameGap: 35,
-      nameTextStyle: {
-        color: themeMode === "dark" ? "#ffffff" : "#000000",
-        fontWeight: "bold",
-        fontSize: window.innerWidth <= 768 ? 14 : 16,
-      },
-      boundaryGap: true,
+      // nameTextStyle: {
+      //   color: themeMode === "dark" ? "#ffffff" : "#000000",
+      //   fontWeight: "bold",
+      //   fontSize: window.innerWidth <= 768 ? 14 : 16,
+      // },
+      // boundaryGap: true,
       data: chartData.map((item) => item.requestedDate),
       axisLine: {
         lineStyle: {
@@ -190,6 +196,8 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         },
       },
       axisLabel: {
+        hideOverlap: true,
+        formatter:'{d} {MMM}',
         color: themeMode === "dark" ? "#ffffff" : "#000000",
       },
     },
@@ -201,11 +209,11 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         nameGap: 42,
 
 
-        nameTextStyle: {
-          color: themeMode === "dark" ? "#ffffff" : "#000000",
-          fontWeight: "bold",
-          fontSize: window.innerWidth <= 768 ? 14 : 16,
-        },
+        // nameTextStyle: {
+        //   color: themeMode === "dark" ? "#ffffff" : "#000000",
+        //   fontWeight: "bold",
+        //   fontSize: window.innerWidth <= 768 ? 14 : 16,
+        // },
         axisLine: {
           lineStyle: {
             color: themeMode === "dark" ? "#ffffff" : "#000000",
@@ -255,14 +263,22 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         {
           name: t("Sales"),
           type: "bar", // Display as a bar chart if the selected range is 7 days or less
-          data: chartData.map((item) => item.totalIncome),
+          data: chartData.map((item) => [item.requestedDate,item.totalIncome]),
           yAxisIndex: 0,
+          barWidth:'35%',
+          itemStyle:{
+            borderRadius:[5,5,0,0]
+          }
         },
         {
           name: t("Expense"),
           type: "bar", // Display as a bar chart if the selected range is 7 days or less
-          data: chartData.map((item) => item.totalExpense),
+          data: chartData.map((item) => [item.requestedDate,item.totalExpense]),
           yAxisIndex: 0,
+          barWidth:'35%',
+          itemStyle:{
+            borderRadius:[5,5,0,0]
+          }
         },
         {
           name: t("Average Sales"),
@@ -274,7 +290,7 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
             width: 2,
             type: "dashed",
           },
-          data: chartData.map(() => averageSales)
+          data: chartData.map((item) => [item.requestedDate,averageSales])
         },
       ]
       : [
@@ -282,27 +298,30 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
           name: t("Sales"),
           type: "line", // Display as a line chart if the selected range is more than 7 days
           smooth: true,
-          data: chartData.map((item) => item.totalIncome),
-          yAxisIndex: 0,
+          symbol: 'none',
+          data: chartData.map((item) => [item.requestedDate,item.totalIncome]),
+          
         },
         {
           name: t("Expense"),
           type: "line", // Display as a line chart if the selected range is more than 7 days
           smooth: true,
-          data: chartData.map((item) => item.totalExpense),
-          yAxisIndex: 0,
+          symbol: 'none',
+          data: chartData.map((item) => [item.requestedDate,item.totalExpense]),
+         
         },
         {
           name: t("Average Sales"),
           type: "line", // Display as a line chart if the selected range is more than 7 days
-          yAxisIndex: 0,
+          symbol: 'none',
+          
           smooth: true,
           lineStyle: {
             color: "#FFC107",
             width: 2,
             type: "dashed",
           },
-          data: chartData.map(() => averageSales)
+          data: chartData.map((item) => [item.requestedDate,averageSales])
         },
       ],
   };

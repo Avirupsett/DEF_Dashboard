@@ -62,5 +62,15 @@
     "Mobile":"Mobile",
     "Vehicle":"Vehicle",
     "Top":"Top",
-    "Visit":"Visit"
+    "Visit":"Visit",
+    "Sales (Day Wise)":"Sales (Day Wise)",
+    "Sales (Month Wise)":"Sales (Month Wise)",
+    "Sales (Year Wise)":"Sales (Year Wise)",
+    "Payment Mode":"Payment Mode",
+    "Payment":"Payment",
+    "Count":"Count",
+    "Card":"Card",
+    "UPI":"UPI",
+    "Cash":"Cash",
+    "NetBanking":"NetBanking"
 }

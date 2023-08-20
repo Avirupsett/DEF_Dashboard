@@ -20,7 +20,8 @@ const SalesProductStacked = ({
     isAdmin,
     alldata,
     officeName,
-    isLoading
+    isLoading,
+    setSelectedRange
 }) => {
 
     const [chartData, setChartData] = useState([])
@@ -49,151 +50,158 @@ const SalesProductStacked = ({
 
     useEffect(() => {
 
-        const startDate = new Date(selectedRange[0]);
-        const endDate = new Date(selectedRange[1]);
-        if (startDate && endDate && selectedOffice) {
-            if (alldata.graph2) {
-                setMerge(true)
-                let daywiseSales = {};
-                let dates = []
-                let startDate2 = new Date(startDate);
+        // const startDate = new Date(selectedRange[0]);
+        // const endDate = new Date(selectedRange[1]);
 
-                let tempMonths = []
+        if (alldata.graph2) {
+            const data = alldata.graph2
+            setMerge(true)
+            let daywiseSales = {};
+            let dates = []
 
 
-                while (startDate2.getMonth() <= endDate.getMonth()) {
-                    const year = startDate2.getFullYear();
-                    const monthName = startDate2.toLocaleString('en-us', { month: 'short' });
-                    tempMonths.push(`${monthName} ${year}`);
-                    startDate2.setMonth(startDate2.getMonth() + 1);
-                }
-                setAllMonths(tempMonths);
+            // Extract all unique product IDs
+            let productIds = Array.from(new Set(data.flatMap(entry => entry.lstproduct.map(product => product.productId))));
 
-                //Extract All the year from start date to end date
-                let tempYears = []
-                let startDate3 = new Date(startDate);
+            // Get the unique years and months present in the data
+            let years = Array.from(new Set(data.map(entry => entry.requestedDate.split('-'))));
+            const months = [
+                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+            ];
 
-                while (startDate3.getFullYear() <= endDate.getFullYear()) {
-                    const year = startDate3.getFullYear();
-                    tempYears.push(year);
-                    startDate3.setFullYear(startDate3.getFullYear() + 1);
-                }
-                setAllYears(tempYears);
+            // Initialize daywiseSales object with zero sales for all products and dates using map
+            productIds.map(productId => {
+                daywiseSales[productId] = {
+                    productName: '',
+                    color: '',
+                    daySales: {},
+                    monthSales: {},
+                    yearSales: {}
+                };
+                years.map(year => {
+                    daywiseSales[productId].yearSales[year[0]] = '';
+                    daywiseSales[productId].monthSales[year[0]] = daywiseSales[productId].monthSales[year[0]] || {};
+                    daywiseSales[productId].monthSales[year[0]][months[parseInt(year[1]) - 1]] = '';
 
-
-
-                // Extract all unique product IDs
-                let productIds = Array.from(new Set(alldata.graph2.flatMap(entry => entry.lstproduct.map(product => product.productId))));
-
-                // Get the unique years and months present in the data
-                let years = Array.from(new Set(alldata.graph2.map(entry => entry.requestedDate.split('-'))));
-                const months = [
-                    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-                ];
-
-                // Initialize daywiseSales object with zero sales for all products and dates using map
-                productIds.map(productId => {
-                    daywiseSales[productId] = {
-                        productName: '',
-                        color: '',
-                        daySales: {},
-                        monthSales: {},
-                        yearSales: {}
-                    };
-                    years.map(year => {
-                        daywiseSales[productId].yearSales[year[0]] = '';
-                        daywiseSales[productId].monthSales[year[0]] = daywiseSales[productId].monthSales[year[0]] || {};
-                        daywiseSales[productId].monthSales[year[0]][months[parseInt(year[1]) - 1]] = '';
-
-                    });
-                    alldata.graph2.map(entry => {
-                        daywiseSales[productId].daySales[entry.requestedDate] = '';
-
-                    });
                 });
+                data.map(entry => {
+                    daywiseSales[productId].daySales[entry.requestedDate] = '';
 
-                // Fill in actual sales data from the given data array using map
-                alldata.graph2.map(entry => {
-                    dates.push(entry.requestedDate)
-                    const requestedDate = entry.requestedDate;
-                    const productList = entry.lstproduct;
+                });
+            });
 
-                    productList.map(product => {
-                        const productColor = product.color;
-                        const productId = product.productId;
-                        const productName = product.productName;
-                        const totalSales = product.totalSales;
+            // Fill in actual sales data from the given data array using map
+            data.map(entry => {
+                dates.push(entry.requestedDate)
+                const requestedDate = entry.requestedDate;
+                const productList = entry.lstproduct;
 
-                        daywiseSales[productId].productName = productName;
-                        daywiseSales[productId].color = productColor;
-                        daywiseSales[productId].daySales[requestedDate] = totalSales;
+                productList.map(product => {
+                    const productColor = product.color;
+                    const productId = product.productId;
+                    const productName = product.productName;
+                    const totalSales = product.totalSales;
 
-                        const [year, month] = requestedDate.split('-');
-                        const monthName = new Date(requestedDate + 'T00:00:00').toLocaleString('en-us', { month: 'short' });
+                    daywiseSales[productId].productName = productName;
+                    daywiseSales[productId].color = productColor;
+                    daywiseSales[productId].daySales[requestedDate] = totalSales;
 
-                        // Initialize monthwise sales if not already done
-                        if (!daywiseSales[productId].monthSales[year]) {
-                            daywiseSales[productId].monthSales[year] = {};
-                        }
+                    const [year, month] = requestedDate.split('-');
+                    const monthName = new Date(requestedDate + 'T00:00:00').toLocaleString('en-us', { month: 'short' });
 
-                        if (!daywiseSales[productId].monthSales[year][monthName]) {
-                            daywiseSales[productId].monthSales[year][monthName] = 0;
-                        }
+                    // Initialize monthwise sales if not already done
+                    if (!daywiseSales[productId].monthSales[year]) {
+                        daywiseSales[productId].monthSales[year] = {};
+                    }
 
-                        // Add the daily sales to the monthwise total
-                        daywiseSales[productId].monthSales[year][monthName] += totalSales;
+                    if (!daywiseSales[productId].monthSales[year][monthName]) {
+                        daywiseSales[productId].monthSales[year][monthName] = 0;
+                    }
 
-                        // Initialize yearwise sales if not already done
-                        if (!daywiseSales[productId].yearSales[year]) {
-                            daywiseSales[productId].yearSales[year] = 0;
-                        }
+                    // Add the daily sales to the monthwise total
+                    daywiseSales[productId].monthSales[year][monthName] += totalSales;
 
-                        // Add the daily sales to the yearwise total
-                        daywiseSales[productId].yearSales[year] += totalSales;
-                    });
+                    // Initialize yearwise sales if not already done
+                    if (!daywiseSales[productId].yearSales[year]) {
+                        daywiseSales[productId].yearSales[year] = 0;
+                    }
+
+                    // Add the daily sales to the yearwise total
+                    daywiseSales[productId].yearSales[year] += totalSales;
+                });
+            })
+            // Usage example
+            // console.log(Object.values(daywiseSales))
+            if (Object.values(daywiseSales).length > 0) {
+                let monthCount=Object.keys(Object.values(daywiseSales)[0].monthSales).flatMap(year => {
+                    return Object.keys(Object.values(daywiseSales)[0].monthSales[year]).map(month => `${month} ${year}`);
                 })
-                // Usage example
-                // console.log(Object.values(daywiseSales))
-                setDaywiseSalesList(daywiseSales);
-                setAllDates(dates)
+                setAllMonths(monthCount)
+                if(monthCount.length>1){
+                    setAlignment("Sales (Month Wise)")
+                }
+                setAllYears(Object.keys(Object.values(daywiseSales)[0].yearSales).map(year => parseInt(year)))
+            }
+            else {
+                setAllMonths([])
+                setAllYears([])
+            }
+            setDaywiseSalesList(daywiseSales);
+            setAllDates(dates)
 
-                const transformedDataDate =alldata.graph2.flatMap((item, index) => {
-                    return (
-                        item.lstproduct.map((product) => {
-                            return (
-                                {
-                                    requestedDate: formatDate(item.requestedDate),
-                                    totalSales: parseFloat(product.totalSales).toFixed(2),
-                                    productName: product.productName
-                                }
-                           )
-                        })
-                    )
-                })
-                setTableDataByDate([...transformedDataDate,{"requestedDate":"Total","productName":"","totalSales":transformedDataDate.reduce((prev,c)=>prev+c.totalSales,0)}])
-                let monthSales=(Object.values(daywiseSales)).map((item)=>{return {"monthSales":item.monthSales,"productName":item.productName}})
-              
-                const transformedDataMonth = monthSales.flatMap(item => {
-                    const productName = item.productName;
-                    const year = Object.keys(item.monthSales)[0];
-                    const monthSales = item.monthSales[year];
-                    
-                    return Object.keys(monthSales).map(month => ({
-                      requestedDate: `${month} ${year}`,
-                      totalSales: monthSales[month],
-                      productName: productName
-                    }));
-                  });
-                
-                  setTableDataByMonth([...transformedDataMonth,{"requestedDate":"Total","productName":"","totalSales":transformedDataMonth.reduce((prev,c)=>prev+c.totalSales,0)}])
+            const transformedDataDate = data.flatMap((item, index) => {
+                return (
+                    item.lstproduct.map((product) => {
+                        return (
+                            {
+                                requestedDate: formatDate(item.requestedDate),
+                                totalSales: parseFloat(product.totalSales),
+                                productName: product.productName
+                            }
+                        )
+                    })
+                )
+            })
+            setTableDataByDate([...transformedDataDate, { "requestedDate": "Total", "productName": "", "totalSales": transformedDataDate.reduce((prev, c) => prev + c.totalSales, 0) }])
+            let monthSales = (Object.values(daywiseSales)).map((item) => { return { "monthSales": item.monthSales, "productName": item.productName } })
 
-                const transformedDataYear=Object.values(daywiseSales).flatMap(item=>{return {"requestedDate":Object.keys(item.yearSales)[0],"productName":item.productName,"totalSales":Object.values(item.yearSales)[0]}})
-                setTableDataByYear([...transformedDataYear,{"requestedDate":"Total","productName":"","totalSales":transformedDataYear.reduce((prev,c)=>prev+c.totalSales,0)}])
+            const transformedDataMonth = monthSales.flatMap(item => {
+                const productName = item.productName;
+                const year = Object.keys(item.monthSales)[0];
+                const monthSales = item.monthSales[year];
+
+                return Object.keys(monthSales).map(month => {
+
+                    return {
+                        requestedDate: `${month} ${year}`,
+                        totalSales: monthSales[month],
+                        productName: productName
+                    };
+
+                });
+            });
+            let filteredDataMonth = transformedDataMonth.filter(item => item.totalSales > 0);
+            filteredDataMonth.sort((a, b) => {
+                const dateA = new Date(a.requestedDate);
+                const dateB = new Date(b.requestedDate);
+                return dateA - dateB;
+            });
+            setTableDataByMonth([...filteredDataMonth, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataMonth.reduce((prev, c) => prev + c.totalSales, 0) }])
+
+            const transformedDataYear = Object.values(daywiseSales).flatMap(item => { return { "requestedDate": Object.keys(item.yearSales)[0], "productName": item.productName, "totalSales": Object.values(item.yearSales)[0] } })
+            const filteredDataYear = transformedDataYear.filter(item => item.totalSales > 0);
+            setTableDataByYear([...filteredDataYear, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataYear.reduce((prev, c) => prev + c.totalSales, 0) }])
+            if (alignment === 'Sales (Day Wise)') {
+                setTableData([...transformedDataDate, { "requestedDate": "Total", "productName": "", "totalSales": transformedDataDate.reduce((prev, c) => prev + c.totalSales, 0) }])
+            }
+            else if (alignment === 'Sales (Month Wise)') {
+                setTableData([...filteredDataMonth, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataMonth.reduce((prev, c) => prev + c.totalSales, 0) }])
+            }
+            else if (alignment === 'Sales (Year Wise)') {
+                setTableData([...filteredDataYear, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataYear.reduce((prev, c) => prev + c.totalSales, 0) }])
             }
         }
-
-
 
     }, [alldata]);
 
@@ -365,10 +373,37 @@ const SalesProductStacked = ({
             containLabel: true
         },
         xAxis: {
-            type: 'category',
+            axisLabel: {
+                hideOverlap: true,
+                formatter: alignment === 'Sales (Day Wise)' ? '{d} {MMM}' : null,
+                color: themeMode === "dark" ? "#ffffff" : "#000000",
+            },
+            type: alignment === 'Sales (Day Wise)' ? 'time' : 'category',
+            axisPointer: {
+                label: {
+                    formatter: function (params) {
+                        if (alignment === 'Sales (Day Wise)') {
+                            let oT = new Date(params.value);
+                            return formatDate(oT);
+                        }
+                        else
+                            return params.value
+                    },
+                },
+            },
             data: alignment === 'Sales (Day Wise)' ? allDates : alignment === 'Sales (Month Wise)' ? allMonths : allYears,
         },
         yAxis: {
+            axisLabel: {
+                color: themeMode === "dark" ? "#ffffff" : "#000000",
+            },
+            formatter: (value) => {
+                if (value >= 10000) {
+                    return (value / 1000) + "k";
+                } else {
+                    return value;
+                }
+            },
             type: 'value'
         },
         series:
@@ -385,8 +420,8 @@ const SalesProductStacked = ({
                         borderRadius: [5, 5, 5, 5],
                         color: product.color,
                     },
-                    // data: Object.values(product.daySales)
-                    data: alignment === 'Sales (Day Wise)' ? Object.values(product.daySales) : alignment === 'Sales (Month Wise)' ? [].concat(...Object.values(product.monthSales).map(yearData => Object.values(yearData))) : Object.values(product.yearSales)
+                    // data: Object.entries(product.daySales)
+                    data: alignment === 'Sales (Day Wise)' ? Object.entries(product.daySales) : alignment === 'Sales (Month Wise)' ? [].concat(...Object.values(product.monthSales).map(yearData => Object.values(yearData))) : Object.values(product.yearSales)
                 };
             })
 
@@ -404,7 +439,7 @@ const SalesProductStacked = ({
         if (!date) {
             return ""; // Return an empty string or a default date string
         }
-        let dateMod=new Date(date)
+        let dateMod = new Date(date)
         const year = dateMod.getFullYear();
         const month = String(dateMod.getMonth() + 1).padStart(2, "0");
         const day = String(dateMod.getDate()).padStart(2, "0");
@@ -451,7 +486,7 @@ const SalesProductStacked = ({
 
                     // Add extra header - Product Wise Summary Data
                     const extraHeaderCell = worksheet.getCell("A1"); // Shifted down by one row
-                    extraHeaderCell.value = `${t("Top Customers Summary Data")} (${officeName})`;
+                    extraHeaderCell.value = `${t("Products Summary Data")} (${officeName})`;
                     extraHeaderCell.font = {
                         bold: true,
                         color: { argb: "000000" }, // Black color
@@ -481,7 +516,7 @@ const SalesProductStacked = ({
                     worksheet.getColumn(4).width = 15;
 
                     // Add headers
-                    const headerRow = worksheet.addRow([t("#"), t(alignment), t("Visit"), t("Sales")]);
+                    const headerRow = worksheet.addRow([t("#"), t("Dates"), t("Product Name"), t("Sales")]);
 
                     headerRow.font = {
                         bold: true,
@@ -503,44 +538,39 @@ const SalesProductStacked = ({
 
                     // Add data rows
                     tableData.forEach((item, index) => {
-                        const row = worksheet.addRow([
-                            index + 1,
-                            item.requestedDate,
-                            item.productName,
-                            item.totalSales
-                        ]); // Add "₹" symbol before the totalSale value
+                        if (index !== tableData.length - 1) {
+                            const row = worksheet.addRow([
+                                index + 1,
+                                item.requestedDate,
+                                item.productName,
+                                item.totalSales.toFixed(2)
+                            ]); // Add "₹" symbol before the totalSale value
 
-                        // Align the serial number to the left
-                        row.getCell(1).alignment = { horizontal: "left" };
-                        row.getCell(2).alignment = { horizontal: "left" };
-                        row.getCell(3).alignment = { horizontal: "right" };
-                        row.getCell(4).alignment = { horizontal: "right" };
+                            // Align the serial number to the left
+                            row.getCell(1).alignment = { horizontal: "left" };
+                            row.getCell(2).alignment = { horizontal: "left" };
+                            row.getCell(3).alignment = { horizontal: "right" };
+                            row.getCell(4).alignment = { horizontal: "right" };
+                        }
+                        else {
+                            const totalRow = worksheet.addRow(["", t("Total"), "", ""]);
+                            totalRow.font = {
+                                bold: true,
+                                color: { argb: "000000" }, // Black color
+                                size: 12,
+                            };
+                            const totalExpenseCell = worksheet.getCell(`D${totalRow.number}`);
+                            totalExpenseCell.value = `₹ ${item.totalSales.toFixed(2)}`;
+                            totalExpenseCell.alignment = { horizontal: "right" };
+
+                        }
                     });
 
 
-                    const totalRow = worksheet.addRow(["", t("Total"), "", ""]);
-                    totalRow.font = {
-                        bold: true,
-                        color: { argb: "000000" }, // Black color
-                        size: 12,
-                    };
-
-                    // Calculate total values
-                    const totalSales = chartData.reduce((total, item) => total + item.total, 0);
-                    const totalVisit = chartData.reduce((total, item) => total + item.count, 0);
-
-                    // Set total values in the total row
-                    const totalSalesCell = worksheet.getCell(`C${totalRow.number}`);
-                    totalSalesCell.value = `${totalVisit}`;
-                    totalSalesCell.alignment = { horizontal: "right" }; // Align to the right
-
-                    const totalExpenseCell = worksheet.getCell(`D${totalRow.number}`);
-                    totalExpenseCell.value = `₹ ${totalSales.toFixed(2)}`;
-                    totalExpenseCell.alignment = { horizontal: "right" };
 
                     // Generate a unique filename
                     const uniqueIdentifier = Date.now();
-                    const fileName = `${uniqueIdentifier}Top_Customers_Summary_by${alignment}_${officeName}_${startDate}_${endDate}.xlsx`;
+                    const fileName = `${uniqueIdentifier}Products_Summary_by${alignment}_${officeName}_${startDate}_${endDate}.xlsx`;
 
                     // Save the workbook
                     workbook.xlsx.writeBuffer().then(async (buffer) => {
@@ -598,7 +628,7 @@ const SalesProductStacked = ({
             doc.setFont('NotoSansDevanagari');
 
             // Set table headers
-            const headers = [[t("#"), t(alignment), t("Visit"), t("Sales")]];
+            const headers = [[t("#"), t("Dates"), t("Product Name"), t("Sales")]];
             const columnStyles = {
                 0: { halign: "center" },
                 1: { halign: "center" },
@@ -626,7 +656,7 @@ const SalesProductStacked = ({
             doc.addImage(imgData, "PNG", 15, 12, imgWidth, imgHeight);
 
             // Add Sales-Expense Summary header
-            const summaryHeader = [[`${t("Top Customers Summary Data")} (${officeName})`]];
+            const summaryHeader = [[`${t("Products Summary Data")} (${officeName})`]];
             doc.autoTable({
                 head: summaryHeader,
                 body: [],
@@ -662,24 +692,27 @@ const SalesProductStacked = ({
             });
 
             // Set table rows
-            let rows = chartData.map((item, index) => [
+            let rows = tableData.map((item, index) => [
+
                 index + 1,
-                item.filterName,
-                `${item.count}`,
-                `₹ ${parseFloat(item.total).toFixed(2)}`,
+                item.requestedDate,
+                item.productName,
+                `₹ ${item.totalSales.toFixed(2)}`
+
+
             ]);
 
 
             // Calculate total values
-            const totalSales = chartData.reduce((total, item) => total + item.total, 0);
-            const totalVisit = chartData.reduce((total, item) => total + item.count, 0);
+            // const totalSales = chartData.reduce((total, item) => total + item.total, 0);
+            // const totalVisit = chartData.reduce((total, item) => total + item.count, 0);
 
-            rows.push([
-                ``,
-                t("Total"),
-                totalVisit,
-                `₹ ${totalSales.toFixed(2)}`,
-            ]);
+            // rows.push([
+            //     ``,
+            //     t("Total"),
+            //     totalVisit,
+            //     `₹ ${totalSales.toFixed(2)}`,
+            // ]);
 
             // AutoTable configuration
             const tableConfig = {
@@ -706,7 +739,7 @@ const SalesProductStacked = ({
 
             // Generate a unique filename
             const uniqueIdentifier = Date.now();
-            const fileName = `${uniqueIdentifier}Top_Customerss_Summary_by${alignment}_${officeName}_${startDate}_${endDate}.pdf`;
+            const fileName = `${uniqueIdentifier}Products_Summary_by${alignment}_${officeName}_${startDate}_${endDate}.pdf`;
 
             // Generate the Blob from the PDF data
             const pdfBlob = doc.output('blob');
@@ -762,13 +795,13 @@ const SalesProductStacked = ({
     const handleIconClick = () => {
         setShowLegend(false)
         setShowExportOptions(!showExportOptions);
-        if(alignment==='Sales (Day Wise)'){
+        if (alignment === 'Sales (Day Wise)') {
             setTableData(tableDataByDate)
         }
-        else if(alignment==='Sales (Month Wise)'){
+        else if (alignment === 'Sales (Month Wise)') {
             setTableData(tableDataByMonth)
         }
-        else if(alignment==='Sales (Year Wise)'){
+        else if (alignment === 'Sales (Year Wise)') {
             setTableData(tableDataByYear)
         }
     };
@@ -776,17 +809,42 @@ const SalesProductStacked = ({
 
     const handleChangeDropdown = (event) => {
         setAlignment(event.target.value);
-        if(event.target.value==='Sales (Day Wise)'){
+        if (event.target.value === 'Sales (Day Wise)') {
             setTableData(tableDataByDate)
         }
-        else if(event.target.value==='Sales (Month Wise)'){
+        else if (event.target.value === 'Sales (Month Wise)') {
             setTableData(tableDataByMonth)
         }
-        else if(event.target.value==='Sales (Year Wise)'){
+        else if (event.target.value === 'Sales (Year Wise)') {
             setTableData(tableDataByYear)
         }
-        
+
     };
+
+    const handleGraphClick = (params) => {
+        // Check if the click event occurred on a valid data point
+        
+        if (params && params.data && params.dataIndex >= 0) {
+            if (alignment==="Sales (Month Wise)"){
+            
+            const currentDate = new Date(allMonths[params.dataIndex])
+
+            // Get the start of the month
+            const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            
+            // Get the end of the month
+            const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth()+1, 0);
+            
+            setSelectedRange([startOfMonth,endOfMonth])
+            setAlignment("Sales (Day Wise)")
+            
+            }
+            if (alignment==="Sales (Year Wise)"){
+                setAlignment("Sales (Month Wise)")
+            }
+            //   const clickedOfficeId = chartData[params.dataIndex].officeId;
+        }
+    }
 
 
 
@@ -808,7 +866,7 @@ const SalesProductStacked = ({
 
     return (
         <>
-            <div  ref={legendButtonRef}
+            <div ref={legendButtonRef}
                 className={`${css.chartContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
                     }`}
             ><ToastContainer
@@ -821,7 +879,7 @@ const SalesProductStacked = ({
                         <button
                             className={css.legendButton}
                             onClick={toggleLegend} // Call the toggleLegend function when the button is clicked
-                           
+
                         >
                             <img
                                 src={import.meta.env.VITE_LEGEND_LOGO}
@@ -917,6 +975,9 @@ const SalesProductStacked = ({
                         maxWidth: "2300px",
                     }}
                     className={css.piechart}
+                    onEvents={{
+                        click: handleGraphClick,
+                      }}
                 // className={themeMode === "dark" ? css.darkMode : css.lightMode}
                 /> : <div className="container-fluid mt-2 table-responsive" style={{ height: "333px" }}>
                     <table className={`table  ${themeMode == 'dark' ? 'table-dark' : ''}`}>
@@ -929,16 +990,16 @@ const SalesProductStacked = ({
                             </tr>
                         </thead>
                         <tbody>
-        
+
                             {tableData.map((item, index) => {
-                                
-                                        return (<tr key={`${item.requestedDate} ${item.productName}`}>
-                                            <th scope="row">{tableData.length - 1 === index ? '' : index + 1}</th>
-                                            <td>{item.requestedDate}</td>
-                                            <td>{item.productName}</td>
-                                            <td>{parseFloat(item.totalSales).toFixed(2)}</td>
-                                        </tr>)
-                                    })
+
+                                return (<tr key={`${item.requestedDate} ${item.productName}`}>
+                                    <th scope="row">{tableData.length - 1 === index ? '' : index + 1}</th>
+                                    <td>{item.requestedDate}</td>
+                                    <td>{item.productName}</td>
+                                    <td>{parseFloat(item.totalSales).toFixed(2)}</td>
+                                </tr>)
+                            })
                             }
 
                         </tbody>

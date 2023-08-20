@@ -16,7 +16,7 @@ import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, alldata, isLoading, SelectedOfficeName,setSelectedOfficeName,selectedOfficeNameLocal,setSelectedOfficeNameLocal, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails, originallist, setOfficeIdLocal, officeIdLocal, setOptionvalue }) => {
+const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, alldata, isLoading, SelectedOfficeName, setSelectedOfficeName, selectedOfficeNameLocal, setSelectedOfficeNameLocal, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails, originallist, setOfficeIdLocal, officeIdLocal, setOptionvalue }) => {
   const [chartData, setChartData] = useState([]);
 
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -34,6 +34,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
   const [showPreviousButton, setShowPreviousButton] = useState(false);
   const [showResetButton, setShowResetButton] = useState(false);
   const [switch1, setswitch1] = useState(true)
+  const [chartData2, setChartData2] = useState([])
   const { t } = useTranslation();
 
 
@@ -119,10 +120,20 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
 
         setswitch1(true)
       }
-     
-        setChartData(temp);
-        setTableData(tabletemp);
-      
+      // Grouping the data by officeType
+      const groupedByOfficeType = temp.reduce((result, item) => {
+        const { officeType } = item;
+        if (!result[officeType]) {
+          result[officeType] = [];
+        }
+        result[officeType].push(item);
+        return result;
+      }, {});
+    
+      setChartData(temp)
+      setChartData2(groupedByOfficeType);
+      setTableData(tabletemp);
+
     }
 
   };
@@ -137,7 +148,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         fetchData(1);
       }
     }
-  }, [ alldata]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [alldata]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -165,7 +176,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
     yAxis: {
       type: "category",
       name: window.innerWidth > 550 ? "" : "",
-      nameLocation: "middle",
+      // nameLocation: "middle",
       nameGap: 80,
       nameTextStyle: {
         color: themeMode === "dark" ? "#ffffff" : "#000000",
@@ -173,6 +184,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         fontSize: window.innerWidth <= 768 ? 14 : 16,
       },
       data: chartData.map((item) => item.officeName),
+  
       axisLine: {
         lineStyle: {
           color: themeMode === "dark" ? "#ffffff" : "#000000",
@@ -232,13 +244,41 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
 
 
     },
-    series: [
+    legend: {
+      show: true
+    },
+    series: 
+    // Object.keys(chartData2).map((officeType) => {
+
+    //   return {
+    //     type: 'bar',
+    //     stack:true,
+    //     barWidth: "30%",
+    //     emphasis: {
+    //             focus: 'series',
+    //           },
+    //     name: officeType,
+    //     itemStyle: {
+    //       color: (chartData2[officeType]).map((office) => office.color)[0],
+    //       borderRadius: [0, 5, 5, 0]
+    //     },
+    //     data: (chartData2[officeType]).map((office) => {
+    //       return {
+    //         value: [office.sales,office.officeName],
+    //         name: office.officeName,
+    //       }
+    //     }
+    //     )
+    //   }
+    // })
+
+    [
       {
         type: "bar",
         barWidth: "30%",
-        itemStyle:{
-        
-            borderRadius:[0,5,5,0]
+        itemStyle: {
+
+          borderRadius: [0, 5, 5, 0]
         },
         data: chartData.map((item, index) => ({
           value: item.sales,
@@ -259,7 +299,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
 
       },
 
-    ],
+    ]
+
   };
 
 
@@ -330,8 +371,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
     worksheet.getColumn(3).width = 15;
 
     // Add headers
-    const headerRow = worksheet.addRow([ t("#"), t("Office Name"), t("Sales")]);
-    headerRow.font = { bold: true};
+    const headerRow = worksheet.addRow([t("#"), t("Office Name"), t("Sales")]);
+    headerRow.font = { bold: true };
 
     headerRow.eachCell((cell) => {
       cell.font = {
@@ -344,7 +385,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       };
     });
 
-    
+
     // Add data rows
     chartData.forEach((item, index) => {
       const row = worksheet.addRow([index + 1, item.officeName, item.sales]);
@@ -353,11 +394,11 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       row.getCell(1).alignment = { horizontal: "left" };
       row.getCell(2).alignment = { horizontal: "left" };
       row.getCell(3).alignment = { horizontal: "right" };
-      
+
     });
 
     // Add the total row
-    const totalRow = worksheet.addRow([``,t("Total"), ""]);
+    const totalRow = worksheet.addRow([``, t("Total"), ""]);
     totalRow.font = {
       bold: true,
       color: { argb: "000000" }, // Black color
@@ -374,38 +415,38 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
     totalSalesCell.alignment = { horizontal: "right" };
 
 
-      // Generate a unique identifier
-  const uniqueIdentifier = Date.now(); // You can use any unique value generation logic
+    // Generate a unique identifier
+    const uniqueIdentifier = Date.now(); // You can use any unique value generation logic
 
-  // Generate a Blob from the workbook
-  workbook.xlsx.writeBuffer().then(async (buffer) => {
-    const excelBlob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
+    // Generate a Blob from the workbook
+    workbook.xlsx.writeBuffer().then(async (buffer) => {
+      const excelBlob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
 
-    // Create a FormData object to send the Blob to the server
-    const formData = new FormData();
-    formData.append("file", excelBlob, `${uniqueIdentifier}sales_of_${selectedOfficeNameLocal}_${startDate}_${endDate}.xlsx`);
+      // Create a FormData object to send the Blob to the server
+      const formData = new FormData();
+      formData.append("file", excelBlob, `${uniqueIdentifier}sales_of_${selectedOfficeNameLocal}_${startDate}_${endDate}.xlsx`);
 
-    // Send FormData to the server using axios or fetch
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL_1}/api/uploader`,
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
-      ); // Replace with your API endpoint
-      if (response.status==200)
-      toast.update(id, { render: "Download Starting...", type: "success", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
-    else
-      toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
-      // Assuming the API returns the file URL
-      const excelFileUrl = response.data.url;
-      window.location.href=`${import.meta.env.VITE_API_URL_1}/static/downloads/${excelFileUrl}`
+      // Send FormData to the server using axios or fetch
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL_1}/api/uploader`,
+          formData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        ); // Replace with your API endpoint
+        if (response.status == 200)
+          toast.update(id, { render: "Download Starting...", type: "success", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
+        else
+          toast.update(id, { render: "Download Failed !", type: "error", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
+        // Assuming the API returns the file URL
+        const excelFileUrl = response.data.url;
+        window.location.href = `${import.meta.env.VITE_API_URL_1}/static/downloads/${excelFileUrl}`
 
-    } catch (error) {
-      console.error("Error saving Excel file:", error);
-    }
-  })
+      } catch (error) {
+        console.error("Error saving Excel file:", error);
+      }
+    })
   };
 
 
@@ -413,43 +454,43 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
     const id = toast.loading("Please wait...")
     const startDate = formatDate(selectedRange[0]);
     const endDate = formatDate(selectedRange[1]);
-  
+
     // Get the 'lang' parameter from the URL
     const urlParams = new URLSearchParams(window.location.search);
     const lang = urlParams.get('lang');
-  
+
     // Add image file
     const response = await axios.get(logo, {
       responseType: "arraybuffer",
     });
-  
+
     const fontBytes = await axios.get(font, { responseType: 'arraybuffer' });
     const fontBase64 = arrayBufferToBase64(fontBytes.data);
-  
+
     const fontBytes2 = await axios.get(font2, { responseType: 'arraybuffer' });
     const fontBase642 = arrayBufferToBase64(fontBytes2.data);
-  
+
     const imageBase64 = arrayBufferToBase64(response.data);
-    
+
     import('jspdf').then(async module => {
       let jsPDF = module.default
       const doc = new jsPDF();
-  
+
       // Add the image
       const imgData = imageBase64;
       const imgWidth = 35;
       const imgHeight = 20;
       doc.addImage(imgData, "PNG", 15, 9, imgWidth, imgHeight);
-  
+
       // Add font to PDF
       doc.addFileToVFS('NotoSansBengali.ttf', fontBase64);
       doc.addFont('NotoSansBengali.ttf', 'NotoSansBengali', 'normal');
       doc.setFont('NotoSansBengali');
-  
+
       doc.addFileToVFS('NotoSansDevanagari.ttf', fontBase642);
       doc.addFont('NotoSansDevanagari.ttf', 'NotoSansDevanagari', 'normal');
       doc.setFont('NotoSansDevanagari');
-  
+
       // Add Sales-Expense Summary header
       const summaryHeader = [[`${t("Sales")} ${t("of")} ${trimName(selectedOfficeNameLocal, 10)}`]];
       doc.autoTable({
@@ -469,7 +510,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
           fontStyle: 'bold'
         },
       });
-  
+
       // Add period - startDate to endDate
       const periodCell = [[`${t("Period")}: ${startDate} ${t("to")} ${endDate}`]];
       doc.autoTable({
@@ -488,23 +529,23 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
           font: lang === 'hi' ? 'NotoSansDevanagari' : 'NotoSansBengali', // Set the correct font name here
         },
       });
-  
+
       // Convert chart data to table format
       const tableData = chartData.map((item, index) => [
         index + 1,
         item.officeName,
         `₹ ${item.sales}`
       ]);
-  
+
       // Calculate total sales
       const totalSales = chartData.reduce(
         (sales, item) => sales + parseFloat(item.sales),
         0
       );
-  
+
       // Add total row
-      tableData.push([ ``,t("Total"), `₹ ${totalSales.toFixed(2)}`]);
-  
+      tableData.push([``, t("Total"), `₹ ${totalSales.toFixed(2)}`]);
+
       // Set table headers
       const headers = [t("#"), t("Office Name"), t("Sales")];
       const columnStyles = {
@@ -512,7 +553,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         1: { halign: "center" }, // Align Sales column to center
         2: { halign: "center" }, // Align Expense column to center
       };
-  
+
       // Set header styles
       const headerStyles = {
         fontSize: 12,
@@ -522,14 +563,14 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         textColor: "#FFFFFF", // White color
       };
 
-            // Define column widths
+      // Define column widths
       const columnWidths = {
         0: 5, // Width for the serial number column (#)
         1: 25, // Width for the Date column
         2: 25, // Width for the Sales column
         3: 25, // Width for the Expense column
       };
-  
+
       // Add table to PDF
       doc.autoTable(headers, tableData, {
         startY: 45, // Start below the header and period
@@ -541,32 +582,32 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         columnWidth: 'wrap', // Set the default column width behavior to 'wrap'
         columnWidths: columnWidths, // Apply specific column widths
       });
-  
+
       // Generate a unique identifier
       const uniqueIdentifier = Date.now(); // You can use any unique value generation logic
-  
+
       // Generate a Blob from the PDF content
       const pdfBlob = doc.output('blob');
-  
+
       // Create a FormData object to send the Blob to the server
       const formData = new FormData();
       formData.append("file", pdfBlob, `${uniqueIdentifier}sales_of_${selectedOfficeNameLocal}_${startDate}_${endDate}.pdf`);
-  
+
       // Send FormData to the server using axios or fetch
       try {
-        const response =await axios.post(
+        const response = await axios.post(
           `${import.meta.env.VITE_API_URL_1}/api/uploader`,
           formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         ); // Replace with your API endpoint
-        if (response.status==200)
-        toast.update(id, { render: "Download Starting...", type: "success", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
-      else
-        toast.update(id, { render: "Download Failed !", type: "error", isLoading: false,autoClose: 5000,closeOnClick: true,pauseOnFocusLoss:false });
+        if (response.status == 200)
+          toast.update(id, { render: "Download Starting...", type: "success", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
+        else
+          toast.update(id, { render: "Download Failed !", type: "error", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
         // Assuming the API returns the file URL
-        const pdfFileUrl =await response.data.url;
-        window.location.href=`${import.meta.env.VITE_API_URL_1}/static/downloads/${pdfFileUrl}`
-  
+        const pdfFileUrl = await response.data.url;
+        window.location.href = `${import.meta.env.VITE_API_URL_1}/static/downloads/${pdfFileUrl}`
+
       } catch (error) {
         console.error("Error saving PDF file:", error);
       }
@@ -585,10 +626,10 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         setswitch1(false)
         // setIsLoading(true);
         // Save the current selectedOffice and isAdmin values to the history
-        setSelectionHistory((prevHistory) => [...prevHistory, { selectedOffice, isAdmin,selectedOfficeNameLocal }]);
+        setSelectionHistory((prevHistory) => [...prevHistory, { selectedOffice, isAdmin, selectedOfficeNameLocal }]);
         setSelectionHistoryOfficeId((prevHistory) => [...prevHistory, officeIdLocal])
         // Update the selectedOffice state variable
-        setOptionvalue({ state: true, Ovalue: clickedOfficeId})
+        setOptionvalue({ state: true, Ovalue: clickedOfficeId })
         setSelectedOfficeName(clickedOfficeName)
         setSelectedOfficeNameLocal(clickedOfficeName)
         setSelectedOffice(clickedOfficeId);
@@ -618,13 +659,13 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         setShowResetButton(true);
         setShowPreviousButton(true);
       }
-      else{
-        if(selectedOffice!==clickedOfficeId){
-        setOptionvalue({ state: true, Ovalue: clickedOfficeId})
-        // setSelectedOfficeName(clickedOfficeName)
-        setSelectedOfficeNameLocal(clickedOfficeName)
-        setSelectedOffice(clickedOfficeId);
-        setIsAdmin(0);
+      else {
+        if (selectedOffice !== clickedOfficeId) {
+          setOptionvalue({ state: true, Ovalue: clickedOfficeId })
+          // setSelectedOfficeName(clickedOfficeName)
+          setSelectedOfficeNameLocal(clickedOfficeName)
+          setSelectedOffice(clickedOfficeId);
+          setIsAdmin(0);
         }
         // setShowResetButton(true);
         // setOfficeIdLocal(clickedOfficeId)
@@ -754,8 +795,8 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
         }`}
     >
       <ToastContainer
-      position="top-center"
-      theme={themeMode}
+        position="top-center"
+        theme={themeMode}
       />
       <div className="container-fluid">
         <div className="d-flex w-100 g-0 align-items-start justify-content-between">
@@ -857,7 +898,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
               {tableData.map((item, index) => {
                 return (
                   <tr key={item.officeName}>
-                    <th scope="row">{tableData.length-1===index?'':index + 1}</th>
+                    <th scope="row">{tableData.length - 1 === index ? '' : index + 1}</th>
                     <td>{item.officeName}</td>
                     <td>{parseFloat(item.sales).toFixed(2)}</td>
                   </tr>

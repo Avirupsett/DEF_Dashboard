@@ -3,7 +3,7 @@ import ReactECharts from 'echarts-for-react';
 import axios from "axios";
 import 'jspdf-autotable';
 import css from './PaymentMode.module.css';
-import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartColumn } from "react-icons/fa6";
+import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartColumn, FaChartPie } from "react-icons/fa6";
 import logo from "/assets/logo.png";
 import { useTranslation } from 'react-i18next';
 import loading from '/assets/loading.gif';
@@ -44,14 +44,19 @@ const PaymentMode = ({
         const startDate = formatDate2(selectedRange[0]);
         const endDate = formatDate2(selectedRange[1]);
         if (startDate && endDate && selectedOffice) {
-            
-            axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/payment/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`).
-            then((response)=>{
-                const data=response.data;
-                setChartData(data)
-                const totalCount=data.reduce((prev,c)=>prev+c.Count,0)
-                setTableData([...data,{"PaymentModeName":"Total","Count":totalCount}])
-            })
+           if(alldata.graph5){
+            const data = alldata.graph5;
+            setChartData(data)
+            const totalCount = data.reduce((prev, c) => prev + c.Count, 0)
+            setTableData([...data, { "PaymentModeName": "Total", "Count": totalCount }])
+           }
+            // axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/payment/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`).
+            //     then((response) => {
+            //         const data = response.data;
+            //         setChartData(data)
+            //         const totalCount = data.reduce((prev, c) => prev + c.Count, 0)
+            //         setTableData([...data, { "PaymentModeName": "Total", "Count": totalCount }])
+            //     })
         }
 
 
@@ -59,7 +64,7 @@ const PaymentMode = ({
 
 
 
-    }, [selectedRange, selectedOffice, isAdmin]);
+    }, [alldata]);
 
 
 
@@ -192,17 +197,26 @@ const PaymentMode = ({
         },
         radiusAxis: {
             type: 'value',
-            min:0
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                show: false
+            },
+            max:chartData.length>0? chartData.sort((a, b) => b.Count - a.Count)[1].Count + 5:5
         },
         angleAxis: {
             type: 'category',
-            data: chartData.map((e)=>t(e.PaymentModeName)),
-            startAngle: 75
+            data: chartData.map((e) => t(e.PaymentModeName)),
+            startAngle: 75,
+            axisLabel: {
+                color: themeMode === "dark" ? "#ffffff" : "#000000",
+            }
         },
         tooltip: {},
         series: {
             type: 'bar',
-            data: chartData.map((e)=>e.Count),
+            data: chartData.map((e) => ({value:e.Count,itemStyle:{color:e.PaymentModeName==t('UPI')?'#5fb476':e.PaymentModeName==t('Card')?'#f0d070':e.PaymentModeName==t('Cash')?'#73a2ee':'#e77267'}})),
             coordinateSystem: 'polar',
             label: {
                 show: true,
@@ -592,7 +606,7 @@ const PaymentMode = ({
                         <div className='d-flex align-items-center'>
                             <div className={`fw-bold me-2 fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
                                 }`}>{t("Payment Mode")}</div>
-                            
+
                         </div>
                         <div title='Export Options' className="d-flex g-0" ref={iconContainerRef}><div className={`${css.iconsContainer} d-flex justify-content-center align-items-center`} >
                             {/* Data grid icon */}
@@ -617,7 +631,7 @@ const PaymentMode = ({
                                             <span>{t("View Table")}</span>
                                         </div> :
                                         <div className={css.exportOption} onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
-                                            <FaChartColumn style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
+                                            <FaChartPie style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
                                             <span>{t("View Graph")}</span>
                                         </div>}
                                     <div className={css.exportOption} onClick={exportToExcel}>
@@ -639,7 +653,7 @@ const PaymentMode = ({
                         <img src={loading} alt="Loading..." width={50} height={50} />
                     </div>
                 )}
-                {tableData.length>0 && tableData[tableData.length-1].Count === 0 && !tableStatus && !isLoading ? <div className={`${css.loadingOverlay} fs-5`}>
+                {tableData.length > 0 && tableData[tableData.length - 1].Count === 0 && !tableStatus && !isLoading ? <div className={`${css.loadingOverlay} fs-5`}>
                     {t("No Data Found")}
                 </div> : ''}
 

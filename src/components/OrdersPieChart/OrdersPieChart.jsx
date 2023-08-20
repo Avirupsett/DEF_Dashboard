@@ -82,14 +82,13 @@ const OrdersPieChart = ({
 
   useEffect(() => {
     // setIsLoading(true)
-    const startDate = formatDate(selectedRange[0]);
-    const endDate = formatDate(selectedRange[1]);
-    if (startDate && endDate && selectedOffice) {
+    // const startDate = formatDate(selectedRange[0]);
+    // const endDate = formatDate(selectedRange[1]);
       if (alldata.graph2) {
         const calculateTotal = calculateTotalSales(alldata.graph2)
 
         const result = Object.entries(calculateTotal).map(([pipeline, { totalSales, color }]) => ({
-          value: totalSales,
+          value: totalSales.toFixed(2),
           name: pipeline,
           itemStyle: {
             color: color,
@@ -99,7 +98,7 @@ const OrdersPieChart = ({
         setChartData(result);
 
         const result2 = Object.entries(calculateTotal).map(([pipeline, { qty, color }]) => ({
-          value: qty,
+          value: qty.toFixed(2),
           name: pipeline,
           itemStyle: {
             color: color,
@@ -108,16 +107,16 @@ const OrdersPieChart = ({
 
         setChartData2(result2);
         const result_export = Object.entries(calculateTotal).map(([pipeline, { totalSales, color, qty, unitShortName }]) => ({
-          "productName": pipeline, "totalSale": totalSales, "color": color, "totalQty": qty, "unit": unitShortName
+          "productName": pipeline, "totalSale": totalSales.toFixed(2), "color": color, "totalQty":qty.toFixed(2), "unit": unitShortName
         }));
         setSellData(result_export)
 
         const result_table = Object.entries(calculateTotal).map(([pipeline, { totalSales, qty, unitShortName }]) => ({
-          "ProductName": pipeline, "Sales": totalSales, "Quantity": `${qty} ${unitShortName}`,
+          "ProductName": pipeline, "Sales": totalSales.toFixed(1), "Quantity": `${qty.toFixed(1)} ${unitShortName}`,
         }));
-        const salesTotal = result_export.reduce((total, item) => total + item.totalSale, 0).toFixed(2);
+        const salesTotal = result_export.reduce((total, item) => total + parseFloat(item.totalSale), 0).toFixed(2);
         const qtyTotal = result_export.reduce(
-          (total, item) => total + item.totalQty,
+          (total, item) => total + parseFloat(item.totalQty),
           0
         );
         result_table.push({ "ProductName": t("Total"), "Sales": `${salesTotal}`, "Quantity": `${qtyTotal}` })
@@ -125,66 +124,9 @@ const OrdersPieChart = ({
 
 
       }
-    }
-
-    // axios
-    //   .get(
-    //     `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`
-    //   )
-    //   .then((response) => {
-    //     const data = response.data;
-    //     const graph2Data = data.graph2;
-
-    //     let result = {}
-    //     let colorlist = {}
-    //     let qtylist = {}
-    //     let unitname = {}
-    //     graph2Data.forEach((item) => {
-    //       const { lstproduct } = item;
-
-    //       lstproduct.forEach((product) => {
-    //         let { productName, totalSales, color, qty, unitShortName } = product;
-    //         if (totalSales !== 0) {
-    //           if (result[productName]) {
-    //             result[productName] += totalSales;
-    //             qtylist[productName] += qty
-    //           } else {
-    //             result[productName] = totalSales;
-    //             colorlist[productName] = color
-    //             qtylist[productName] = qty
-    //             unitname[productName] = unitShortName
-
-    //           }
-    //         }
-    //       }
-    //       )
-
-    //     }
-    //     )
-
-    //     if (result) {
-    //       let temp = []
-    //       let tabletemp = []
-    //       for (let key in result) {
-    //         temp.push({ "productName": key, "totalSale": result[key], "color": colorlist[key], "totalQty": qtylist[key], "unit": unitname[key] })
-    //         tabletemp.push({ "Product Name": key, "Sales": result[key], "Quantity": `${qtylist[key]} ${unitname[key]}` })
-    //       }
-    //       setTableData(tabletemp)
-    //       setSellData(temp)
-    //     }
 
 
-    //   })
-    //   .catch((error) => {
-    //     // setSellData([])
-    //     // console.error("Error fetching data:", error);
-    //   }).finally(() => {
-    //     setIsLoading(false); // Set loading state to false after the data is loaded or in case of an error
-    //   });
-    // }
-
-
-  }, [selectedRange, selectedOffice, isAdmin, alldata]);
+  }, [alldata]);
 
   const toggleLegend = () => {
     if (sellData.length > 0) {
@@ -423,8 +365,8 @@ const OrdersPieChart = ({
           };
 
           // Calculate total values
-          const totalSales = sellData.reduce((total, item) => total + item.totalSale, 0);
-          const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
+          const totalSales = sellData.reduce((total, item) => total + parseFloat(item.totalSale), 0);
+          // const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
 
           // Set total values in the total row
           // const totalSalesCell = worksheet.getCell(`B${totalRow.number}`);
@@ -563,13 +505,13 @@ const OrdersPieChart = ({
         index + 1,
         item.productName,
         `${item.totalQty} ${item.unit}`,
-        `₹ ${item.totalSale.toFixed(2)}`,
+        `₹ ${item.totalSale}`,
       ]);
 
 
       // Calculate total values
-      const totalSales = sellData.reduce((total, item) => total + item.totalSale, 0);
-      const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
+      const totalSales = sellData.reduce((total, item) => total + parseFloat(item.totalSale), 0);
+      // const totalQty = sellData.reduce((total, item) => total + item.totalQty, 0);
 
       rows.push([
         ``,

@@ -195,7 +195,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
     if (selectedOffice)
       handleSelectedOffice()
 
-  }, [selectedOffice, isAdmin])
+  }, [selectedOffice,selectedRange, isAdmin])
 
   const handleSelectedOffice = async () => {
     setIsLoading(true)
@@ -213,11 +213,11 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
     } else {
       setIsLoading(true)
       setSelectedRange(value);
-      let SalesResponse = await fetchSalesData(value[0], value[1], selectedOffice, isAdmin)
-      if (SalesResponse) {
-        setAlldata(SalesResponse)
-        setIsLoading(false)
-      }
+      // let SalesResponse = await fetchSalesData(value[0], value[1], selectedOffice, isAdmin)
+      // if (SalesResponse) {
+      //   setAlldata(SalesResponse)
+      //   setIsLoading(false)
+      // }
     }
   };
 
@@ -233,27 +233,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
     setSelectedOffice(event.target.value);
     setIsAdmin(isAdmin);
     setSelectedOfficeName(event.target.selectedOptions[0].getAttribute("data-officename"))
-    // if (officeData.filter(
-    //   (office) => office.OfficeId === event.target.value
-    // ).length > 0) {
-    //   setSelectedOfficeName((officeData.filter(
-    //     (office) => office.OfficeId === event.target.value
-    //   )[0].OfficeName))
-    // }else{
-      // setSelectedOfficeName(userOfficeName)
-    // }
-    // if (officeData.filter(
-    //   (office) => office.OfficeId === event.target.value
-    // ).length > 0) {
-    //   setOfficeName(officeData.filter(
-    //     (office) => office.OfficeId === event.target.value
-    //   )[0].OfficeName)
-    // }
-    // let SalesResponse = await fetchSalesData(selectedRange[0], selectedRange[1], event.target.value, isAdmin)
-    // if (SalesResponse) {
-    //   setAlldata(SalesResponse)
-    //   setIsLoading(false)
-    // }
+    
   };
 
   const trimName = (name, maxLength) => {
@@ -417,7 +397,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
               <StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName}/>
             </Suspense>
           </div>
-          <div className='col-md-12 col-lg-4'>
+           <div className='col-md-12 col-lg-4'>
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
               <OrdersPieChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName}/>
             </Suspense>
@@ -435,7 +415,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           </div>
            <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <SalesProductStacked selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading}/>
+              <SalesProductStacked selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} setSelectedRange={setSelectedRange}/>
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-4 mt-2' >

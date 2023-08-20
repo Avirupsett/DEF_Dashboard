@@ -66,5 +66,15 @@
     "Mobile": "मोबाइल",
     "Vehicle": "वाहन",
     "Top": "शीर्ष",
-    "Visit": "यात्रा"
+    "Visit": "यात्रा",
+    "Sales (Day Wise)": "दिन के आधार पर बिक्री",
+    "Sales (Month Wise)": "महीने के आधार पर बिक्री",
+    "Sales (Year Wise)": "वर्ष के आधार पर बिक्री",
+    "Payment Mode": "भुगतान मोड",
+    "Payment": "भुगतान",
+    "Count": "गणना",
+    "Card": "कार्ड",
+    "UPI": "यूपीआई",
+    "Cash": "नकद",
+    "NetBanking": "नेट बैंकिंग"
 }

@@ -65,5 +65,15 @@
     "Mobile": "মোবাইল",
     "Vehicle": "যানবাহন",
     "Top": "শীর্ষ",
-    "Visit": "দর্শন"
+    "Visit": "দর্শন",
+    "Sales (Day Wise)": "দিনভিত্তিক বিক্রয়",
+    "Sales (Month Wise)": "মাসিক বিক্রয়",
+    "Sales (Year Wise)": "বার্ষিক বিক্রয়",
+    "Payment Mode": "পেমেন্ট মোড",
+    "Payment": "পেমেন্ট",
+    "Count": "গণনা",
+    "Card": "কার্ড",
+    "UPI": "উপি",
+    "Cash": "নগদ",
+    "NetBanking": "নেটব্যাংকিং"
 }
