@@ -117,6 +117,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
   const [officeIdLocal, setOfficeIdLocal] = useState(officeId)
   const [optionvalue, setOptionvalue] = useState("")
   const [selectedOfficeName, setSelectedOfficeName] = useState("")
+  const [isDateRangeActive, setIsDateRangeActive] = useState(true)
 
   // const handleResize = () => {
   //   setWindowWidth(window.innerWidth);
@@ -208,6 +209,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
   const handleDateRange = async (value) => {
 
+    setIsDateRangeActive(true)
     if (value === null) {
       setSelectedRange([null, null]); // Clear the dateRange value
     } else {
@@ -415,7 +417,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           </div>
            <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <SalesProductStacked selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} setSelectedRange={setSelectedRange}/>
+              <SalesProductStacked selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} setSelectedRange={setSelectedRange} isDateRangeActive={isDateRangeActive} setIsDateRangeActive={setIsDateRangeActive}/>
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-4 mt-2' >

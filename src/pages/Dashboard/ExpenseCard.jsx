@@ -9,7 +9,7 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
   const { t } = useTranslation();
   const [chartData, setChartData] = useState({ current7Days: [], previous7Days: [] });
   const [showToday, setShowToday] = useState(true);
-  const [growthPercentage, setGrowthPercentage] = useState(0);
+  const [growthPercentageValue, setGrowthPercentage] = useState(0);
 
   const formatDate = (date) => {
     if (!date) {
@@ -44,7 +44,7 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
         expense: item.totalExpense,
       }));
 
-      // console.log(filteredData);
+      console.log(filteredData);
 
       const today = new Date();
       const last7Days = new Date(today);
@@ -69,14 +69,14 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
       const currentWeekSales = current7DaysData.reduce((total, item) => total + item.expense, 0);
       const previousWeekSales = previous7DaysData.reduce((total, item) => total + item.expense, 0);
       const growthPercentageValue =
-        ((currentWeekSales - previousWeekSales) / previousWeekSales) * 100;
+      Math.min(((currentWeekSales - previousWeekSales) / previousWeekSales) * 100, 100);
 
-        console.log(growthPercentage)
+        console.log(growthPercentageValue)
       setGrowthPercentage(growthPercentageValue);
       
 
-      console.log(current7DaysData)
-      console.log(previous7DaysData)
+      // console.log(current7DaysData)
+      // console.log(previous7DaysData)
 
       setChartData({ current7Days: current7DaysData, previous7Days: previous7DaysData });
     } else {
@@ -88,7 +88,7 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
 }, []); // Empty dependency array, so it runs once on component mount
 
 
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 
   const options = {
@@ -96,16 +96,17 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
       left: 12,
       right: 12,
       top: 10,
-      bottom: 50,
+      bottom: 20,
     },
     legend: {
+      show:false,
       textStyle: {
         color: 'white',
         fontSize: window.innerWidth <= 768 ? 8 : 12, // Set font size to 0 to hide text
       },
-      data: ['This Week'], // Add legend data
-      top: 100, // Adjust the vertical position of the legend
-      right: 0,
+    
+      top: 20, // Adjust the vertical position of the legend
+      left: 'center',
       itemWidth: window.innerWidth <= 768 ? 5 : 5, // Adjust the width of the legend switches
       itemHeight: window.innerWidth <= 768 ? 8 : 10, // Adjust the height of the legend switches
       
@@ -213,21 +214,21 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
     </div>
     <div>
     <div style={{display:'flex', flexDirection: 'column'}}>
-    <div style={{display: 'flex',width: '100%'}} onMouseEnter={() => setShowToday(true)} // Show "Today" on hover
+    <div style={{display: 'flex',width: '100%',height: '30px' }} onMouseEnter={() => setShowToday(true)} // Show "Today" on hover
               onMouseLeave={() => setShowToday(false)} > 
     <div  className='mb-0' style={{ display: 'flex', alignItems: 'center' }}  >
-          <span style={{ marginRight: "5px", fontSize: window.innerWidth > 600 ? "1.1rem" : "1rem" }}> {showToday ? t('Today') : '7 ' + t('days')}</span>
+          <span style={{ marginRight: "5px", fontSize: window.innerWidth > 600 ? "1.1rem" : "0.8rem" }}> {showToday ? t('Today') : '7 ' + t('days')}</span>
           <div>
             <div style={{display: 'flex'}}>
               <span style={{ marginRight: '2px',marginTop: '6px',fontWeight:'bold',fontSize: window.innerWidth > 600 ? ".9rem" : "0.7rem" }}>₹</span>
-              <span style={{ fontWeight: 'bold', fontSize: window.innerWidth > 600 ? "2.1rem" : "1.9rem", marginRight: '5px' }}>{showToday ? todayExpense : totalExpense}</span>
+              <span style={{ fontWeight: 'bold', fontSize: window.innerWidth > 600 ? "2.1rem" : "1.7rem", marginRight: '5px' }}>{showToday ? todayExpense : totalExpense}</span>
             </div>
           </div>
     </div>
     <div style={{ display: window.innerWidth > 600 ? 'flex' : 'none', alignItems: 'flex-start' }}>
   <div
     style={{
-      backgroundColor: '#edd8bacc',
+      backgroundColor: 'rgba(255, 105, 180)',
       padding: '2px 4px',
       borderRadius: '20px',
       display: 'inline-flex',
@@ -238,13 +239,13 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
       style={{
         fontWeight: 'bold',
         fontSize: window.innerWidth > 600 ? '0.9rem' : '0.7rem',
-        color: growthPercentage > 0 ? 'yellow' : 'rgba(255,0,0,0.6)',
+        color: growthPercentageValue > 0 ? 'yellow' : 'rgba(255,0,0,0.6)',
       }}
     >
-      {`${growthPercentage.toFixed(0)}%`}
+ 
     </span>
     <i style={{ marginLeft: '0px' }}>
-      {growthPercentage > 0 ? (
+      {growthPercentageValue > 0 ? (
         <FaArrowTrendUp
           style={{
             fontSize: window.innerWidth > 600 ? '0.9rem' : '0.7rem',
@@ -264,7 +265,7 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
     </div>
     </div>
     <div style={{display: 'flex'}}>
-    <ReactECharts option={options} style={{  height: '120%', width: '100%'}} />
+    <ReactECharts option={options} style={{ height: '80%', width: '100%'}} />
     </div>
    
     </div>

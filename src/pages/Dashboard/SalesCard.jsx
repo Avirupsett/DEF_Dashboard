@@ -10,7 +10,7 @@ import axios from "axios";
 export default function SalesCard({countIncome,totalIncome,todaySales, alldata, selectedRange, officeId, adminStatus}) {
   const [chartData, setChartData] = useState({ current7Days: [], previous7Days: [] });
   const [showToday, setShowToday] = useState(true); // State variable to track what to display
-  const [growthPercentage, setGrowthPercentage] = useState(0); // State variable to store growth percentage
+  const [growthPercentageValue, setGrowthPercentage] = useState(0); // State variable to store growth percentage
  
   const { t } = useTranslation();
 
@@ -46,7 +46,7 @@ export default function SalesCard({countIncome,totalIncome,todaySales, alldata, 
         sales: item.totalIncome,
       }));
 
-      // console.log(filteredData);
+      console.log(filteredData);
 
       const today = new Date();
       const last7Days = new Date(today);
@@ -71,7 +71,8 @@ export default function SalesCard({countIncome,totalIncome,todaySales, alldata, 
       const currentWeekSales = current7DaysData.reduce((total, item) => total + item.sales, 0);
       const previousWeekSales = previous7DaysData.reduce((total, item) => total + item.sales, 0);
       const growthPercentageValue =
-        ((currentWeekSales - previousWeekSales) / previousWeekSales) * 100;
+      Math.min(((currentWeekSales - previousWeekSales) / previousWeekSales) * 100, 100);
+
       setGrowthPercentage(growthPercentageValue);
       
 
@@ -88,7 +89,7 @@ export default function SalesCard({countIncome,totalIncome,todaySales, alldata, 
 }, []); // Empty dependency array, so it runs once on component mount
 
 
-const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 
   const options = {
@@ -96,16 +97,17 @@ const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       left: 12,
       right: 12,
       top: 10,
-      bottom: 50,
+      bottom: 20,
     },
     legend: {
+      show:false,
       textStyle: {
         color: 'white',
         fontSize: window.innerWidth <= 768 ? 8 : 12, // Set font size to 0 to hide text
       },
-      data: ['This Week'], // Add legend data
-      top: 100, // Adjust the vertical position of the legend
-      right: 0,
+      data: ['This Week', 'Previous Week'], // Add legend data
+      top: 20, // Adjust the vertical position of the legend
+      left: 'center',
       itemWidth: window.innerWidth <= 768 ? 5 : 5, // Adjust the width of the legend switches
       itemHeight: window.innerWidth <= 768 ? 8 : 10, // Adjust the height of the legend switches
       
@@ -221,14 +223,14 @@ const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     </div>
     <div>
     <div style={{display:'flex', flexDirection: 'column'}}>
-    <div style={{display: 'flex',width: '100%'}} onMouseEnter={() => setShowToday(true)} // Show "Today" on hover
+    <div style={{display: 'flex',width: '100%', height: '30px' }} onMouseEnter={() => setShowToday(true)} // Show "Today" on hover
               onMouseLeave={() => setShowToday(false)} > 
-    <div  className='mb-0' style={{ display: 'flex', alignItems: 'center' }}  >
-          <span style={{ marginRight: "5px", fontSize: window.innerWidth > 600 ? "1.1rem" : "1rem" }}> {showToday ? t('Today') : '7 ' + t('days')}</span>
+    <div  className='mb-0' style={{ display: 'flex', alignItems: 'center'}}  >
+          <span style={{ marginRight: "5px", fontSize: window.innerWidth > 600 ? "1.1rem" : "0.8rem" }}> {showToday ? t('Today') : '7 ' + t('days')}</span>
           <div>
             <div style={{display: 'flex'}}>
               <span style={{ marginRight: '2px',marginTop: '6px',fontWeight:'bold',fontSize: window.innerWidth > 600 ? ".9rem" : "0.7rem" }}>₹</span>
-              <span style={{ fontWeight: 'bold', fontSize: window.innerWidth > 600 ? "2.1rem" : "1.9rem", marginRight: '5px' }}>{showToday ? todaySales : totalIncome}</span>
+              <span style={{ fontWeight: 'bold', fontSize: window.innerWidth > 600 ? "2.1rem" : "1.7rem", marginRight: '5px' }}>{showToday ? todaySales : totalIncome}</span>
             </div>
           </div>
     </div>
@@ -246,13 +248,13 @@ const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       style={{
         fontWeight: 'bold',
         fontSize: window.innerWidth > 600 ? '0.9rem' : '0.7rem',
-        color: growthPercentage > 0 ? 'yellow' : 'rgba(255,0,0,0.6)',
+        color: growthPercentageValue > 0 ? 'yellow' : 'rgba(255,0,0,0.6)',
       }}
     >
-      {`${growthPercentage.toFixed(0)}%`}
+      
     </span>
     <i style={{ marginLeft: '0px' }}>
-      {growthPercentage > 0 ? (
+      {growthPercentageValue > 0 ? (
         <FaArrowTrendUp
           style={{
             fontSize: window.innerWidth > 600 ? '0.9rem' : '0.7rem',
@@ -275,7 +277,7 @@ const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     </div>
     <div style={{display: 'flex'}}>
-    <ReactECharts option={options} style={{ height: '120%', width: '100%'}} />
+    <ReactECharts option={options} style={{height: '80%', width: '100%'}} />
     </div>
    
     </div>

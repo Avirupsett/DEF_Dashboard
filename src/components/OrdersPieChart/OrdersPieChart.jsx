@@ -12,6 +12,7 @@ import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider, ToggleButton, ToggleButtonGroup, createTheme } from '@mui/material';
+import * as echarts from 'echarts';
 
 const OrdersPieChart = ({
   themeMode,
@@ -63,6 +64,31 @@ const OrdersPieChart = ({
 
     return totalSalesByProduct;
   }
+  function shadeColor(color, percent) {
+
+    var R = parseInt(color.substring(1,3),16);
+    var G = parseInt(color.substring(3,5),16);
+    var B = parseInt(color.substring(5,7),16);
+
+    R = parseInt(R * (100 + percent) / 100);
+    G = parseInt(G * (100 + percent) / 100);
+    B = parseInt(B * (100 + percent) / 100);
+
+    R = (R<255)?R:255;  
+    G = (G<255)?G:255;  
+    B = (B<255)?B:255;  
+
+    R = Math.round(R)
+    G = Math.round(G)
+    B = Math.round(B)
+
+    var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+    var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+    var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+    return "#"+RR+GG+BB;
+}
+
 
 
   // useEffect(() => {
@@ -91,7 +117,16 @@ const OrdersPieChart = ({
           value: totalSales.toFixed(2),
           name: pipeline,
           itemStyle: {
-            color: color,
+            color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 1,
+                color: shadeColor(color,30)
+              },
+              {
+                offset: 0,
+                color: shadeColor(color,70)
+              }
+            ]),
           },
         }));
 
@@ -101,7 +136,16 @@ const OrdersPieChart = ({
           value: qty.toFixed(2),
           name: pipeline,
           itemStyle: {
-            color: color,
+            color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 1,
+                color: shadeColor(color,30)
+              },
+              {
+                offset: 0,
+                color: shadeColor(color,70)
+              }
+            ]),
           },
         }));
 
@@ -616,6 +660,30 @@ const OrdersPieChart = ({
       }
     }
   })
+  function shadeColor(color, percent) {
+
+    var R = parseInt(color.substring(1,3),16);
+    var G = parseInt(color.substring(3,5),16);
+    var B = parseInt(color.substring(5,7),16);
+
+    R = parseInt(R * (100 + percent) / 100);
+    G = parseInt(G * (100 + percent) / 100);
+    B = parseInt(B * (100 + percent) / 100);
+
+    R = (R<255)?R:255;  
+    G = (G<255)?G:255;  
+    B = (B<255)?B:255;  
+
+    R = Math.round(R)
+    G = Math.round(G)
+    B = Math.round(B)
+
+    var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+    var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+    var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+    return "#"+RR+GG+BB;
+}
 
   return (
     <>

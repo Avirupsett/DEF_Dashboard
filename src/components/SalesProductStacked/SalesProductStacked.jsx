@@ -11,6 +11,7 @@ import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import * as echarts from 'echarts';
 import { FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme } from '@mui/material';
 
 const SalesProductStacked = ({
@@ -21,7 +22,9 @@ const SalesProductStacked = ({
     alldata,
     officeName,
     isLoading,
-    setSelectedRange
+    setSelectedRange,
+    isDateRangeActive,
+    setIsDateRangeActive
 }) => {
 
     const [chartData, setChartData] = useState([])
@@ -105,7 +108,7 @@ const SalesProductStacked = ({
 
                     daywiseSales[productId].productName = productName;
                     daywiseSales[productId].color = productColor;
-                    daywiseSales[productId].daySales[requestedDate] = totalSales;
+                    daywiseSales[productId].daySales[requestedDate] = Math.round(totalSales * 100) / 100;
 
                     const [year, month] = requestedDate.split('-');
                     const monthName = new Date(requestedDate + 'T00:00:00').toLocaleString('en-us', { month: 'short' });
@@ -120,7 +123,7 @@ const SalesProductStacked = ({
                     }
 
                     // Add the daily sales to the monthwise total
-                    daywiseSales[productId].monthSales[year][monthName] += totalSales;
+                    daywiseSales[productId].monthSales[year][monthName] += Math.round(totalSales * 100) / 100;
 
                     // Initialize yearwise sales if not already done
                     if (!daywiseSales[productId].yearSales[year]) {
@@ -128,20 +131,25 @@ const SalesProductStacked = ({
                     }
 
                     // Add the daily sales to the yearwise total
-                    daywiseSales[productId].yearSales[year] += totalSales;
+                    daywiseSales[productId].yearSales[year] += Math.round(totalSales * 100) / 100;
                 });
             })
             // Usage example
             // console.log(Object.values(daywiseSales))
             if (Object.values(daywiseSales).length > 0) {
-                let monthCount=Object.keys(Object.values(daywiseSales)[0].monthSales).flatMap(year => {
+                let yearCount = Object.keys(Object.values(daywiseSales)[0].yearSales).map(year => parseInt(year))
+                let monthCount = Object.keys(Object.values(daywiseSales)[0].monthSales).flatMap(year => {
                     return Object.keys(Object.values(daywiseSales)[0].monthSales[year]).map(month => `${month} ${year}`);
                 })
                 setAllMonths(monthCount)
-                if(monthCount.length>1){
+                setAllYears(yearCount)
+
+                if (yearCount.length > 1) {
+                    setAlignment("Sales (Year Wise)")
+                }
+                else if (monthCount.length > 1) {
                     setAlignment("Sales (Month Wise)")
                 }
-                setAllYears(Object.keys(Object.values(daywiseSales)[0].yearSales).map(year => parseInt(year)))
             }
             else {
                 setAllMonths([])
@@ -168,19 +176,23 @@ const SalesProductStacked = ({
 
             const transformedDataMonth = monthSales.flatMap(item => {
                 const productName = item.productName;
-                const year = Object.keys(item.monthSales)[0];
-                const monthSales = item.monthSales[year];
+                const year = Object.keys(item.monthSales);
+                // const monthSales = item.monthSales[subyear];
+                return year.flatMap((subyear) => {
 
-                return Object.keys(monthSales).map(month => {
 
-                    return {
-                        requestedDate: `${month} ${year}`,
-                        totalSales: monthSales[month],
-                        productName: productName
-                    };
+                    return Object.keys(item.monthSales[subyear]).map(month => {
 
-                });
+                        return {
+                            requestedDate: `${month} ${subyear}`,
+                            totalSales: item.monthSales[subyear][month],
+                            productName: productName
+                        };
+
+                    });
+                })
             });
+
             let filteredDataMonth = transformedDataMonth.filter(item => item.totalSales > 0);
             filteredDataMonth.sort((a, b) => {
                 const dateA = new Date(a.requestedDate);
@@ -189,8 +201,9 @@ const SalesProductStacked = ({
             });
             setTableDataByMonth([...filteredDataMonth, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataMonth.reduce((prev, c) => prev + c.totalSales, 0) }])
 
-            const transformedDataYear = Object.values(daywiseSales).flatMap(item => { return { "requestedDate": Object.keys(item.yearSales)[0], "productName": item.productName, "totalSales": Object.values(item.yearSales)[0] } })
+            const transformedDataYear = Object.values(daywiseSales).flatMap(item => Object.entries(item.yearSales).map((subitem) => { return { "requestedDate": subitem[0], "productName": item.productName, "totalSales": subitem[1] } }))
             const filteredDataYear = transformedDataYear.filter(item => item.totalSales > 0);
+
             setTableDataByYear([...filteredDataYear, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataYear.reduce((prev, c) => prev + c.totalSales, 0) }])
             if (alignment === 'Sales (Day Wise)') {
                 setTableData([...transformedDataDate, { "requestedDate": "Total", "productName": "", "totalSales": transformedDataDate.reduce((prev, c) => prev + c.totalSales, 0) }])
@@ -206,6 +219,30 @@ const SalesProductStacked = ({
     }, [alldata]);
 
 
+function shadeColor(color, percent) {
+
+    var R = parseInt(color.substring(1,3),16);
+    var G = parseInt(color.substring(3,5),16);
+    var B = parseInt(color.substring(5,7),16);
+
+    R = parseInt(R * (100 + percent) / 100);
+    G = parseInt(G * (100 + percent) / 100);
+    B = parseInt(B * (100 + percent) / 100);
+
+    R = (R<255)?R:255;  
+    G = (G<255)?G:255;  
+    B = (B<255)?B:255;  
+
+    R = Math.round(R)
+    G = Math.round(G)
+    B = Math.round(B)
+
+    var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+    var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+    var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+    return "#"+RR+GG+BB;
+}
 
     //   const option = {
     //     title: {
@@ -418,7 +455,16 @@ const SalesProductStacked = ({
                     },
                     itemStyle: {
                         borderRadius: [5, 5, 5, 5],
-                        color: product.color,
+                        color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
+                            {
+                                offset: 1,
+                                color: shadeColor(product.color,40)
+                            },
+                            {
+                                offset: 0,
+                                color: shadeColor(product.color,80)
+                            }
+                        ]),
                     },
                     // data: Object.entries(product.daySales)
                     data: alignment === 'Sales (Day Wise)' ? Object.entries(product.daySales) : alignment === 'Sales (Month Wise)' ? [].concat(...Object.values(product.monthSales).map(yearData => Object.values(yearData))) : Object.values(product.yearSales)
@@ -814,6 +860,21 @@ const SalesProductStacked = ({
         }
         else if (event.target.value === 'Sales (Month Wise)') {
             setTableData(tableDataByMonth)
+            if (isDateRangeActive === false) {
+                const currentDateStart = new Date(selectedRange[0])
+                const currentDateEnd = new Date(selectedRange[1])
+
+                const startOfMonth = new Date(currentDateStart.getFullYear(), 0, 1);
+
+                const endOfMonth = new Date(currentDateEnd.getFullYear(), 11, 31);
+                if (`${selectedRange[0].getFullYear()}-${selectedRange[0].getMonth() + 1}-${selectedRange[0].getDate()}` !==
+                    `${startOfMonth.getFullYear()}-${startOfMonth.getMonth() + 1}-${startOfMonth.getDate()}` ||
+                    `${selectedRange[1].getFullYear()}-${selectedRange[1].getMonth() + 1}-${selectedRange[1].getDate()}` !==
+                    `${endOfMonth.getFullYear()}-${endOfMonth.getMonth() + 1}-${endOfMonth.getDate()}`
+                ) {
+                    setSelectedRange([startOfMonth, endOfMonth])
+                }
+            }
         }
         else if (event.target.value === 'Sales (Year Wise)') {
             setTableData(tableDataByYear)
@@ -823,24 +884,42 @@ const SalesProductStacked = ({
 
     const handleGraphClick = (params) => {
         // Check if the click event occurred on a valid data point
-        
-        if (params && params.data && params.dataIndex >= 0) {
-            if (alignment==="Sales (Month Wise)"){
-            
-            const currentDate = new Date(allMonths[params.dataIndex])
 
-            // Get the start of the month
-            const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            
-            // Get the end of the month
-            const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth()+1, 0);
-            
-            setSelectedRange([startOfMonth,endOfMonth])
-            setAlignment("Sales (Day Wise)")
-            
+        if (params && params.data && params.dataIndex >= 0) {
+            if (alignment === "Sales (Month Wise)") {
+
+                const currentDate = new Date(allMonths[params.dataIndex])
+
+                // Get the start of the month
+                const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                setIsDateRangeActive(false)
+                // Get the end of the month
+                const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+                setSelectedRange([startOfMonth, endOfMonth])
+                setAlignment("Sales (Day Wise)")
+
             }
-            if (alignment==="Sales (Year Wise)"){
+            if (alignment === "Sales (Year Wise)") {
+                // if(isDateRangeActive==true){
+                setIsDateRangeActive(false)
                 setAlignment("Sales (Month Wise)")
+                // }
+                // else{
+                const currentDate = new Date(allMonths[params.dataIndex])
+                // Get the start of the month
+                const startOfMonth = new Date(currentDate.getFullYear(), 0, 1);
+                // Get the end of the month
+                const endOfMonth = new Date(currentDate.getFullYear() + 1, 0, 0);
+                if (`${selectedRange[0].getFullYear()}-${selectedRange[0].getMonth() + 1}-${selectedRange[0].getDate()}` !==
+                    `${startOfMonth.getFullYear()}-${startOfMonth.getMonth() + 1}-${startOfMonth.getDate()}` ||
+                    `${selectedRange[1].getFullYear()}-${selectedRange[1].getMonth() + 1}-${selectedRange[1].getDate()}` !==
+                    `${endOfMonth.getFullYear()}-${endOfMonth.getMonth() + 1}-${endOfMonth.getDate()}`
+                ) {
+                    setSelectedRange([startOfMonth, endOfMonth])
+                }
+                // setAlignment("Sales (Month Wise)")
+                // }
             }
             //   const clickedOfficeId = chartData[params.dataIndex].officeId;
         }
@@ -977,7 +1056,7 @@ const SalesProductStacked = ({
                     className={css.piechart}
                     onEvents={{
                         click: handleGraphClick,
-                      }}
+                    }}
                 // className={themeMode === "dark" ? css.darkMode : css.lightMode}
                 /> : <div className="container-fluid mt-2 table-responsive" style={{ height: "333px" }}>
                     <table className={`table  ${themeMode == 'dark' ? 'table-dark' : ''}`}>

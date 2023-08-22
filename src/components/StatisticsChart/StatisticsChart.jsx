@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import css from "./StatisticsChart.module.css";
+import * as echarts from 'echarts'
 
 import "jspdf-autotable"
 import loading from '/assets/loading.gif';
@@ -126,8 +127,30 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
     }
   }, [selectedRange, selectedOffice]);
 
+  function shadeColor(color, percent) {
 
+    var R = parseInt(color.substring(1,3),16);
+    var G = parseInt(color.substring(3,5),16);
+    var B = parseInt(color.substring(5,7),16);
 
+    R = parseInt(R * (100 + percent) / 100);
+    G = parseInt(G * (100 + percent) / 100);
+    B = parseInt(B * (100 + percent) / 100);
+
+    R = (R<255)?R:255;  
+    G = (G<255)?G:255;  
+    B = (B<255)?B:255;  
+
+    R = Math.round(R)
+    G = Math.round(G)
+    B = Math.round(B)
+
+    var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+    var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+    var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+    return "#"+RR+GG+BB;
+}
 
 
 
@@ -267,7 +290,17 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
           yAxisIndex: 0,
           barWidth:'35%',
           itemStyle:{
-            borderRadius:[5,5,0,0]
+            borderRadius:[5,5,0,0],
+            color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 1,
+                color: shadeColor("#66BA69",0)
+              },
+              {
+                offset: 0,
+                color: shadeColor("#66BA69",30)
+              }
+            ])
           }
         },
         {
@@ -277,7 +310,17 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
           yAxisIndex: 0,
           barWidth:'35%',
           itemStyle:{
-            borderRadius:[5,5,0,0]
+            borderRadius:[5,5,0,0],
+            color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 1,
+                color: shadeColor("#E81A1A",0)
+              },
+              {
+                offset: 0,
+                color: shadeColor("#ff1A1A",40)
+              }
+            ])
           }
         },
         {
@@ -285,6 +328,9 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
           type: "line", // Display as a line chart if the selected range is 7 days or less
           yAxisIndex: 0,
           smooth: true,
+          itemStyle:{
+            color:"#FFC107"
+          },
           lineStyle: {
             color: "#FFC107",
             width: 2,
@@ -312,6 +358,9 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
         },
         {
           name: t("Average Sales"),
+          itemStyle:{
+            color:"#FFC107"
+          },
           type: "line", // Display as a line chart if the selected range is more than 7 days
           symbol: 'none',
           
