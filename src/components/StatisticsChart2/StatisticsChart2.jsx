@@ -832,7 +832,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
       />
       <div className="container-fluid">
         <div className="d-flex w-100 g-0 align-items-start justify-content-between">
-          <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
+          <div className={`fw-bold noselect fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Sales")} {t("of")} {trimName(selectedOfficeNameLocal, 10)}</div>
           {/* Stylish "Reset" button */}
           {showResetButton ? (

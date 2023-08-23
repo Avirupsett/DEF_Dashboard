@@ -712,7 +712,7 @@ const OrdersPieChart = ({
 
             </button>
             <div className='d-flex align-items-center'>
-              <div className={`fw-bold me-2 fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
+              <div className={`fw-bold noselect me-2 fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
                 }`}>{t("Product")}</div>
               <ThemeProvider theme={theme}>
                 <ToggleButtonGroup

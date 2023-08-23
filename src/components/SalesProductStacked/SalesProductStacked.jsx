@@ -108,7 +108,7 @@ const SalesProductStacked = ({
 
                     daywiseSales[productId].productName = productName;
                     daywiseSales[productId].color = productColor;
-                    daywiseSales[productId].daySales[requestedDate] = Math.round(totalSales * 100) / 100;
+                    daywiseSales[productId].daySales[requestedDate] = (totalSales).toFixed(2);
 
                     const [year, month] = requestedDate.split('-');
                     const monthName = new Date(requestedDate + 'T00:00:00').toLocaleString('en-us', { month: 'short' });
@@ -123,7 +123,7 @@ const SalesProductStacked = ({
                     }
 
                     // Add the daily sales to the monthwise total
-                    daywiseSales[productId].monthSales[year][monthName] += Math.round(totalSales * 100) / 100;
+                    daywiseSales[productId].monthSales[year][monthName] += totalSales;
 
                     // Initialize yearwise sales if not already done
                     if (!daywiseSales[productId].yearSales[year]) {
@@ -131,7 +131,7 @@ const SalesProductStacked = ({
                     }
 
                     // Add the daily sales to the yearwise total
-                    daywiseSales[productId].yearSales[year] += Math.round(totalSales * 100) / 100;
+                    daywiseSales[productId].yearSales[year] += totalSales;
                 });
             })
             // Usage example
@@ -144,11 +144,21 @@ const SalesProductStacked = ({
                 setAllMonths(monthCount)
                 setAllYears(yearCount)
 
-                if (yearCount.length > 1) {
+                if (monthCount.length >= 12 || yearCount.length>1) {
+                    if(isDateRangeActive==true){
+                        setAlignment("Sales (Year Wise)")
+                    }
+                    else if(alignment=="Sales (Day Wise)"){
                     setAlignment("Sales (Year Wise)")
+                    }
                 }
                 else if (monthCount.length > 1) {
+                    if(isDateRangeActive==true){
+                        setAlignment("Sales (Month Wise)")
+                    }
+                    else if(alignment=="Sales (Day Wise)"){
                     setAlignment("Sales (Month Wise)")
+                    }
                 }
             }
             else {
@@ -372,7 +382,12 @@ function shadeColor(color, percent) {
             trigger: 'axis',
             axisPointer: {
                 // Use axis to trigger tooltip
-                type: 'shadow' // 'shadow' as default; can also be 'line' or 'shadow'
+                type: 'shadow', // 'shadow' as default; can also be 'line' or 'shadow'
+                label:{
+                formatter:function(params){
+                    return params[0].value[0]+"h"
+                }
+            }
             }
         },
         legend: {
@@ -467,7 +482,7 @@ function shadeColor(color, percent) {
                         ]),
                     },
                     // data: Object.entries(product.daySales)
-                    data: alignment === 'Sales (Day Wise)' ? Object.entries(product.daySales) : alignment === 'Sales (Month Wise)' ? [].concat(...Object.values(product.monthSales).map(yearData => Object.values(yearData))) : Object.values(product.yearSales)
+                    data: alignment === 'Sales (Day Wise)' ? Object.entries(product.daySales) : alignment === 'Sales (Month Wise)' ? [].concat(...(Object.values(product.monthSales).map(yearData => Object.values(yearData).map(value => value?parseFloat(value).toFixed(2):value)))) : Object.values(product.yearSales).map((item)=>item.toFixed(2))
                 };
             })
 
@@ -866,7 +881,13 @@ function shadeColor(color, percent) {
 
                 const startOfMonth = new Date(currentDateStart.getFullYear(), 0, 1);
 
-                const endOfMonth = new Date(currentDateEnd.getFullYear(), 11, 31);
+                let endOfMonth;
+                if(currentDateEnd.getFullYear()===new Date().getFullYear() && currentDateEnd.getMonth()>new Date().getMonth()){
+                    endOfMonth = new Date(currentDateEnd.getFullYear(), new Date().getMonth(), new Date().getDate());
+                }else{
+                    endOfMonth = new Date(currentDateEnd.getFullYear(), 11, 31);
+                }
+
                 if (`${selectedRange[0].getFullYear()}-${selectedRange[0].getMonth() + 1}-${selectedRange[0].getDate()}` !==
                     `${startOfMonth.getFullYear()}-${startOfMonth.getMonth() + 1}-${startOfMonth.getDate()}` ||
                     `${selectedRange[1].getFullYear()}-${selectedRange[1].getMonth() + 1}-${selectedRange[1].getDate()}` !==
@@ -878,6 +899,27 @@ function shadeColor(color, percent) {
         }
         else if (event.target.value === 'Sales (Year Wise)') {
             setTableData(tableDataByYear)
+            if (isDateRangeActive === false) {
+                const currentDateStart = new Date(selectedRange[0])
+                const currentDateEnd = new Date(selectedRange[1])
+
+                const startOfMonth = new Date(currentDateStart.getFullYear(), 0, 1);
+
+                let endOfMonth;
+                // if(currentDateEnd.getFullYear()===new Date().getFullYear() && currentDateEnd.getMonth()===new Date().getMonth()){
+                //     endOfMonth = new Date(currentDateEnd.getFullYear(), new Date().getMonth(), new Date().getDate());
+                // }else{
+                    endOfMonth = new Date(currentDateEnd.getFullYear(), 11, 31);
+                // }
+
+                if (`${selectedRange[0].getFullYear()}-${selectedRange[0].getMonth() + 1}-${selectedRange[0].getDate()}` !==
+                    `${startOfMonth.getFullYear()}-${startOfMonth.getMonth() + 1}-${startOfMonth.getDate()}` ||
+                    `${selectedRange[1].getFullYear()}-${selectedRange[1].getMonth() + 1}-${selectedRange[1].getDate()}` !==
+                    `${endOfMonth.getFullYear()}-${endOfMonth.getMonth() + 1}-${endOfMonth.getDate()}`
+                ) {
+                    setSelectedRange([startOfMonth, endOfMonth])
+                }
+            }
         }
 
     };
@@ -894,7 +936,12 @@ function shadeColor(color, percent) {
                 const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
                 setIsDateRangeActive(false)
                 // Get the end of the month
-                const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                let endOfMonth;
+                if(currentDate.getFullYear()===new Date().getFullYear() && currentDate.getMonth()===new Date().getMonth()){
+                    endOfMonth = new Date(currentDate.getFullYear(), new Date().getMonth(), new Date().getDate());
+                }else{
+                endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                }
 
                 setSelectedRange([startOfMonth, endOfMonth])
                 setAlignment("Sales (Day Wise)")
@@ -910,7 +957,12 @@ function shadeColor(color, percent) {
                 // Get the start of the month
                 const startOfMonth = new Date(currentDate.getFullYear(), 0, 1);
                 // Get the end of the month
-                const endOfMonth = new Date(currentDate.getFullYear() + 1, 0, 0);
+                let endOfMonth
+                if(currentDate.getFullYear()===new Date().getFullYear()){
+                 endOfMonth = new Date(currentDate.getFullYear(), new Date().getMonth(), new Date().getDate());
+                }else{
+                 endOfMonth = new Date(currentDate.getFullYear() + 1, 0, 0);
+                }
                 if (`${selectedRange[0].getFullYear()}-${selectedRange[0].getMonth() + 1}-${selectedRange[0].getDate()}` !==
                     `${startOfMonth.getFullYear()}-${startOfMonth.getMonth() + 1}-${startOfMonth.getDate()}` ||
                     `${selectedRange[1].getFullYear()}-${selectedRange[1].getMonth() + 1}-${selectedRange[1].getDate()}` !==

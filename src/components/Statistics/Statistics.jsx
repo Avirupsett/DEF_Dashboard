@@ -255,7 +255,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
     <div className={`${css.container} ${themeMode === 'dark' ? 'theme-container' : 'theme2-container'} pb-5`}>
       <div className='d-flex justify-content-between align-items-center mb-0'>
-        <div className={`fs-${window.innerWidth <= 768 ? 3 : 2} mx-sm-0 mx-md-3 fw-bold`}><span className='me-2 ms-md-1  ms-2 text-primary'><FaCoins /></span> {t("Sales Overview")}</div>
+        <div className={`fs-${window.innerWidth <= 768 ? 3 : 2} mx-sm-0 mx-md-3 fw-bold noselect`}><span className='me-2 ms-md-1  ms-2 text-primary'><FaCoins /></span> {t("Sales Overview")}</div>
         <button className="btn btn-primary btn-lg mx-2 d-flex align-items-center shadow border-2 border-white" type="submit" onClick={() => setFilterOn(!filterOn)}><span className='d-flex'>{filterOn ? <FaXmark style={{ fontSize: "1.4rem", marginRight: window.innerWidth > 500 ? "4px" : "0px" }} /> : <FaFilter style={{ fontSize: "1.2rem", marginRight: window.innerWidth > 500 ? "8px" : "0px" }} />}</span>  {window.innerWidth > 500 ? filterOn ? t('Close') : t(`Filter`) : ""}</button>
       </div>
       <div style={{ visibility: filterOn ? 'visible' : 'hidden', opacity: filterOn ? 1 : 0, height: filterOn ? window.innerWidth >= 768 ? "85px" : "130px" : 0, marginBottom: filterOn ? "10px" : 0 }} className={`${css.topContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode

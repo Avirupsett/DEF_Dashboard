@@ -778,7 +778,7 @@ doc.autoTable(headers, tableData, {
       />
       <div className="container-fluid" >
         <div className="d-flex w-100 g-0 align-items-center justify-content-between">
-          <div className={`fw-bold fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
+          <div className={`fw-bold noselect fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Sales-Expense")} {t("of")} {trimName(officeName,10)}</div>
           {/* <div className={css.exportOption}
             onClick={() => { setTableStatus(!tableStatus); setShowExportOptions(false) }}>
