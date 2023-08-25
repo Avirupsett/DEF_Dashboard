@@ -18,6 +18,7 @@ const SalesProductStacked = ({
     themeMode,
     selectedRange,
     selectedOffice,
+    showGraph,
     isAdmin,
     alldata,
     officeName,
@@ -144,20 +145,20 @@ const SalesProductStacked = ({
                 setAllMonths(monthCount)
                 setAllYears(yearCount)
 
-                if (monthCount.length >= 12 || yearCount.length>1) {
-                    if(isDateRangeActive==true){
+                if (monthCount.length >= 12 || yearCount.length > 1) {
+                    if (isDateRangeActive == true) {
                         setAlignment("Sales (Year Wise)")
                     }
-                    else if(alignment=="Sales (Day Wise)"){
-                    setAlignment("Sales (Year Wise)")
+                    else if (alignment == "Sales (Day Wise)") {
+                        setAlignment("Sales (Year Wise)")
                     }
                 }
                 else if (monthCount.length > 1) {
-                    if(isDateRangeActive==true){
+                    if (isDateRangeActive == true) {
                         setAlignment("Sales (Month Wise)")
                     }
-                    else if(alignment=="Sales (Day Wise)"){
-                    setAlignment("Sales (Month Wise)")
+                    else if (alignment == "Sales (Day Wise)") {
+                        setAlignment("Sales (Month Wise)")
                     }
                 }
             }
@@ -228,31 +229,35 @@ const SalesProductStacked = ({
 
     }, [alldata]);
 
+    useEffect(() => {
+        setTableStatus(!showGraph)
 
-function shadeColor(color, percent) {
+    }, [showGraph])
 
-    var R = parseInt(color.substring(1,3),16);
-    var G = parseInt(color.substring(3,5),16);
-    var B = parseInt(color.substring(5,7),16);
+    function shadeColor(color, percent) {
 
-    R = parseInt(R * (100 + percent) / 100);
-    G = parseInt(G * (100 + percent) / 100);
-    B = parseInt(B * (100 + percent) / 100);
+        var R = parseInt(color.substring(1, 3), 16);
+        var G = parseInt(color.substring(3, 5), 16);
+        var B = parseInt(color.substring(5, 7), 16);
 
-    R = (R<255)?R:255;  
-    G = (G<255)?G:255;  
-    B = (B<255)?B:255;  
+        R = parseInt(R * (100 + percent) / 100);
+        G = parseInt(G * (100 + percent) / 100);
+        B = parseInt(B * (100 + percent) / 100);
 
-    R = Math.round(R)
-    G = Math.round(G)
-    B = Math.round(B)
+        R = (R < 255) ? R : 255;
+        G = (G < 255) ? G : 255;
+        B = (B < 255) ? B : 255;
 
-    var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-    var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-    var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+        R = Math.round(R)
+        G = Math.round(G)
+        B = Math.round(B)
 
-    return "#"+RR+GG+BB;
-}
+        var RR = ((R.toString(16).length == 1) ? "0" + R.toString(16) : R.toString(16));
+        var GG = ((G.toString(16).length == 1) ? "0" + G.toString(16) : G.toString(16));
+        var BB = ((B.toString(16).length == 1) ? "0" + B.toString(16) : B.toString(16));
+
+        return "#" + RR + GG + BB;
+    }
 
     //   const option = {
     //     title: {
@@ -383,11 +388,11 @@ function shadeColor(color, percent) {
             axisPointer: {
                 // Use axis to trigger tooltip
                 type: 'shadow', // 'shadow' as default; can also be 'line' or 'shadow'
-                label:{
-                formatter:function(params){
-                    return params[0].value[0]+"h"
+                label: {
+                    formatter: function (params) {
+                        return params[0].value[0] + "h"
+                    }
                 }
-            }
             }
         },
         legend: {
@@ -473,16 +478,16 @@ function shadeColor(color, percent) {
                         color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
                             {
                                 offset: 1,
-                                color: shadeColor(product.color,40)
+                                color: shadeColor(product.color, 40)
                             },
                             {
                                 offset: 0,
-                                color: shadeColor(product.color,80)
+                                color: shadeColor(product.color, 80)
                             }
                         ]),
                     },
                     // data: Object.entries(product.daySales)
-                    data: alignment === 'Sales (Day Wise)' ? Object.entries(product.daySales) : alignment === 'Sales (Month Wise)' ? [].concat(...(Object.values(product.monthSales).map(yearData => Object.values(yearData).map(value => value?parseFloat(value).toFixed(2):value)))) : Object.values(product.yearSales).map((item)=>item.toFixed(2))
+                    data: alignment === 'Sales (Day Wise)' ? Object.entries(product.daySales) : alignment === 'Sales (Month Wise)' ? [].concat(...(Object.values(product.monthSales).map(yearData => Object.values(yearData).map(value => value ? parseFloat(value).toFixed(2) : value)))) : Object.values(product.yearSales).map((item) => item.toFixed(2))
                 };
             })
 
@@ -882,9 +887,13 @@ function shadeColor(color, percent) {
                 const startOfMonth = new Date(currentDateStart.getFullYear(), 0, 1);
 
                 let endOfMonth;
-                if(currentDateEnd.getFullYear()===new Date().getFullYear() && currentDateEnd.getMonth()>new Date().getMonth()){
+                if (currentDateEnd.getFullYear() === new Date().getFullYear() && currentDateEnd.getMonth() > new Date().getMonth()) {
                     endOfMonth = new Date(currentDateEnd.getFullYear(), new Date().getMonth(), new Date().getDate());
-                }else{
+                }
+                else if (currentDateEnd.getFullYear() === new Date().getFullYear() && currentDateEnd.getMonth() <= new Date().getMonth()) {
+                    endOfMonth = new Date(currentDateEnd.getFullYear(), new Date().getMonth(), new Date().getDate());
+                }
+                else {
                     endOfMonth = new Date(currentDateEnd.getFullYear(), 11, 31);
                 }
 
@@ -896,6 +905,7 @@ function shadeColor(color, percent) {
                     setSelectedRange([startOfMonth, endOfMonth])
                 }
             }
+
         }
         else if (event.target.value === 'Sales (Year Wise)') {
             setTableData(tableDataByYear)
@@ -906,11 +916,11 @@ function shadeColor(color, percent) {
                 const startOfMonth = new Date(currentDateStart.getFullYear(), 0, 1);
 
                 let endOfMonth;
-                // if(currentDateEnd.getFullYear()===new Date().getFullYear() && currentDateEnd.getMonth()===new Date().getMonth()){
-                //     endOfMonth = new Date(currentDateEnd.getFullYear(), new Date().getMonth(), new Date().getDate());
-                // }else{
+                if (currentDateEnd.getFullYear() === new Date().getFullYear()) {
+                    endOfMonth = new Date(currentDateEnd.getFullYear(), new Date().getMonth(), new Date().getDate());
+                } else {
                     endOfMonth = new Date(currentDateEnd.getFullYear(), 11, 31);
-                // }
+                }
 
                 if (`${selectedRange[0].getFullYear()}-${selectedRange[0].getMonth() + 1}-${selectedRange[0].getDate()}` !==
                     `${startOfMonth.getFullYear()}-${startOfMonth.getMonth() + 1}-${startOfMonth.getDate()}` ||
@@ -937,10 +947,10 @@ function shadeColor(color, percent) {
                 setIsDateRangeActive(false)
                 // Get the end of the month
                 let endOfMonth;
-                if(currentDate.getFullYear()===new Date().getFullYear() && currentDate.getMonth()===new Date().getMonth()){
+                if (currentDate.getFullYear() === new Date().getFullYear() && currentDate.getMonth() === new Date().getMonth()) {
                     endOfMonth = new Date(currentDate.getFullYear(), new Date().getMonth(), new Date().getDate());
-                }else{
-                endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                } else {
+                    endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
                 }
 
                 setSelectedRange([startOfMonth, endOfMonth])
@@ -958,10 +968,10 @@ function shadeColor(color, percent) {
                 const startOfMonth = new Date(currentDate.getFullYear(), 0, 1);
                 // Get the end of the month
                 let endOfMonth
-                if(currentDate.getFullYear()===new Date().getFullYear()){
-                 endOfMonth = new Date(currentDate.getFullYear(), new Date().getMonth(), new Date().getDate());
-                }else{
-                 endOfMonth = new Date(currentDate.getFullYear() + 1, 0, 0);
+                if (currentDate.getFullYear() === new Date().getFullYear()) {
+                    endOfMonth = new Date(currentDate.getFullYear(), new Date().getMonth(), new Date().getDate());
+                } else {
+                    endOfMonth = new Date(currentDate.getFullYear() + 1, 0, 0);
                 }
                 if (`${selectedRange[0].getFullYear()}-${selectedRange[0].getMonth() + 1}-${selectedRange[0].getDate()}` !==
                     `${startOfMonth.getFullYear()}-${startOfMonth.getMonth() + 1}-${startOfMonth.getDate()}` ||

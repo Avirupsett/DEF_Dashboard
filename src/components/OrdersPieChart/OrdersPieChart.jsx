@@ -19,6 +19,7 @@ const OrdersPieChart = ({
   selectedRange,
   selectedOffice,
   isAdmin,
+  showGraph,
   alldata,
   isLoading,
   officeName
@@ -64,6 +65,12 @@ const OrdersPieChart = ({
 
     return totalSalesByProduct;
   }
+
+  useEffect(() => {
+    setTableStatus(!showGraph)
+  
+  }, [showGraph])
+  
   function shadeColor(color, percent) {
 
     var R = parseInt(color.substring(1,3),16);

@@ -16,7 +16,7 @@ import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, alldata, isLoading, SelectedOfficeName, setSelectedOfficeName, selectedOfficeNameLocal, setSelectedOfficeNameLocal, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails, originallist, setOfficeIdLocal, officeIdLocal, setOptionvalue }) => {
+const StatisticsChart2 = ({ themeMode, selectedRange,showGraph, selectedOffice, isAdmin, alldata, isLoading, SelectedOfficeName, setSelectedOfficeName, selectedOfficeNameLocal, setSelectedOfficeNameLocal, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails, originallist, setOfficeIdLocal, officeIdLocal, setOptionvalue }) => {
   const [chartData, setChartData] = useState([]);
 
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -768,7 +768,10 @@ const StatisticsChart2 = ({ themeMode, selectedRange, selectedOffice, isAdmin, a
   //   handleSelectionHistory()
   // }, [selectedOffice])
 
-
+  useEffect(() => {
+    setTableStatus(!showGraph)
+  
+  }, [showGraph])
 
 
 

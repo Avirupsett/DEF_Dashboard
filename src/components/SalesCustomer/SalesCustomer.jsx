@@ -19,6 +19,7 @@ const SalesCustomer = ({
   selectedRange,
   selectedOffice,
   isAdmin,
+  showGraph,
   alldata,
   officeName,
   isLoading
@@ -65,10 +66,15 @@ const SalesCustomer = ({
       setChartByName(byName)
 
     }
-
-
+  
 
   }, [alldata]);
+  
+  useEffect(() => {
+    setTableStatus(!showGraph)
+  
+  }, [showGraph])
+  
   function shadeColor(color, percent) {
 
     var R = parseInt(color.substring(1,3),16);

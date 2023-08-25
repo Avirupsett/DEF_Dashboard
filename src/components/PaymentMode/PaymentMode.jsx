@@ -19,6 +19,7 @@ const PaymentMode = ({
     selectedRange,
     selectedOffice,
     isAdmin,
+    showGraph,
     alldata,
     officeName,
     isLoading
@@ -629,6 +630,10 @@ const PaymentMode = ({
             document.removeEventListener("click", handleClickOutsideIconContainer);
         };
     }, []);
+    useEffect(() => {
+        setTableStatus(!showGraph)
+      
+      }, [showGraph])
 
     const handleIconClick = () => {
         // setShowLegend(false)

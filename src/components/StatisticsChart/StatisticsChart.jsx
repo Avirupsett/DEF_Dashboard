@@ -17,7 +17,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 
-const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, alldata, isLoading, officeName }) => {
+const StatisticsChart = ({ selectedRange, themeMode,showGraph, selectedOffice, isAdmin, alldata, isLoading, officeName }) => {
   const [chartData, setChartData] = useState([]);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const iconContainerRef = useRef(null);
@@ -97,7 +97,11 @@ const StatisticsChart = ({ selectedRange, themeMode, selectedOffice, isAdmin, al
 
   }, [alldata]); // eslint-disable-line react-hooks/exhaustive-deps
 
-
+  useEffect(() => {
+    setTableStatus(!showGraph)
+  
+  }, [showGraph])
+  
 
 
 
