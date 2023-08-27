@@ -712,13 +712,13 @@ const PaymentMode = ({
                     option={option}
                     style={{
                         // marginTop: window.innerWidth <= 1496 ? "-8%" : "-6%",
-                        height: "350px",
+                        height: "349px",
                         width: "100%",
                         maxWidth: "2300px",
                     }}
                     className={css.piechart}
                 // className={themeMode === "dark" ? css.darkMode : css.lightMode}
-                /> : <div className="container-fluid mt-2 table-responsive" style={{ height: "342px" }}>
+                /> : <div className="container-fluid mt-2 table-responsive" style={{ height: "341px" }}>
                     <table className={`table  ${themeMode == 'dark' ? 'table-dark' : ''}`}>
                         <thead>
                             <tr>

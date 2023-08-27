@@ -66,39 +66,39 @@ const SalesCustomer = ({
       setChartByName(byName)
 
     }
-  
+
 
   }, [alldata]);
-  
+
   useEffect(() => {
     setTableStatus(!showGraph)
-  
+
   }, [showGraph])
-  
+
   function shadeColor(color, percent) {
 
-    var R = parseInt(color.substring(1,3),16);
-    var G = parseInt(color.substring(3,5),16);
-    var B = parseInt(color.substring(5,7),16);
+    var R = parseInt(color.substring(1, 3), 16);
+    var G = parseInt(color.substring(3, 5), 16);
+    var B = parseInt(color.substring(5, 7), 16);
 
     R = parseInt(R * (100 + percent) / 100);
     G = parseInt(G * (100 + percent) / 100);
     B = parseInt(B * (100 + percent) / 100);
 
-    R = (R<255)?R:255;  
-    G = (G<255)?G:255;  
-    B = (B<255)?B:255;  
+    R = (R < 255) ? R : 255;
+    G = (G < 255) ? G : 255;
+    B = (B < 255) ? B : 255;
 
     R = Math.round(R)
     G = Math.round(G)
     B = Math.round(B)
 
-    var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-    var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-    var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+    var RR = ((R.toString(16).length == 1) ? "0" + R.toString(16) : R.toString(16));
+    var GG = ((G.toString(16).length == 1) ? "0" + G.toString(16) : G.toString(16));
+    var BB = ((B.toString(16).length == 1) ? "0" + B.toString(16) : B.toString(16));
 
-    return "#"+RR+GG+BB;
-}
+    return "#" + RR + GG + BB;
+  }
 
 
 
@@ -209,7 +209,7 @@ const SalesCustomer = ({
         data: chartData.map((item) => item.count),
         itemStyle: {
           borderRadius: [10, 10, 0, 0],
-          color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             {
               offset: 0,
               color: '#a6ffcb'
@@ -257,7 +257,9 @@ const SalesCustomer = ({
     },
 
     legend: {
-      show:false,
+      show: true,
+      data:[t('Visit')],
+      selected:{'Visit':true},
       bottom: 0,
       textStyle: {
         color: themeMode === "dark" ? "#ffffff" : "#000000",
@@ -265,21 +267,22 @@ const SalesCustomer = ({
       }
     },
     grid: {
-      left:  window.innerWidth <= 768 ? '14%' : '9%',
-      right: "4%",
+      left: window.innerWidth <= 768 ? '14%' : '9%',
+      // right: "4%",
       top: "15%",
-      bottom: "10%",
+      // bottom: "10%",
       containLabel: chartData2.length > 0 ? true : false,
     },
     xAxis: [{
       type: 'time',
       axisPointer: {
-        label:  {
-          formatter: function(params) {
+        label: {
+          formatter: function (params) {
             let oT = new Date(params.value);
             return formatDate(oT);
           },
-       },},
+        },
+      },
       axisLine: {
         lineStyle: {
           color: themeMode === "dark" ? "#ffffff" : "#000000",
@@ -291,8 +294,30 @@ const SalesCustomer = ({
         color: themeMode === "dark" ? "#ffffff" : "#000000",
       },
     }],
-    yAxis: {
+    yAxis: [
+    {
       type: 'value',
+      name: t('Visit'),
+      min: 0,
+      // onZero: false ,
+      minInterval: 1,
+      // max: 250,
+      // interval: 5,
+      // axisLabel: {
+      //   formatter: '{value} ml'
+      // },
+      axisLine: {
+        lineStyle: {
+          color: themeMode === "dark" ? "#ffffff" : "#000000",
+        },
+      },
+      axisLabel: {
+        color: themeMode === "dark" ? "#ffffff" : "#000000",
+      },
+    },
+    {
+      type: 'value',
+      name: t('Sales'),
       axisLine: {
         lineStyle: {
           color: themeMode === "dark" ? "#ffffff" : "#000000",
@@ -316,6 +341,7 @@ const SalesCustomer = ({
         },
       },
     },
+  ],
     dataZoom: [
       {
         show: true,
@@ -325,33 +351,69 @@ const SalesCustomer = ({
         startValue: new Date(selectedRange[0]),
         endValue: new Date(selectedRange[1])
       }],
-    series:
-    Object.values(chartData2).map(product => {
-      return {
+    series: 
+      Object.values(chartData2).flatMap((product,index) => {
+        return [
+          {
+            name: t('Visit'),
+            type: 'scatter',
+            symbolSize:20,
+            itemStyle:{
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                {
+                  offset: 0,
+                  color: '#a6ffcb'
+                },
+                {
+                  offset: 1,
+                  color: '#1fa2ff'
+                }
+              ])
+            },
+            yAxisIndex: 0,
+            // symbol:"none",
+            smooth:true,
+            // lineStyle: {
+            //   type: "dashed",
+            // },
+            data:Object.entries(product.visit)
+          },
+          {
           name: product.productName,
           type: 'bar',
           stack: 'total',
+          yAxisIndex: 1,
           barWidth: "40%",
           label: {
-              show: false
+            show: false
           },
           itemStyle: {
-              borderRadius: [5, 5, 5, 5],
-              color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                {
-                  offset: 1,
-                  color: shadeColor(product.color,20)
-                },
-                {
-                  offset: 0,
-                  color: shadeColor(product.color,60)
-                }
-              ])
+            borderRadius: [5, 5, 5, 5],
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 1,
+                color: shadeColor(product.color, 20)
+              },
+              {
+                offset: 0,
+                color: shadeColor(product.color, 60)
+              }
+            ])
           },
           // data: Object.entries(product.daySales)
           data: Object.entries(product.daySales)
-      };
-  })
+        }
+        
+      
+      ]
+      }),
+      // {
+      //   name: t('Visit'),
+      //   type: 'line',
+      //   yAxisIndex: 1,
+      //   data: Object.values(chartData2).map((item) => item.totalCount)
+      // }
+    
     //  {
 
     //   name: t('Sales'),
@@ -1059,7 +1121,7 @@ const SalesCustomer = ({
       }
 
       axios.request(reqOptions).then((response) => {
-       
+
         let daywiseSales = {}
         let productIds = Array.from(new Set(response.data.flatMap(entry => entry.lstproduct.map(product => product.productId))));
         // Initialize daywiseSales object with zero sales for all products and dates using map
@@ -1068,13 +1130,21 @@ const SalesCustomer = ({
             productName: '',
             color: '',
             daySales: {},
+            visit:{}
+          };
+          daywiseSales["Visit"] = {
+            productName: '',
+            color: '',
+            daySales: {},
+            visit:{}
           };
           response.data.map(entry => {
             daywiseSales[productId].daySales[entry.requestedDate] = '';
+            // daywiseSales["Visit"].visit[entry.requestedDate] = '';
 
           });
         });
-        
+
         setTableData2([...response.data.filter((item) => item.totalIncome > 0), { "requestedDate": t("Total"), "totalIncome": response.data.reduce((prev, c) => prev + c.totalIncome, 0) }])
         setIsBack(true)
         response.data.map(entry => {
@@ -1082,9 +1152,10 @@ const SalesCustomer = ({
 
           const requestedDate = entry.requestedDate;
           const productList = entry.lstproduct;
+          daywiseSales["Visit"].visit[requestedDate] = entry.totalCount>0?entry.totalCount:'';
           if (productList.length > 0) {
             productList.map(product => {
-              console.log(product.productName)
+              // console.log(product.productName)
               const productColor = product.color;
               const productId = product.productId;
               const productName = product.productName;
@@ -1097,7 +1168,7 @@ const SalesCustomer = ({
             });
           }
         })
-        console.log(daywiseSales)
+        // console.log(daywiseSales)
         setChartData2(daywiseSales)
       }).finally(() => {
         setLocalloading(false)
