@@ -10,7 +10,7 @@ import { FaXmark, FaFilter, FaArrowTrendUp } from "react-icons/fa6";
 import { Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import fetchSalesData from './FetchSalesData';
-import CustomerType from '../CustomerType/CustomerType';
+// import CustomerType from '../CustomerType/CustomerType';
 
 
 const StatisticsChart = React.lazy(() => import('../StatisticsChart/StatisticsChart'));
@@ -471,11 +471,11 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
               <NewExCustomerBar selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} showGraph={showGraph} />
             </Suspense>
           </div>
-          <div className='col-md-12 col-lg-12 mt-2' >
+          {/* <div className='col-md-12 col-lg-12 mt-2' >
        
              <CustomerType/>
 
-          </div>
+          </div> */}
         </div>
         {/* {selectedOffice.length > 0 ? <div className='row'>
           <div className='col-md-12 col-lg-8'><StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} /></div>
