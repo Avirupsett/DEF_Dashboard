@@ -19,7 +19,7 @@ export default function OfficeCard({officeCountData}) {
       officeCountData.map((entry, index) => (
   
         <div className={css.cardAmount} key={index}>
-          <span style={{ fontSize:window.innerWidth>600?".9rem":"0.8rem"}}>{t(entry.officeTypeName)} :</span>
+          <span style={{ fontSize:window.innerWidth>600?".9rem":"0.8rem"}}>{t(entry.officeType)} :</span>
           <span>{entry.officeCount}</span>
         </div>
        

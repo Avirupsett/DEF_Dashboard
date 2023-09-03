@@ -3,9 +3,8 @@ import css from "./Dashboard.module.css";
 import { FaArrowTrendUp,FaMoneyBill1, FaArrowTrendDown } from 'react-icons/fa6';
 import { useTranslation } from 'react-i18next';
 import ReactECharts from 'echarts-for-react';
-import axios from "axios";
 
-export default function OfficeCard({ countExpense, totalExpense,todayExpense,  alldata, selectedRange, officeId, adminStatus }) {
+export default function OfficeCard({ countExpense, totalExpense,todayExpense,  alldata, selectedRange, officeId, adminStatus, expenseCardData }) {
   const { t } = useTranslation();
   const [chartData, setChartData] = useState({ current7Days: [], previous7Days: [] });
   const [showToday, setShowToday] = useState(true);
@@ -32,11 +31,9 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
   startDate.setDate(today.getDate() - 13);
 
   async function fetchData() {
-    const response = await axios.get(
-      `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/sales_list/${formatDate(startDate)}/${formatDate(endDate)}/${officeId}/${adminStatus}`
-    );
+    
 
-    const data = response.data.graph1; // Extract data from graph1 property
+    const data = expenseCardData
 
     if (Array.isArray(data)) {
       const filteredData = data.map((item) => ({
@@ -44,7 +41,7 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
         expense: item.totalExpense,
       }));
 
-      console.log(filteredData);
+     
 
       const today = new Date();
       const last7Days = new Date(today);
@@ -71,7 +68,7 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
       const growthPercentageValue =
       Math.min(((currentWeekSales - previousWeekSales) / previousWeekSales) * 100, 100);
 
-        console.log(growthPercentageValue)
+      
       setGrowthPercentage(growthPercentageValue);
       
 
@@ -85,7 +82,7 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
   }
 
   fetchData();
-}, []); // Empty dependency array, so it runs once on component mount
+}, [expenseCardData]); // Empty dependency array, so it runs once on component mount
 
 
   const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -204,7 +201,8 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
 
 
   return (
-    <div className={css.card4}  >
+    <div className={css.card4} onMouseEnter={() => setShowToday(true)} 
+    onMouseLeave={() => setShowToday(false)} >
     <div className={css.cardHead}   >
       <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{t("Expense")}</span>
       
@@ -214,14 +212,13 @@ export default function OfficeCard({ countExpense, totalExpense,todayExpense,  a
     </div>
     <div>
     <div style={{display:'flex', flexDirection: 'column'}}>
-    <div style={{display: 'flex',width: '100%',height: '30px' }} onMouseEnter={() => setShowToday(true)} // Show "Today" on hover
-              onMouseLeave={() => setShowToday(false)} > 
+    <div style={{display: 'flex',width: '100%',height: '30px' }} > 
     <div  className='mb-0' style={{ display: 'flex', alignItems: 'center' }}  >
-          <span style={{ marginRight: "5px", fontSize: window.innerWidth > 600 ? "1.1rem" : "0.8rem" }}> {showToday ? t('Today') : '7 ' + t('days')}</span>
+          <span style={{ marginRight: "5px", fontSize: window.innerWidth > 600 ? "1.1rem" : "0.8rem" }}> {!showToday ? t('Today') : '7 ' + t('days')}</span>
           <div>
             <div style={{display: 'flex'}}>
               <span style={{ marginRight: '2px',marginTop: '6px',fontWeight:'bold',fontSize: window.innerWidth > 600 ? ".9rem" : "0.7rem" }}>₹</span>
-              <span style={{ fontWeight: 'bold', fontSize: window.innerWidth > 600 ? "2.1rem" : "1.7rem", marginRight: '5px' }}>{showToday ? todayExpense : totalExpense}</span>
+              <span style={{ fontWeight: 'bold', fontSize: window.innerWidth > 600 ? "2.1rem" : "1.7rem", marginRight: '5px' }}>{!showToday ? todayExpense : totalExpense}</span>
             </div>
           </div>
     </div>

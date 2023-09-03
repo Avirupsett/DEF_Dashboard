@@ -327,7 +327,7 @@ padding-bottom: 8px;
 padding-left: 10px;
 padding-right: 10px;
 }
-.NoDataOverlay {
+.loadingOverlay {
   position: absolute;
    top: 0;
   left: 0;
@@ -336,7 +336,7 @@ padding-right: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 5;
+  z-index: 10;
   background-color: var(--backgroundOverlay);
   
 }
@@ -479,7 +479,7 @@ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 margin-top: 20px;
 }
 
-.loadingOverlay {
+/* .loadingOverlay {
 position: absolute;
 top: 0;
 left: 0;
@@ -490,7 +490,7 @@ justify-content: center;
 align-items: center;
 background-color: rgba(255, 255, 255, 0);
 z-index: 999;
-}
+} */
 
 .loadingSpinner {
 font-size: 2rem;
@@ -545,3 +545,15 @@ font-style: italic;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
 }
 
+.NoDataOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 52%;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  z-index: 5;
+  background-color: var(--backgroundOverlay);
+}

@@ -50,6 +50,7 @@ const Dashboard = () => {
   const [officeName, setOfficeName] = useState("")
   const [todayExpense, setTodayExpense] = useState(0)
   const [todaySales, setTodaySales] = useState(0)
+  const [salesCardData, setSalesCardData] = useState([])
 
   // Function to update the window width state on window resize
   const handleWindowResize = () => {
@@ -105,7 +106,7 @@ const Dashboard = () => {
           const officeId = userDataResponse.officeId;
 
           // Use the officeId to construct the second API endpoint
-          const apiUrl2 = `${import.meta.env.VITE_API_URL_2}/api/Dashboard/AdminDashboradData/${officeId}/${userDataResponse.roleName === "PumpUser" ? 1 : userDataResponse.roleName === "CompanyAdmin" ? 1 : 1}`;
+          const apiUrl2 = `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/card_details_list/${officeId}/${userDataResponse.roleName === "PumpUser" ? 1 : userDataResponse.roleName === "CompanyAdmin" ? 1 : 0}`;
 
           // Fetch data from the second API endpoint
           const response2 = await axios.get(apiUrl2);
@@ -122,6 +123,7 @@ const Dashboard = () => {
 
           setTodaySales(data2.incomeDetailsCurrentDay.total)
           setTodayExpense(data2.expenseDetailsCurrentDay.total)
+          setSalesCardData(data2.graph1)
 
           setUserCountData(userCountData);
           setOfficeCountData(officeCountData);
@@ -157,7 +159,7 @@ const Dashboard = () => {
             const officeId = userDataResponse.officeId;
 
             // Use the officeId to construct the second API endpoint
-            const apiUrl2 = `${import.meta.env.VITE_API_URL_2}/api/Dashboard/AdminDashboradData/${officeId}/${userDataResponse.roleName === "PumpUser" ? 1 : userDataResponse.roleName === "CompanyAdmin" ? 1 : 1}`;
+            const apiUrl2 = `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/card_details_list/${officeId}/${userDataResponse.roleName === "PumpUser" ? 1 : userDataResponse.roleName === "CompanyAdmin" ? 1 : 0}`;
 
             // Fetch data from the second API endpoint
             const response2 = await axios.get(apiUrl2);
@@ -217,10 +219,10 @@ const Dashboard = () => {
               {officeData ? <OfficeCard officeCountData={officeCountData} /> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
             <Suspense fallback={<Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}>
-              {officeData ? <SalesCard totalIncome={totalIncome} countIncome={countIncome} todaySales={todaySales} officeId={userData.officeId} adminStatus={adminStatus} /> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
+              {officeData ? <SalesCard totalIncome={totalIncome} countIncome={countIncome} todaySales={todaySales} officeId={userData.officeId} adminStatus={adminStatus} salesCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
             <Suspense fallback={<Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}>
-              {officeData ? <ExpenseCard totalExpense={totalExpense} countExpense={countExpense} todayExpense={todayExpense} officeId={userData.officeId} adminStatus={adminStatus} /> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
+              {officeData ? <ExpenseCard totalExpense={totalExpense} countExpense={countExpense} todayExpense={todayExpense} officeId={userData.officeId} adminStatus={adminStatus} expenseCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
 
 

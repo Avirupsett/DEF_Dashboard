@@ -289,6 +289,7 @@ const SalesCustomer = ({
         },
       },
       axisLabel: {
+        rotate:window.innerWidth<768?45:0,
         hideOverlap: true,
         formatter: '{d} {MMM}',
         color: themeMode === "dark" ? "#ffffff" : "#000000",

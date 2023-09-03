@@ -224,7 +224,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange,showGraph, selectedOffice, 
       },
     },
     grid: {
-      left: window.innerWidth <= 768 ? 85 : 105, // Adjust the left margin to give space for the y-axis labels
+      left: window.innerWidth <= 768 ? 90 : 105, // Adjust the left margin to give space for the y-axis labels
       right: 50,
       bottom: 50,
       top: 15,
@@ -834,7 +834,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange,showGraph, selectedOffice, 
         theme={themeMode}
       />
       <div className="container-fluid">
-        <div className="d-flex w-100 g-0 align-items-start justify-content-between">
+        <div className="d-flex w-100 g-0 align-items-center justify-content-between">
           <div className={`fw-bold noselect fs-${window.innerWidth <= 768 ? 7 : 5} ${themeMode === "dark" ? css.darkMode : css.lightMode
             }`} >{t("Sales")} {t("of")} {trimName(selectedOfficeNameLocal, 10)}</div>
           {/* Stylish "Reset" button */}
@@ -900,7 +900,7 @@ const StatisticsChart2 = ({ themeMode, selectedRange,showGraph, selectedOffice, 
 
       {/* Loading spinner */}
       {isLoading && (
-        <div className={css.NoDataOverlay}>
+        <div className={css.loadingOverlay}>
           <img src={loading} alt="Loading..." width={50} height={50} />
         </div>
       )}

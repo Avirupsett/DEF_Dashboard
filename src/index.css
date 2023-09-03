@@ -152,6 +152,21 @@ body {
 .MuiTablePagination-toolbar{
   overflow: overlay;
 }
+.MuiDataGrid-menu{
+  background-color: var(--option-color) !important;
+}
+.MuiDataGrid-cellContent{
+  color: var(--text-color)!important;
+}
+.MuiDataGrid-columnHeaderTitle,.MuiNativeSelect-select,.MuiInputBase-input{
+  color: var(--text-color) !important;
+}
+.MuiDataGrid-panelContent{
+  background-color: var(--option-color) !important;
+}
+select[id=':rm:'] option,select[id=':rk:'] option{
+  background-color: var(--option-color) !important;
+}
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */

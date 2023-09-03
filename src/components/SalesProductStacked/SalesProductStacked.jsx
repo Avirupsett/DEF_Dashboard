@@ -431,6 +431,7 @@ const SalesProductStacked = ({
         },
         xAxis: {
             axisLabel: {
+                rotate:window.innerWidth<768?45:0,
                 hideOverlap: true,
                 formatter: alignment === 'Sales (Day Wise)' ? '{d} {MMM}' : null,
                 color: themeMode === "dark" ? "#ffffff" : "#000000",

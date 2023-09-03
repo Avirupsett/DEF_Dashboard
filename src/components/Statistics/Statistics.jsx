@@ -10,14 +10,17 @@ import { FaXmark, FaFilter, FaArrowTrendUp } from "react-icons/fa6";
 import { Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import fetchSalesData from './FetchSalesData';
+import CustomerType from '../CustomerType/CustomerType';
 
 
 const StatisticsChart = React.lazy(() => import('../StatisticsChart/StatisticsChart'));
 const StatisticsChart2 = React.lazy(() => import('../StatisticsChart2/StatisticsChart2'));
 const OrdersPieChart = React.lazy(() => import('../OrdersPieChart/OrdersPieChart'));
-const SalesCustomer = React.lazy(()=>import('../SalesCustomer/SalesCustomer'))
-const SalesProductStacked = React.lazy(()=>import('../SalesProductStacked/SalesProductStacked'))
-const PaymentMode = React.lazy(()=>import('../PaymentMode/PaymentMode'))
+const SalesCustomer = React.lazy(() => import('../SalesCustomer/SalesCustomer'))
+const SalesProductStacked = React.lazy(() => import('../SalesProductStacked/SalesProductStacked'))
+const PaymentMode = React.lazy(() => import('../PaymentMode/PaymentMode'))
+const NewExCustomerPie=React.lazy(()=> import('../NewExCustomerPie/NewExCustomer'))
+const NewExCustomerBar=React.lazy(()=> import('../NewExCustomerBar/NewExCustomerBar'))
 // const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
 
 
@@ -119,6 +122,8 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
   const [selectedOfficeName, setSelectedOfficeName] = useState("")
   const [isDateRangeActive, setIsDateRangeActive] = useState(true)
   const [showGraph, setShowGraph] = useState(true)
+  const [newExData, setNewExData] = useState([])
+  const [isloading2, setIsloading2] = useState(true)
 
   // const handleResize = () => {
   //   setWindowWidth(window.innerWidth);
@@ -179,7 +184,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
             setRetails(temp.filter(
               (office) => office.officeType === "Retail Pumps"
             ));
-            setOriginallist({ officeId, adminStatus,userOfficeName })
+            setOriginallist({ officeId, adminStatus, userOfficeName })
 
           }
         }
@@ -196,8 +201,9 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
   useEffect(() => {
     if (selectedOffice)
       handleSelectedOffice()
-
-  }, [selectedOffice,selectedRange, isAdmin])
+      fetchNewExdData(selectedOffice,isAdmin)
+     
+  }, [selectedOffice, selectedRange, isAdmin])
 
   const handleSelectedOffice = async () => {
     setIsLoading(true)
@@ -236,7 +242,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
     setSelectedOffice(event.target.value);
     setIsAdmin(isAdmin);
     setSelectedOfficeName(event.target.selectedOptions[0].getAttribute("data-officename"))
-    
+
   };
 
   const trimName = (name, maxLength) => {
@@ -251,12 +257,41 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
     }
   };
 
+  // Define an async function to fetch the sales data and calculate growth percentages
+  async function fetchNewExdData(selectedOffice, isAdmin) {
+    const startDate = formatDate2(selectedRange[0]);
+    const endDate = formatDate2(selectedRange[1]);
+    if (selectedOffice !== undefined && isAdmin !== undefined) {
+      setIsloading2(true)
+      const apiNewEx = `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/customer_list/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`;
+
+      const response = await axios.get(apiNewEx);
+      const data = await response.data;
+      if(data){
+        setNewExData(data)
+        setIsloading2(false)
+      }
+    }
+
+  }
+
+  const formatDate2 = (date) => {
+    if (!date) {
+        return ""; // Return an empty string or a default date string
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
 
   return (
 
     <div className={`${css.container} ${themeMode === 'dark' ? 'theme-container' : 'theme2-container'} pb-5`}>
       <div className='d-flex justify-content-between align-items-center mb-0'>
-        <div className={`fs-${window.innerWidth <= 768 ? 3 : 2} mx-sm-0 mx-md-3 fw-bold noselect`}><span className='me-2 ms-md-1  ms-2 text-primary'><FaArrowTrendUp style={{cursor:'pointer'}} onClick={()=>setShowGraph(!showGraph)}/></span> {t("Sales Overview")}</div>
+        <div className={`fs-${window.innerWidth <= 768 ? 3 : 2} mx-sm-0 mx-md-3 fw-bold noselect`}><span className='me-2 ms-md-1  ms-2 text-primary'><FaArrowTrendUp style={{ cursor: 'pointer' }} onClick={() => setShowGraph(!showGraph)} /></span> {t("Sales Overview")}</div>
         <button className="btn btn-primary btn-lg mx-2 d-flex align-items-center shadow border-2 border-white" type="submit" onClick={() => setFilterOn(!filterOn)}><span className='d-flex'>{filterOn ? <FaXmark style={{ fontSize: "1.4rem", marginRight: window.innerWidth > 500 ? "4px" : "0px" }} /> : <FaFilter style={{ fontSize: "1.2rem", marginRight: window.innerWidth > 500 ? "8px" : "0px" }} />}</span>  {window.innerWidth > 500 ? filterOn ? t('Close') : t(`Filter`) : ""}</button>
       </div>
       <div style={{ visibility: filterOn ? 'visible' : 'hidden', opacity: filterOn ? 1 : 0, height: filterOn ? window.innerWidth >= 768 ? "85px" : "130px" : 0, marginBottom: filterOn ? "10px" : 0 }} className={`${css.topContainer} ${themeMode === "dark" ? css.darkMode : css.lightMode
@@ -281,7 +316,7 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
           <div className="col-md-6 col-lg-5 col-xl-4 col-xxl-4 my-sm-2   my-2 d-flex justify-content-center align-items-center mx-0">
             {window.innerWidth > 400 ? <div className="me-2 me-sm-3 ms-1 ms-lg-2 mt-1"><FaRegBuilding style={{ fontSize: '2.3rem', color: "white" }} /></div> : ''}
             <select value={optionvalue.state ? optionvalue.Ovalue : null} className="form-select form-select-lg" aria-label="Default select example" id="office" onChange={handleOfficeChange} style={{ paddingBottom: "4px !important", paddingTop: "4px !important" }}>
-              {companies.length > 1 ? <><option
+              {companies.length > 0 ? <><option
                 value={officeIdLocal}
                 data-officename={officeName}
                 data-isretail="-1"
@@ -397,35 +432,50 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
           <div className='col-md-12 col-lg-8'>
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName} showGraph={showGraph}/>
+              <StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName} showGraph={showGraph} />
             </Suspense>
           </div>
-           <div className='col-md-12 col-lg-4'>
+          <div className='col-md-12 col-lg-4'>
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <OrdersPieChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName} showGraph={showGraph}/>
+              <OrdersPieChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName} showGraph={showGraph} />
             </Suspense>
           </div>
 
-           <div className='col-md-12 col-lg-6 mt-2' >
+          <div className='col-md-12 col-lg-6 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <SalesCustomer selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph}/>
+              <SalesCustomer selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} />
             </Suspense>
-          </div> 
+          </div>
           <div className='col-md-12 col-lg-6 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
               <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} setSelectedOfficeName={setOfficeName} showGraph={showGraph} selectedOfficeNameLocal={selectedOfficeName} setSelectedOfficeNameLocal={setSelectedOfficeName} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue} />
             </Suspense>
           </div>
-           <div className='col-md-12 col-lg-8 mt-2' >
+          <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <SalesProductStacked selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} setSelectedRange={setSelectedRange} isDateRangeActive={isDateRangeActive} setIsDateRangeActive={setIsDateRangeActive}/>
+              <SalesProductStacked selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} setSelectedRange={setSelectedRange} isDateRangeActive={isDateRangeActive} setIsDateRangeActive={setIsDateRangeActive} />
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-4 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <PaymentMode selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph}/>
+              <PaymentMode selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} />
             </Suspense>
-          </div> 
+          </div>
+          <div className='col-md-12 col-lg-4 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+              <NewExCustomerPie selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} showGraph={showGraph} />
+            </Suspense>
+          </div>
+          <div className='col-md-12 col-lg-8 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+              <NewExCustomerBar selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} showGraph={showGraph} />
+            </Suspense>
+          </div>
+          <div className='col-md-12 col-lg-12 mt-2' >
+       
+             <CustomerType/>
+
+          </div>
         </div>
         {/* {selectedOffice.length > 0 ? <div className='row'>
           <div className='col-md-12 col-lg-8'><StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} /></div>

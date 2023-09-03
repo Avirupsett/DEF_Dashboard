@@ -223,6 +223,7 @@ const StatisticsChart = ({ selectedRange, themeMode,showGraph, selectedOffice, i
         },
       },
       axisLabel: {
+        rotate:window.innerWidth<768?45:0,
         hideOverlap: true,
         formatter:'{d} {MMM}',
         color: themeMode === "dark" ? "#ffffff" : "#000000",
@@ -247,6 +248,7 @@ const StatisticsChart = ({ selectedRange, themeMode,showGraph, selectedOffice, i
           },
         },
         axisLabel: {
+          
           color: themeMode === "dark" ? "#ffffff" : "#000000",
           formatter: (value) => {
             if (value >= 10000) {
