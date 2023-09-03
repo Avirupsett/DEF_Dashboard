@@ -6,9 +6,9 @@ import ReactECharts from 'echarts-for-react';
 
 
 
-export default function SalesCard({ countIncome, totalIncome, todaySales, alldata, selectedRange, officeId, adminStatus, salesCardData }) {
-  const [chartData, setChartData] = useState({ current7Days: [], previous7Days: [] });
-  const [showToday, setShowToday] = useState(true); // State variable to track what to display
+export default function SalesCard({ totalIncome, todaySales, salesCardData }) {
+  const [chartData, setChartData] = useState([]);
+  const [showToday, setShowToday] = useState(false); // State variable to track what to display
   const [growthPercentageValue, setGrowthPercentage] = useState(0); // State variable to store growth percentage
 
   const { t } = useTranslation();
@@ -19,48 +19,49 @@ export default function SalesCard({ countIncome, totalIncome, todaySales, alldat
   useEffect(() => {
 
 
-    async function fetchData() {
+    function fetchData() {
 
-      const data = salesCardData; // Extract data from graph1 property
+      if (salesCardData) {
+        const data = salesCardData; // Extract data from graph1 property
 
-      if (Array.isArray(data)) {
-        const filteredData = data.map((item) => ({
-          requestedDate: new Date(item.requestedDate),
-          sales: item.totalIncome,
-        }));
+        if (Array.isArray(data)) {
+          const filteredData = data.map((item) => ({
+            requestedDate: new Date(item.requestedDate),
+            sales: item.totalIncome,
+          }));
 
+          setChartData(data.slice(-7,));
+          const today = new Date();
+          let last7Days = new Date(today);
+          last7Days.setDate(today.getDate() - 7);
 
+          const current7DaysData = filteredData.filter((item) => {
+            const itemDate = new Date(item.requestedDate);
+            return itemDate >= last7Days && itemDate <= today;
+          });
 
-        const today = new Date();
-        const last7Days = new Date(today);
-        last7Days.setDate(today.getDate() - 7);
+          // Calculate the start date for the previous 7 days
+          const previous7DaysStart = new Date(last7Days);
+          previous7DaysStart.setDate(last7Days.getDate() - 7);
 
-        const current7DaysData = filteredData.filter((item) => {
-          const itemDate = new Date(item.requestedDate);
-          return itemDate >= last7Days && itemDate <= today;
-        });
+          // Filter data for the previous 7 days using the calculated start date
+          const previous7DaysData = filteredData.filter((item) => {
+            const itemDate = new Date(item.requestedDate);
+            return itemDate >= previous7DaysStart && itemDate < last7Days;
+          });
 
-        // Calculate the start date for the previous 7 days
-        const previous7DaysStart = new Date(last7Days);
-        previous7DaysStart.setDate(last7Days.getDate() - 7);
+          // Calculate growth percentage
+          const currentWeekSales = current7DaysData.reduce((total, item) => total + item.sales, 0);
+          const previousWeekSales = previous7DaysData.reduce((total, item) => total + item.sales, 0);
+          const growthPercentageValue =
+            Math.min(((currentWeekSales - previousWeekSales) / previousWeekSales) * 100, 100);
 
-        // Filter data for the previous 7 days using the calculated start date
-        const previous7DaysData = filteredData.filter((item) => {
-          const itemDate = new Date(item.requestedDate);
-          return itemDate >= previous7DaysStart && itemDate < last7Days;
-        });
+          setGrowthPercentage(growthPercentageValue);
 
-        // Calculate growth percentage
-        const currentWeekSales = current7DaysData.reduce((total, item) => total + item.sales, 0);
-        const previousWeekSales = previous7DaysData.reduce((total, item) => total + item.sales, 0);
-        const growthPercentageValue =
-          Math.min(((currentWeekSales - previousWeekSales) / previousWeekSales) * 100, 100);
-
-        setGrowthPercentage(growthPercentageValue);
-
-        setChartData({ current7Days: current7DaysData, previous7Days: previous7DaysData });
-      } else {
-        console.log('Invalid data format:', data);
+          
+        } else {
+          console.log('Invalid data format:', data);
+        }
       }
     }
 
@@ -84,7 +85,7 @@ export default function SalesCard({ countIncome, totalIncome, todaySales, alldat
         color: 'white',
         fontSize: window.innerWidth <= 768 ? 8 : 12, // Set font size to 0 to hide text
       },
-      data: ['This Week', 'Previous Week'], // Add legend data
+      // data: ['This Week', 'Previous Week'], // Add legend data
       top: 20, // Adjust the vertical position of the legend
       left: 'center',
       itemWidth: window.innerWidth <= 768 ? 5 : 5, // Adjust the width of the legend switches
@@ -108,7 +109,7 @@ export default function SalesCard({ countIncome, totalIncome, todaySales, alldat
 
 
       boundaryGap: false, // Adjust boundaryGap to align with labels
-      data: chartData.current7Days.map((item) => {
+      data: chartData.map((item) => {
         const date = new Date(item.requestedDate);
         return dayNames[date.getDay()];
       }),
@@ -145,7 +146,7 @@ export default function SalesCard({ countIncome, totalIncome, todaySales, alldat
 
     series: [
       {
-        data: chartData.current7Days.map((item) => item.sales),
+        data: chartData.map((item) => item.totalIncome),
         name: 'This Week',
         type: 'line',
         yAxisIndex: 0,
@@ -192,8 +193,8 @@ export default function SalesCard({ countIncome, totalIncome, todaySales, alldat
 
 
   return (
-    <div className={css.card3}  onMouseEnter={() => setShowToday(true)} 
-    onMouseLeave={() => setShowToday(false)}>
+    <div className={css.card3} onMouseEnter={() => setShowToday(true)}
+      onMouseLeave={() => setShowToday(false)}>
       <div className={css.cardHead}   >
         <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{t("Sales")}</span>
 

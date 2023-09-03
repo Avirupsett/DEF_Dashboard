@@ -4,10 +4,10 @@ import { FaArrowTrendUp, FaMoneyBill1, FaArrowTrendDown } from 'react-icons/fa6'
 import { useTranslation } from 'react-i18next';
 import ReactECharts from 'echarts-for-react';
 
-export default function OfficeCard({ countExpense, totalExpense, todayExpense, alldata, selectedRange, officeId, adminStatus, expenseCardData }) {
+export default function OfficeCard({ totalExpense, todayExpense, expenseCardData }) {
   const { t } = useTranslation();
-  const [chartData, setChartData] = useState({ current7Days: [], previous7Days: [] });
-  const [showToday, setShowToday] = useState(true);
+  const [chartData, setChartData] = useState([]);
+  const [showToday, setShowToday] = useState(false);
   const [growthPercentageValue, setGrowthPercentage] = useState(0);
 
   const formatDate = (date) => {
@@ -25,23 +25,23 @@ export default function OfficeCard({ countExpense, totalExpense, todayExpense, a
   // Inside your useEffect where you're preparing the chart data
   useEffect(() => {
     // Calculate the current date and 14 days ago
-    const today = new Date();
-    const endDate = new Date(today);
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() - 13);
-
+    
     async function fetchData() {
-
-
+      if(expenseCardData){
+      
       const data = expenseCardData
-
+      
+      const today = new Date();
+      const endDate = new Date(today);
+      let startDate = new Date(today);
+      startDate.setDate(today.getDate() - 13);
       if (Array.isArray(data)) {
         const filteredData = data.map((item) => ({
           requestedDate: new Date(item.requestedDate),
           expense: item.totalExpense,
         }));
 
-
+        setChartData(data.slice(-7,));
 
         const today = new Date();
         const last7Days = new Date(today);
@@ -75,7 +75,8 @@ export default function OfficeCard({ countExpense, totalExpense, todayExpense, a
         // console.log(current7DaysData)
         // console.log(previous7DaysData)
 
-        setChartData({ current7Days: current7DaysData, previous7Days: previous7DaysData });
+        
+      }
       } else {
         console.log('Invalid data format:', data);
       }
@@ -125,11 +126,11 @@ export default function OfficeCard({ countExpense, totalExpense, todayExpense, a
 
 
       boundaryGap: false, // Adjust boundaryGap to align with labels
-      // data: chartData.current7Days.map((item) => {
-      //   const date = new Date(item.requestedDate);
-      //   return dayNames[date.getDay()];
-      // }),
-      data:["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+      data: chartData.map((item) => {
+        const date = new Date(item.requestedDate);
+        return dayNames[date.getDay()];
+      }),
+  
     },
     yAxis: {
       type: 'value',
@@ -163,8 +164,7 @@ export default function OfficeCard({ countExpense, totalExpense, todayExpense, a
 
     series: [
       {
-        // data: chartData.current7Days.map((item) => item.expense),
-        data: [100,15,352,145,500,512,400],
+        data: chartData.map((item) => item.totalExpense),
         name: 'This Week',
         type: 'line',
         yAxisIndex: 0,

@@ -219,10 +219,10 @@ const Dashboard = () => {
               {officeData ? <OfficeCard officeCountData={officeCountData} /> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
             <Suspense fallback={<Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}>
-              {officeData ? <SalesCard totalIncome={totalIncome} countIncome={countIncome} todaySales={todaySales} officeId={userData.officeId} adminStatus={adminStatus} salesCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
+              {officeData ? <SalesCard totalIncome={totalIncome} countIncome={countIncome} todaySales={todaySales} salesCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
             <Suspense fallback={<Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}>
-              {officeData ? <ExpenseCard totalExpense={totalExpense} countExpense={countExpense} todayExpense={todayExpense} officeId={userData.officeId} adminStatus={adminStatus} expenseCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
+              {officeData ? <ExpenseCard totalExpense={totalExpense} countExpense={countExpense} todayExpense={todayExpense} expenseCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
 
 
