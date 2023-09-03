@@ -176,6 +176,7 @@ const Dashboard = () => {
 
             setTodaySales(data2.incomeDetailsCurrentDay.total)
             setTodayExpense(data2.expenseDetailsCurrentDay.total)
+            setSalesCardData(data2.graph1)
 
             setUserCountData(userCountData);
             setOfficeCountData(officeCountData);
