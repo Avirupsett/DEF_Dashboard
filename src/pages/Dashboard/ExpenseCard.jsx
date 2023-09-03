@@ -125,10 +125,11 @@ export default function OfficeCard({ countExpense, totalExpense, todayExpense, a
 
 
       boundaryGap: false, // Adjust boundaryGap to align with labels
-      data: chartData.current7Days.map((item) => {
-        const date = new Date(item.requestedDate);
-        return dayNames[date.getDay()];
-      }),
+      // data: chartData.current7Days.map((item) => {
+      //   const date = new Date(item.requestedDate);
+      //   return dayNames[date.getDay()];
+      // }),
+      data:["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
     },
     yAxis: {
       type: 'value',
@@ -162,7 +163,8 @@ export default function OfficeCard({ countExpense, totalExpense, todayExpense, a
 
     series: [
       {
-        data: chartData.current7Days.map((item) => item.expense),
+        // data: chartData.current7Days.map((item) => item.expense),
+        data: [100,15,352,145,500,512,400],
         name: 'This Week',
         type: 'line',
         yAxisIndex: 0,
