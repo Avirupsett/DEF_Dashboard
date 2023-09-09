@@ -2,9 +2,9 @@ import React, { useEffect, useState, useRef } from 'react'
 import css from "./Dashboard.module.css";
 import { FaArrowTrendUp, FaMoneyBill1, FaArrowTrendDown } from 'react-icons/fa6';
 import { useTranslation } from 'react-i18next';
-import ReactECharts from 'echarts-for-react';
+// import ReactECharts from 'echarts-for-react';
 
-export default function OfficeCard({ totalExpense, todayExpense, expenseCardData }) {
+export default function ExpenseCard({ totalExpense, todayExpense, expenseCardData,ReactECharts }) {
   const { t } = useTranslation();
   const [chartData, setChartData] = useState([]);
   const [showToday, setShowToday] = useState(false);

@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { FaArrowTrendUp, FaMoneyBill, FaArrowTrendDown } from 'react-icons/fa6'
 import css from "./Dashboard.module.css";
 import { useTranslation } from 'react-i18next';
-import ReactECharts from 'echarts-for-react';
 
 
 
-export default function SalesCard({ totalIncome, todaySales, salesCardData }) {
+export default function SalesCard({ totalIncome, todaySales, salesCardData,ReactECharts }) {
   const [chartData, setChartData] = useState([]);
   const [showToday, setShowToday] = useState(false); // State variable to track what to display
   const [growthPercentageValue, setGrowthPercentage] = useState(0); // State variable to store growth percentage

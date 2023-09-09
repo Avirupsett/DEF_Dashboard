@@ -76,5 +76,19 @@
     "Card": "कार्ड",
     "UPI": "यूपीआई",
     "Cash": "नकद",
-    "NetBanking": "नेट बैंकिंग"
+    "NetBanking": "नेट बैंकिंग",
+    "Customers": "ग्राहक",
+    "Customer Type": "ग्राहक प्रकार",
+    "Total Count": "कुल गणना",
+    "Existing Customers": "मौजूदा ग्राहक",
+    "New Customers": "नए ग्राहक",
+    "Existing Customer Count": "मौजूदा ग्राहक गणना",
+    "Existing Customer Sales": "मौजूदा ग्राहक बिक्री",
+    "New Customer Count": "नए ग्राहक गणना",
+    "New Customer Sales": "नए ग्राहक बिक्री",
+    "Customers Summary Data": "ग्राहक संक्षेप डेटा",
+    "Customer Name": "ग्राहक का नाम",
+    "Mobile No": "मोबाइल नंबर",
+    "Vehicle No": "वाहन नंबर",
+    "Top Customers Summary Data": "शीर्ष ग्राहक संक्षेप डेटा"
 }

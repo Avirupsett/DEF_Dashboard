@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import ReactECharts from "echarts-for-react";
+
 import axios from "axios";
 import css from "./StatisticsChart2.module.css";
-import * as echarts from 'echarts'
 
 import "jspdf-autotable";
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaRegChartBar, FaAngleLeft, FaAnglesLeft } from "react-icons/fa6";
@@ -16,7 +15,7 @@ import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const StatisticsChart2 = ({ themeMode, selectedRange,showGraph, selectedOffice, isAdmin, alldata, isLoading, SelectedOfficeName, setSelectedOfficeName, selectedOfficeNameLocal, setSelectedOfficeNameLocal, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails, originallist, setOfficeIdLocal, officeIdLocal, setOptionvalue }) => {
+const StatisticsChart2 = ({echarts,ReactECharts,themeMode, selectedRange,showGraph, selectedOffice, isAdmin, alldata, isLoading, SelectedOfficeName, setSelectedOfficeName, selectedOfficeNameLocal, setSelectedOfficeNameLocal, setSelectedOffice, setIsAdmin, setCompanies, setWholesales, setRetails, originallist, setOfficeIdLocal, officeIdLocal, setOptionvalue }) => {
   const [chartData, setChartData] = useState([]);
 
   const [showExportOptions, setShowExportOptions] = useState(false);

@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import Skeleton from '@mui/material/Skeleton';
 import Statistics from "../../components/Statistics/Statistics";
 import { useTranslation } from "react-i18next";
+import ReactECharts from 'echarts-for-react';
 
 // const Statistics =React.lazy(()=>import("../../components/Statistics/Statistics")); 
 const UserCard = React.lazy(() => import("./UserCard"));
@@ -67,12 +68,12 @@ const Dashboard = () => {
       window.removeEventListener("resize", handleWindowResize);
     };
   }, []);
-
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         // const headers = {
-        //   Authorization: `Bearer ${jwtToken}`,
+          //   Authorization: `Bearer ${jwtToken}`,
         // };
         const urlParams = new URLSearchParams(window.location.search);
         const userIdParams = urlParams.get("userId");
@@ -220,18 +221,18 @@ const Dashboard = () => {
               {officeData ? <OfficeCard officeCountData={officeCountData} /> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
             <Suspense fallback={<Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}>
-              {officeData ? <SalesCard totalIncome={totalIncome} countIncome={countIncome} todaySales={todaySales} salesCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
+              {officeData ? <SalesCard ReactECharts={ReactECharts} totalIncome={totalIncome} countIncome={countIncome} todaySales={todaySales} salesCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
             <Suspense fallback={<Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}>
-              {officeData ? <ExpenseCard totalExpense={totalExpense} countExpense={countExpense} todayExpense={todayExpense} expenseCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
+              {officeData ?  <ExpenseCard ReactECharts={ReactECharts} totalExpense={totalExpense} countExpense={countExpense} todayExpense={todayExpense} expenseCardData={salesCardData}/> : <Skeleton variant="rounded" width={windowWidth > 900 ? "22%" : windowWidth > 768 ? "45%" : "40%"} height={"auto"} style={{ borderRadius: "10px", paddingTop: "155px", margin: "10px" }} />}
             </Suspense>
-
+           
 
 
           </div>
         </div>
 
-        <Statistics themeMode={themeMode} officeId={userData.officeId} adminStatus={adminStatus} userId={userId} userOfficeName={officeName} />
+        <Statistics ReactECharts={ReactECharts} themeMode={themeMode} officeId={userData.officeId} adminStatus={adminStatus} userId={userId} userOfficeName={officeName} />
 
       </div>
     </div>

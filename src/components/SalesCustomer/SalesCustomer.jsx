@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import ReactECharts from 'echarts-for-react';
+
 import axios from "axios";
 import 'jspdf-autotable';
 import css from './SalesCustomer.module.css';
@@ -11,10 +11,11 @@ import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import * as echarts from 'echarts';
+
 import { FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme } from '@mui/material';
 
 const SalesCustomer = ({
+  echarts,ReactECharts,
   themeMode,
   selectedRange,
   selectedOffice,

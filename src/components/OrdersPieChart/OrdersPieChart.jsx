@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import ReactECharts from 'echarts-for-react';
+
 import axios from "axios";
 import 'jspdf-autotable';
 import css from './OrdersPieChart.module.css';
@@ -12,9 +12,10 @@ import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider, ToggleButton, ToggleButtonGroup, createTheme } from '@mui/material';
-import * as echarts from 'echarts';
+
 
 const OrdersPieChart = ({
+  echarts,ReactECharts,
   themeMode,
   selectedRange,
   selectedOffice,

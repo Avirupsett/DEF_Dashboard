@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import css from "./StatisticsChart.module.css";
-import * as echarts from 'echarts'
 
 import "jspdf-autotable"
 import loading from '/assets/loading.gif';
@@ -9,7 +8,6 @@ import logo from "/assets/logo.png";
 import { differenceInDays } from 'date-fns';
 import { FaFileExcel, FaXmark, FaFilePdf, FaListUl, FaTable, FaChartColumn } from "react-icons/fa6";
 
-import ReactECharts from "echarts-for-react";
 import { useTranslation } from "react-i18next";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,7 +15,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 
-const StatisticsChart = ({ selectedRange, themeMode,showGraph, selectedOffice, isAdmin, alldata, isLoading, officeName }) => {
+const StatisticsChart = ({ echarts,ReactECharts,selectedRange, themeMode,showGraph, selectedOffice, isAdmin, alldata, isLoading, officeName }) => {
   const [chartData, setChartData] = useState([]);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const iconContainerRef = useRef(null);
@@ -33,29 +31,7 @@ const StatisticsChart = ({ selectedRange, themeMode,showGraph, selectedOffice, i
 
 
 
-  const columns = [{ name: "requestedDate", label: t("Date") }, { name: "sales", label: `${t("Sales")}(₹)` }, { name: "expense", label: `${t("Expense")}(₹)` }];
-
-  const options = {
-    // filterType: 'checkbox',
-    selectableRowsHeader: false,
-    filter: false,
-    download: false,
-    print: false,
-    viewColumns: false,
-    search: false,
-    responsive: 'standard',
-    selectableRows: "none",
-    rowsPerPage: 10,
-    rowsPerPageOptions: [10, 25, 50],
-    tableBodyHeight: "228px",
-    elevation: 0,
-    fixedHeader: false,
-    textLabels: {
-      pagination: {
-        rowsPerPage: t("Rows")
-      }
-    }
-  };
+  
 
 
   useEffect(() => {

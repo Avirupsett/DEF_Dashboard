@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import ReactECharts from 'echarts-for-react';
+
 import axios from "axios";
 import 'jspdf-autotable';
 import css from './NewExCustomerBar.module.css';
@@ -11,7 +11,7 @@ import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import * as echarts from 'echarts';
+
 import { FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme } from '@mui/material';
 
 
@@ -19,6 +19,7 @@ import { FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme }
 
 
 const NewExCustomerBar = ({
+  echarts,ReactECharts,
   themeMode,
   selectedRange,
   selectedOffice,
@@ -178,7 +179,7 @@ const NewExCustomerBar = ({
           // Add Total row to dataToShow
           dataToShow.push({
             '#': '', // Leave the column empty for serial number
-            'Date': 'Total',
+            'Date': t('Total'),
             'New Customer Count': totalNewCustomerCount,
             'Existing Customer Count': totalExistingCustomerCount,
             'New Customer Sales': `₹ ${totalNewCustomerSales.toFixed(2)}`,
@@ -359,7 +360,7 @@ const NewExCustomerBar = ({
     },
     series: alignment2 == "Count" ? [
       {
-        name: 'Existing Customer Count',
+        name: t('Existing Customer Count'),
         type: getTimeSpanInDays() > 30 ? 'line' : 'bar',
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
@@ -399,7 +400,7 @@ const NewExCustomerBar = ({
         },
       },
       {
-        name: 'New Customer Count',
+        name: t('New Customer Count'),
         step: true,
         type: getTimeSpanInDays() > 30 ? 'line' : 'bar',
         areaStyle: {
@@ -440,7 +441,7 @@ const NewExCustomerBar = ({
 
     ] : [
       {
-        name: 'Existing Customer Sales',
+        name: t('Existing Customer Sales'),
         type: 'line',
         symbol: "none",
         stack: 'total2',
@@ -452,7 +453,7 @@ const NewExCustomerBar = ({
 
       },
       {
-        name: 'New Customer Sales',
+        name: t('New Customer Sales'),
         type: 'line',
         symbol: "none",
         stack: 'total2',
@@ -1054,7 +1055,7 @@ const NewExCustomerBar = ({
     // Add Total row to dataToShow
     dataToShow.push({
       '#': '', // Leave the column empty for serial number
-      'Date': 'Total',
+      'Date': t('Total'),
       'New Customer Count': totalNewCustomerCount,
       'Existing Customer Count': totalExistingCustomerCount,
       'New Customer Sales': `₹ ${totalNewCustomerSales.toFixed(2)}`,
@@ -1146,7 +1147,7 @@ const NewExCustomerBar = ({
     // Add Total row to dataToShow
     dataToShow.push({
       '#': '', // Leave the column empty for serial number
-      'Date': 'Total',
+      'Date': t('Total'),
       'New Customer Count': totalNewCustomerCount,
       'Existing Customer Count': totalExistingCustomerCount,
       'New Customer Sales': `₹ ${totalNewCustomerSales.toFixed(2)}`,
@@ -1331,7 +1332,7 @@ const NewExCustomerBar = ({
                 ))}
 
                 {/* Render the Total row */}
-                {tableData.length > 0 && tableData[tableData.length - 1]['Date'] === 'Total' && (
+                {tableData.length > 0 && tableData[tableData.length - 1]['Date'] === t('Total') && (
                   <tr>
                     <th scope="row">{[tableData.length - 1]['#']}</th>
                     <td>{[tableData.length - 1]['Date']}</td>

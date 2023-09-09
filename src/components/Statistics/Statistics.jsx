@@ -1,6 +1,6 @@
 import css from './Statistics.module.css';
 import React, { useState, useEffect, Suspense } from 'react';
-
+import * as echarts from 'echarts'
 import axios from 'axios';
 import { DateRangePicker } from 'rsuite';
 import { addDays, subDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addMonths, toDate } from 'date-fns';
@@ -10,6 +10,7 @@ import { FaXmark, FaFilter, FaArrowTrendUp } from "react-icons/fa6";
 import { Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import fetchSalesData from './FetchSalesData';
+// import CustomerType from '../CustomerType/CustomerType';
 // import CustomerType from '../CustomerType/CustomerType';
 
 
@@ -21,10 +22,11 @@ const SalesProductStacked = React.lazy(() => import('../SalesProductStacked/Sale
 const PaymentMode = React.lazy(() => import('../PaymentMode/PaymentMode'))
 const NewExCustomerPie=React.lazy(()=> import('../NewExCustomerPie/NewExCustomer'))
 const NewExCustomerBar=React.lazy(()=> import('../NewExCustomerBar/NewExCustomerBar'))
+const CustomerType=React.lazy(()=> import('../CustomerType/CustomerType'))
 // const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
 
 
-const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }) => {
+const Statistics = ({ReactECharts, themeMode, officeId, adminStatus, userId, userOfficeName }) => {
 
   const { t } = useTranslation();
   const predefinedRanges = [
@@ -432,50 +434,50 @@ const Statistics = ({ themeMode, officeId, adminStatus, userId, userOfficeName }
 
           <div className='col-md-12 col-lg-8'>
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName} showGraph={showGraph} />
+              <StatisticsChart echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName} showGraph={showGraph} />
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-4'>
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "360px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <OrdersPieChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName} showGraph={showGraph} />
+              <OrdersPieChart echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} officeName={selectedOfficeName} showGraph={showGraph} />
             </Suspense>
           </div>
 
           <div className='col-md-12 col-lg-6 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <SalesCustomer selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} />
+              <SalesCustomer echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} />
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-6 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <StatisticsChart2 selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} setSelectedOfficeName={setOfficeName} showGraph={showGraph} selectedOfficeNameLocal={selectedOfficeName} setSelectedOfficeNameLocal={setSelectedOfficeName} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue} />
+              <StatisticsChart2 echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} alldata={alldata} isLoading={isLoading} setSelectedOfficeName={setOfficeName} showGraph={showGraph} selectedOfficeNameLocal={selectedOfficeName} setSelectedOfficeNameLocal={setSelectedOfficeName} SelectedOfficeName={officeName} setSelectedOffice={setSelectedOffice} setIsAdmin={setIsAdmin} setCompanies={setCompanies} setWholesales={setWholesales} setRetails={setRetails} originallist={originallist} setOfficeIdLocal={setOfficeIdLocal} officeIdLocal={officeIdLocal} setOptionvalue={setOptionvalue} />
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <SalesProductStacked selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} setSelectedRange={setSelectedRange} isDateRangeActive={isDateRangeActive} setIsDateRangeActive={setIsDateRangeActive} />
+              <SalesProductStacked echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} setSelectedRange={setSelectedRange} isDateRangeActive={isDateRangeActive} setIsDateRangeActive={setIsDateRangeActive} />
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-4 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <PaymentMode selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} />
+              <PaymentMode echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={alldata} isLoading={isLoading} showGraph={showGraph} />
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-4 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <NewExCustomerPie selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} showGraph={showGraph} />
+              <NewExCustomerPie echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} showGraph={showGraph} />
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <NewExCustomerBar selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} showGraph={showGraph} />
+              <NewExCustomerBar echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} showGraph={showGraph} />
             </Suspense>
           </div>
-          {/* <div className='col-md-12 col-lg-12 mt-2' >
-       
-             <CustomerType/>
-
-          </div> */}
+          <div className='col-md-12 col-lg-12 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+              <CustomerType selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} />
+            </Suspense>
+          </div>
         </div>
         {/* {selectedOffice.length > 0 ? <div className='row'>
           <div className='col-md-12 col-lg-8'><StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} /></div>

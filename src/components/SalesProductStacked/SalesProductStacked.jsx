@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import ReactECharts from 'echarts-for-react';
+
 import axios from "axios";
 import 'jspdf-autotable';
 import css from './SalesProductStacked.module.css';
@@ -11,10 +11,11 @@ import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import * as echarts from 'echarts';
+
 import { FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme } from '@mui/material';
 
 const SalesProductStacked = ({
+    echarts,ReactECharts,
     themeMode,
     selectedRange,
     selectedOffice,
@@ -182,7 +183,7 @@ const SalesProductStacked = ({
                     })
                 )
             })
-            setTableDataByDate([...transformedDataDate, { "requestedDate": "Total", "productName": "", "totalSales": transformedDataDate.reduce((prev, c) => prev + c.totalSales, 0) }])
+            setTableDataByDate([...transformedDataDate, { "requestedDate": t("Total"), "productName": "", "totalSales": transformedDataDate.reduce((prev, c) => prev + c.totalSales, 0) }])
             let monthSales = (Object.values(daywiseSales)).map((item) => { return { "monthSales": item.monthSales, "productName": item.productName } })
 
             const transformedDataMonth = monthSales.flatMap(item => {
@@ -210,20 +211,20 @@ const SalesProductStacked = ({
                 const dateB = new Date(b.requestedDate);
                 return dateA - dateB;
             });
-            setTableDataByMonth([...filteredDataMonth, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataMonth.reduce((prev, c) => prev + c.totalSales, 0) }])
+            setTableDataByMonth([...filteredDataMonth, { "requestedDate": t("Total"), "productName": "", "totalSales": filteredDataMonth.reduce((prev, c) => prev + c.totalSales, 0) }])
 
             const transformedDataYear = Object.values(daywiseSales).flatMap(item => Object.entries(item.yearSales).map((subitem) => { return { "requestedDate": subitem[0], "productName": item.productName, "totalSales": subitem[1] } }))
             const filteredDataYear = transformedDataYear.filter(item => item.totalSales > 0);
 
-            setTableDataByYear([...filteredDataYear, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataYear.reduce((prev, c) => prev + c.totalSales, 0) }])
+            setTableDataByYear([...filteredDataYear, { "requestedDate": t("Total"), "productName": "", "totalSales": filteredDataYear.reduce((prev, c) => prev + c.totalSales, 0) }])
             if (alignment === 'Sales (Day Wise)') {
-                setTableData([...transformedDataDate, { "requestedDate": "Total", "productName": "", "totalSales": transformedDataDate.reduce((prev, c) => prev + c.totalSales, 0) }])
+                setTableData([...transformedDataDate, { "requestedDate": t("Total"), "productName": "", "totalSales": transformedDataDate.reduce((prev, c) => prev + c.totalSales, 0) }])
             }
             else if (alignment === 'Sales (Month Wise)') {
-                setTableData([...filteredDataMonth, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataMonth.reduce((prev, c) => prev + c.totalSales, 0) }])
+                setTableData([...filteredDataMonth, { "requestedDate": t("Total"), "productName": "", "totalSales": filteredDataMonth.reduce((prev, c) => prev + c.totalSales, 0) }])
             }
             else if (alignment === 'Sales (Year Wise)') {
-                setTableData([...filteredDataYear, { "requestedDate": "Total", "productName": "", "totalSales": filteredDataYear.reduce((prev, c) => prev + c.totalSales, 0) }])
+                setTableData([...filteredDataYear, { "requestedDate": t("Total"), "productName": "", "totalSales": filteredDataYear.reduce((prev, c) => prev + c.totalSales, 0) }])
             }
         }
 

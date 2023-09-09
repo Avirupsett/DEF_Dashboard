@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import ReactECharts from 'echarts-for-react';
+
 import axios from "axios";
 import 'jspdf-autotable';
 import css from './NewExCustomer.module.css';
@@ -11,14 +11,16 @@ import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import * as echarts from 'echarts';
+
 import { FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme } from '@mui/material';
+import { FaChartPie } from 'react-icons/fa';
 
 
 
 
 
 const NewExCustomer = ({
+    echarts,ReactECharts,
     themeMode,
     selectedRange,
     selectedOffice,
@@ -250,7 +252,7 @@ const NewExCustomer = ({
         legend: {
             orient: 'horizontal',
             bottom: 0, // You can adjust the positioning of the legend
-            data: ['Existing Customers', 'New Customers'],
+            data: [t('Existing Customers'), t('New Customers')],
             textStyle: {
                 color: themeMode === "dark" ? "#ffffff" : "#000000",
                 fontSize: window.innerWidth <= 1496 ? 12 : 14,
@@ -259,7 +261,7 @@ const NewExCustomer = ({
         },
         series: [
             {
-                name: 'Customers',
+                name: t('Customers'),
                 type: 'pie',
                 radius: ['35%', '70%'],
                 center: ['50%', '40%'],
@@ -292,7 +294,7 @@ const NewExCustomer = ({
                 data: [
                     {
                         value: getPieChartData().existingCustomerCount,
-                        name: 'Existing Customers',
+                        name: t('Existing Customers'),
                         itemStyle: {
                             color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
                                 {
@@ -308,7 +310,7 @@ const NewExCustomer = ({
                     },
                     {
                         value: getPieChartData().newCustomerCount,
-                        name: 'New Customers',
+                        name: t('New Customers'),
                         itemStyle: {
                             color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
                                 {
@@ -504,7 +506,7 @@ const NewExCustomer = ({
                     // Add total row to dataToShow
                     dataToShow.push({
                         '#': '', // Leave the column empty for serial number
-                        'CustomerName': 'Total',
+                        'CustomerName': t('Total'),
                         'Total Count': totalTotalCount,
                     });
 
@@ -683,7 +685,7 @@ const NewExCustomer = ({
                     const totalTotalCount = dataToShow.reduce((total, item) => total + item.totalCount, 0);
 
                     // Add total row
-                    const totalRow = worksheet.addRow(['', 'Total', totalTotalCount]);
+                    const totalRow = worksheet.addRow(['', t('Total'), totalTotalCount]);
                     totalRow.font = {
                         bold: true,
                     };
@@ -870,7 +872,7 @@ const NewExCustomer = ({
             // Add total row to dataToShow
             dataToShow.push({
                 '#': '', // Leave the column empty for serial number
-                'CustomerName': 'Total',
+                'CustomerName': t('Total'),
                 'Total Count': totalTotalCount,
             });
 
@@ -1061,7 +1063,7 @@ const NewExCustomer = ({
             const totalTotalCount = dataToShow.reduce((total, item) => total + item.totalCount, 0);
 
             // Add total row to the rows array
-            const totalRow = ['', 'Total', totalTotalCount];
+            const totalRow = ['', t('Total'), totalTotalCount];
             rows.push(totalRow);
 
 
@@ -1481,7 +1483,7 @@ const NewExCustomer = ({
                                             <span>{t("View Table")}</span>
                                         </div> :
                                         <div className={css.exportOption} onClick={handleViewGraph}>
-                                            <FaChartColumn style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
+                                            <FaChartPie style={{ fontSize: "1.1rem", color: "#6c3fb5" }} />
                                             <span>{t("View Graph")}</span>
                                         </div>}
                                     <div className={css.exportOption} onClick={!isBack ? exportToExcel : exportToExcel2}>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import ReactECharts from 'echarts-for-react';
+
 import axios from "axios";
 import 'jspdf-autotable';
 import css from './PaymentMode.module.css';
@@ -11,10 +11,11 @@ import font from '/assets/NotoSansBengali-VariableFont_wdth,wght.ttf'
 import font2 from '/assets/NotoSansDevanagari-VariableFont_wdth,wght.ttf'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import * as echarts from 'echarts';
+
 
 
 const PaymentMode = ({
+    echarts,ReactECharts,
     themeMode,
     selectedRange,
     selectedOffice,
@@ -50,7 +51,7 @@ const PaymentMode = ({
             const data = alldata.graph5;
             setChartData(data)
             const totalCount = data.reduce((prev, c) => prev + c.Count, 0)
-            setTableData([...data, { "PaymentModeName": "Total", "Count": totalCount }])
+            setTableData([...data, { "PaymentModeName": t("Total"), "Count": totalCount }])
            }
             // axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/payment/${startDate}/${endDate}/${selectedOffice}/${isAdmin}`).
             //     then((response) => {
@@ -247,11 +248,11 @@ const PaymentMode = ({
             itemStyle:{color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 {
                   offset: 1,
-                  color: e.PaymentModeName==t('UPI')?'#5fb476':e.PaymentModeName==t('Card')?'#f0d070':e.PaymentModeName==t('Cash')?'#73a2ee':'#e77267'
+                  color: e.PaymentModeName=='UPI'?'#5fb476':e.PaymentModeName=='Card'?'#f0d070':e.PaymentModeName=='Cash'?'#73a2ee':'#e77267'
                 },
                 {
                   offset: 0,
-                  color: e.PaymentModeName==t('UPI')?shadeColor('#5fb476',50):e.PaymentModeName==t('Card')?shadeColor('#f0d070',50):e.PaymentModeName==t('Cash')?shadeColor('#73a2ee',50):shadeColor('#e77267',50)
+                  color: e.PaymentModeName=='UPI'?shadeColor('#5fb476',50):e.PaymentModeName=='Card'?shadeColor('#f0d070',50):e.PaymentModeName=='Cash'?shadeColor('#73a2ee',50):shadeColor('#e77267',50)
                 }
               ]),
               borderRadius:[5,5,5,5]

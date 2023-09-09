@@ -72,5 +72,20 @@
     "Card":"Card",
     "UPI":"UPI",
     "Cash":"Cash",
-    "NetBanking":"NetBanking"
+    "NetBanking":"NetBanking",
+    "Customers":"Customers",
+    "Customer Type":"Customer Type",
+    "Total Count":"Total Count",
+    "Existing Customers":"Existing Customers",
+    "New Customers":"New Customers",
+    "Existing Customer Count":"Existing Customer Count",
+    "Existing Customer Sales":"Existing Customer Sales",
+    "New Customer Count":"New Customer Count",
+    "New Customer Sales":"New Customer Sales",
+    "Customers Summary Data":"Customers Summary Data",
+    "Customer Name":"Customer Name",
+    "Mobile No":"Mobile No",
+    "Vehicle No":"Vehicle No",
+    "Top Customers Summary Data":"Top Customers Summary Data"
+
 }

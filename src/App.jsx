@@ -3,8 +3,6 @@ import React from 'react';
 import Dashboard from './pages/Dashboard/Dashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-
-
 const App = () => {
   return (
     <div id="dashboard">
