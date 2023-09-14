@@ -475,7 +475,7 @@ const Statistics = ({ReactECharts, themeMode, officeId, adminStatus, userId, use
           </div>
           <div className='col-md-12 col-lg-12 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <CustomerType selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} />
+              <CustomerType echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} />
             </Suspense>
           </div>
         </div>
