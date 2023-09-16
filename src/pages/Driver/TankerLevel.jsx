@@ -49,7 +49,7 @@ export default function TankerLevelChart({ title, filllevel, emptylevel, fillTit
                     // silent: true,
                     type: 'pie',
                     radius: [45, 60],
-                    color: ['#239dab','#EAECF1'],
+                    color: ['#4b8587','#EAECF1'],
                     itemStyle: {
                         borderRadius: 5,
                     },
@@ -89,7 +89,7 @@ export default function TankerLevelChart({ title, filllevel, emptylevel, fillTit
         <div className='text-center'>
             <div ref={ref} style={{ minWidth: '100%', height: '250px' }}>
             </div>
-            <div style={{ width: "140px", marginTop: "5px" }}>
+            <div className='text-dark fw-semibold' style={{ width: "140px", marginTop: "5px" }}>
                 {t(title)}
             </div>
         </div>)

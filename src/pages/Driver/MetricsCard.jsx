@@ -30,7 +30,7 @@ export default function MetricsCard({distanceCovered,drivingTime,idleTime,averag
             </div>
             <div className="px-2 rounded-4 py-2 mt-1 mx-1" style={{width:'44%',fontSize:'12px',backgroundColor:"var(--driver-secondary)"}}>
                 <div className='text-dark'>
-                    <IoIosSpeedometer className='me-2 text-warning' style={{ marginBottom: "2px",fontSize:"16px" }} />
+                    <IoIosSpeedometer className='me-2 text-primary' style={{ marginBottom: "2px",fontSize:"16px" }} />
                     {t("Average Speed")}
                 </div>
                 <div className='fs-1 fw-bold py-1 px-1 text-dark'>{averageSpeed} <span className='fs-4'>km/hr</span></div>

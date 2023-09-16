@@ -29,10 +29,10 @@ export default function DriverDashboard() {
     })
     const [progress, setProgress] = useState(false)
 
-    const startProgress=()=>{
+    const startProgress = () => {
         setProgress(true)
         setTimeout(() => {
-           setProgress(false) 
+            setProgress(false)
         }, 2500);
     }
 
@@ -83,7 +83,7 @@ export default function DriverDashboard() {
     }
 
     useEffect(() => {
-    
+
         fetchData();
 
         // Set up the interval to call fetchData every 5 minutes (300,000 milliseconds)
@@ -92,38 +92,39 @@ export default function DriverDashboard() {
         // Cleanup the interval when the component unmounts
         return () => clearInterval(intervalId);
     }, [])
-    
+
 
 
     return (
         <div style={{ fontFamily: "'Poppins', sans-serif" }}>
-            <div className='py-2' style={{ borderBottomRightRadius: "20px", borderBottomLeftRadius: "20px", background: '-webkit-linear-gradient(45deg,#073660,#13a098)' }}>
+            <div className='py-0' style={{ borderBottomRightRadius: "20px", borderBottomLeftRadius: "20px" }}>
                 <div className='px-3 pt-3 pb-1 d-flex justify-content-between align-items-center'>
                     <div>
-                        <div className='text-light fs-2' style={{ letterSpacing: ".8px", fontWeight: 500 }}>{t("Hello")},</div>
-                        <div className='text-light fs-1 lh-1' style={{ letterSpacing: ".5px", fontWeight: 500 }}>{profile.name}</div>
-                        <div className='text-light ' style={{ letterSpacing: "0px", lineHeight: 1.75, fontSize: 14,marginTop:"8px" }}><BsTelephone style={{ marginBottom: "4px", fontSize: "12px" }} /> +91 {profile.ContactNo.slice(0, 5)} {profile.ContactNo.slice(5,)}</div>
-                        {profile.licenceNo !== '' ? <div className='text-light ' style={{ letterSpacing: "0px", lineHeight: 0.25, fontSize: 14 }}><BsPersonVcard style={{ marginBottom: "2px", marginRight: "0px" }} /> <span style={{ fontSize: "12px" }}>(lic.)</span> {profile.licenceNo}</div> : null}
+                        <div className='fs-2 text-dark' style={{ letterSpacing: ".8px", fontWeight: 500, color: "var(--driver-primary)" }}>{t("Hello")},</div>
+                        <div className='fs-1 text-dark lh-1' style={{ letterSpacing: ".5px", fontWeight: 500, color: "var(--driver-primary)" }}>{profile.name}</div>
+                        <div className='text-secondary ' style={{ letterSpacing: "0px", lineHeight: 1.75, fontSize: 14, marginTop: "8px" }}><BsTelephone style={{ marginBottom: "4px", fontSize: "12px" }} /> +91 {profile.ContactNo.slice(0, 5)} {profile.ContactNo.slice(5,)}</div>
+                        {profile.licenceNo !== '' ? <div className='text-secondary ' style={{ letterSpacing: "0px", lineHeight: 0.25, fontSize: 14 }}><BsPersonVcard style={{ marginBottom: "2px", marginRight: "0px" }} /> <span style={{ fontSize: "12px" }}>(lic.)</span> {profile.licenceNo}</div> : null}
                     </div>
                     <div className='mx-2'>
-                        <IoIosRefresh className='display-5 text-light mb-1 mx-1' onClick={()=>{fetchData();startProgress()}} />
-                        {progress?<LinearProgress color="info" />:<span style={{minHeight:"4px",position: "relative",overflow: "hidden",display:"block",height: "4px",zIndex: 0}}></span>}
+                        <IoIosRefresh className='display-5 mb-1 mx-1' style={{ color: "var(--driver-primary)" }} onClick={() => { fetchData(); startProgress() }} />
+                        {progress ? <LinearProgress color="info" /> : <span style={{ minHeight: "4px", position: "relative", overflow: "hidden", display: "block", height: "4px", zIndex: 0 }}></span>}
                     </div>
                 </div>
-                <div className='display-6 text-light fw-semibold px-3 pt-2 pb-2' style={{}}>
-                    <BsSpeedometer2 className='text-warning' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "10px" }} />
+                <div className="ms-4 me-4 d-flex align-items-center justify-content-between" style={{ marginTop: "-50px" }}>
+                    <TankerLevelChart title={"Tanker Fuel Level"} filllevel={graph1.filllevel} emptylevel={graph1.emptylevel} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
+                    <TankerLevelChart title={"Jobs Completed"} filllevel={graph2.filllevel} emptylevel={graph2.emptylevel} fillTitle="Job Done" emptyTitle="Job Left" />
+                </div>
+                <div className='display-6 text-dark fw-semibold px-3 pt-4 pb-2' style={{ color: "var(--driver-primary)" }}>
+                    <BsSpeedometer2 className='' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "10px", color: "var(--driver-primary)" }} />
                     Metrics
                 </div>
                 <MetricsCard distanceCovered={distanceCovered} drivingTime={drivingTime} idleTime={idleTime} averageSpeed={averageSpeed} />
             </div>
-            <div className='display-6 text-dark fw-semibold px-3 pt-3 pb-2' style={{}}>
+            {/* <div className='display-6 text-dark fw-semibold px-3 pt-0 pb-2' style={{}}>
                 <IoMdStats className='display-5' style={{ marginBottom: "4px", verticalAlign: "bottom", marginRight: "8px", color: 'var(--driver-primary)' }} />
                 Stats
-            </div>
-            <div className="ms-4 me-4 d-flex align-items-center justify-content-between" style={{marginTop:"-55px"}}>
-                <TankerLevelChart title={"Tanker Fuel Level"} filllevel={graph1.filllevel} emptylevel={graph1.emptylevel} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
-                <TankerLevelChart title={"Jobs Completed"} filllevel={graph2.filllevel} emptylevel={graph2.emptylevel} fillTitle="Job Done" emptyTitle="Job Left" />
-            </div>
+            </div> */}
+
             {/* <div className='display-6 text-dark fw-semibold px-3 pt-4 pb-3' style={{  }}>
                 <BiSolidTruck className='display-5' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "8px", color: 'var(--driver-primary)' }} />
                 My Trips
