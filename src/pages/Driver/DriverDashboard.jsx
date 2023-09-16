@@ -96,12 +96,12 @@ export default function DriverDashboard() {
 
 
     return (
-        <div style={{ fontFamily: "'Poppins', sans-serif",height:"100vh" }}>
-            <div className='py-0' style={{ borderBottomRightRadius: "20px", borderBottomLeftRadius: "20px" }}>
+        <div style={{ fontFamily: "'Poppins', sans-serif", height: "100vh" }}>
+            <div className='py-0 pb-1' style={{ borderBottomRightRadius: "20px", borderBottomLeftRadius: "20px",backgroundColor:"#d0e8f0d4" }}>
                 <div className='px-3 pt-3 pb-1 d-flex justify-content-between align-items-center'>
                     <div>
-                        <div className='fs-2 text-dark' style={{ letterSpacing: ".8px", fontWeight: 500, color: "var(--driver-primary)" }}>{t("Hello")},</div>
-                        <div className='fs-1 text-dark lh-1' style={{ letterSpacing: ".5px", fontWeight: 500, color: "var(--driver-primary)" }}>{profile.name}</div>
+                        <div className='fs-2 ' style={{ letterSpacing: ".8px", fontWeight: 500, color: "var(--driver-primary)" }}>{t("Hello")},</div>
+                        <div className='fs-1 lh-1' style={{ letterSpacing: ".5px", fontWeight: 500, color: "var(--driver-primary)" }}>{profile.name}</div>
                         <div className='text-secondary ' style={{ letterSpacing: "0px", lineHeight: 1.75, fontSize: 14, marginTop: "8px" }}><BsTelephone style={{ marginBottom: "4px", fontSize: "12px" }} /> +91 {profile.ContactNo.slice(0, 5)} {profile.ContactNo.slice(5,)}</div>
                         {profile.licenceNo !== '' ? <div className='text-secondary ' style={{ letterSpacing: "0px", lineHeight: 0.25, fontSize: 14 }}><BsPersonVcard style={{ marginBottom: "2px", marginRight: "0px" }} /> <span style={{ fontSize: "12px" }}>(lic.)</span> {profile.licenceNo}</div> : null}
                     </div>
@@ -110,11 +110,8 @@ export default function DriverDashboard() {
                         {progress ? <LinearProgress color="info" /> : <span style={{ minHeight: "4px", position: "relative", overflow: "hidden", display: "block", height: "4px", zIndex: 0 }}></span>}
                     </div>
                 </div>
-                <div className="ms-4 me-4 d-flex align-items-center justify-content-between" style={{ marginTop: "-50px" }}>
-                    <TankerLevelChart title={"Tanker Fuel Level"} filllevel={graph1.filllevel} emptylevel={graph1.emptylevel} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
-                    <TankerLevelChart title={"Jobs Completed"} filllevel={graph2.filllevel} emptylevel={graph2.emptylevel} fillTitle="Job Done" emptyTitle="Job Left" />
-                </div>
-                <div className='display-6 text-dark fw-semibold px-3 pt-4 pb-2' style={{ color: "var(--driver-primary)" }}>
+
+                <div className='display-6 fw-semibold px-3 pt-3 pb-2' style={{ color: "var(--driver-primary)",letterSpacing:".5px" }}>
                     <BsSpeedometer2 className='' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "10px", color: "var(--driver-primary)" }} />
                     Metrics
                 </div>
@@ -124,6 +121,10 @@ export default function DriverDashboard() {
                 <IoMdStats className='display-5' style={{ marginBottom: "4px", verticalAlign: "bottom", marginRight: "8px", color: 'var(--driver-primary)' }} />
                 Stats
             </div> */}
+            <div className="ms-4 me-4 d-flex align-items-center justify-content-between" style={{ marginTop: "10px" }}>
+                <TankerLevelChart title={"Tanker Fuel Level"} filllevel={graph1.filllevel} emptylevel={graph1.emptylevel} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
+                <TankerLevelChart title={"Jobs Completed"} filllevel={graph2.filllevel} emptylevel={graph2.emptylevel} fillTitle="Job Done" emptyTitle="Job Left" />
+            </div>
 
             {/* <div className='display-6 text-dark fw-semibold px-3 pt-4 pb-3' style={{  }}>
                 <BiSolidTruck className='display-5' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "8px", color: 'var(--driver-primary)' }} />
