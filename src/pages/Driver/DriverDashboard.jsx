@@ -96,7 +96,7 @@ export default function DriverDashboard() {
 
 
     return (
-        <div style={{ fontFamily: "'Poppins', sans-serif" }}>
+        <div style={{ fontFamily: "'Poppins', sans-serif",height:"100vh" }}>
             <div className='py-0' style={{ borderBottomRightRadius: "20px", borderBottomLeftRadius: "20px" }}>
                 <div className='px-3 pt-3 pb-1 d-flex justify-content-between align-items-center'>
                     <div>
