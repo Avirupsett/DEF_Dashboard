@@ -8,6 +8,16 @@ import TankerLevelChart from './TankerLevel';
 import { useTranslation } from "react-i18next";
 import axios from 'axios';
 import { LinearProgress } from '@mui/material';
+import PrevJourney from './prevJourney';
+import { BiFilterAlt, BiSolidTruck} from 'react-icons/bi';
+import { FaClockRotateLeft} from 'react-icons/fa6';
+import MyTrips from './Mytrips';
+
+const prevJourneyData = [
+    { serialNumber: 1 },
+    { serialNumber: 2 },
+    { serialNumber: 3 },
+  ];
 
 export default function DriverDashboard() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -97,7 +107,7 @@ export default function DriverDashboard() {
 
     return (
         <div style={{ fontFamily: "'Poppins', sans-serif", height: "100vh" }}>
-            <div className='py-0 pb-1' style={{ borderBottomRightRadius: "20px", borderBottomLeftRadius: "20px",backgroundColor:"#d0e8f0d4" }}>
+            <div className='py-0 pb-1' style={{ borderBottomRightRadius: "20px", borderBottomLeftRadius: "20px", backgroundColor: "#d0e8f0d4" }}>
                 <div className='px-3 pt-3 pb-1 d-flex justify-content-between align-items-center'>
                     <div>
                         <div className='fs-2 ' style={{ letterSpacing: ".8px", fontWeight: 500, color: "var(--driver-primary)" }}>{t("Hello")},</div>
@@ -111,7 +121,7 @@ export default function DriverDashboard() {
                     </div>
                 </div>
 
-                <div className='display-6 fw-semibold px-3 pt-3 pb-2' style={{ color: "var(--driver-primary)",letterSpacing:".5px" }}>
+                <div className='display-6 fw-semibold px-3 pt-3 pb-2' style={{ color: "var(--driver-primary)", letterSpacing: ".5px" }}>
                     <BsSpeedometer2 className='' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "10px", color: "var(--driver-primary)" }} />
                     Metrics
                 </div>
@@ -131,6 +141,21 @@ export default function DriverDashboard() {
                 My Trips
             </div>
             <MyTrips/> */}
+            <div className='display-6 text-dark fw-semibold px-3 pt-4 pb-3' style={{}}>
+                <BiSolidTruck className='display-5' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "15px", color: '#4b8587' }} />
+                My Trips
+            </div>
+            <MyTrips />
+            <div className='display-6 text-dark fw-semibold px-3 pt-4 pb-3' style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                    <FaClockRotateLeft className='display-5' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "15px", color: '#4b8587' }} />
+                    Prev Journey
+                </div>
+                <BiFilterAlt />
+            </div>
+            {prevJourneyData.map((dataItem, index) => (
+                <PrevJourney key={index} serialNumber={dataItem.serialNumber} />
+            ))}
         </div>
     )
 }

@@ -86,6 +86,11 @@
     "Customer Name":"Customer Name",
     "Mobile No":"Mobile No",
     "Vehicle No":"Vehicle No",
-    "Top Customers Summary Data":"Top Customers Summary Data"
-
+    "Top Customers Summary Data":"Top Customers Summary Data",
+    "Distance Covered":"Distance Covered",
+    "Driving Time":"Driving Time",
+    "Idle Time":"Idle Time",
+    "Average Speed":"Average Speed",
+    "Tanker Fuel Level":"Tanker Fuel Level",
+    "Jobs Completed":"Jobs Completed"
 }
