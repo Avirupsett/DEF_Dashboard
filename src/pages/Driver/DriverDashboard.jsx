@@ -141,7 +141,7 @@ export default function DriverDashboard() {
                 My Trips
             </div>
             <MyTrips/> */}
-            <div className='display-6 text-dark fw-semibold px-3 pt-4 pb-3' style={{}}>
+            {/* <div className='display-6 text-dark fw-semibold px-3 pt-4 pb-3' style={{}}>
                 <BiSolidTruck className='display-5' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "15px", color: '#4b8587' }} />
                 My Trips
             </div>
@@ -155,7 +155,7 @@ export default function DriverDashboard() {
             </div>
             {prevJourneyData.map((dataItem, index) => (
                 <PrevJourney key={index} serialNumber={dataItem.serialNumber} />
-            ))}
+            ))} */}
         </div>
     )
 }
