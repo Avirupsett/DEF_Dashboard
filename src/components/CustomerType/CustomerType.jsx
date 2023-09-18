@@ -118,7 +118,7 @@ const CustomerType = ({ ReactECharts, echarts, newExData, themeMode, selectedRan
         }
 
         return {
-          Header: key,
+          Header: t(key),
           accessor: key,
           Cell: ({ value }) => cellFormatter(value),
         };
@@ -1356,7 +1356,7 @@ const CustomerType = ({ ReactECharts, echarts, newExData, themeMode, selectedRan
 
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px',marginTop:"10px" }}>
               <ThemeProvider theme={theme}>
-                <FormControl sx={{ minWidth: 280, marginRight: "5px" }} size="small">
+                <FormControl sx={{ minWidth: 250,mazWidth:280, marginRight: "5px" }} size="small">
                   <InputLabel
                     id="demo-simple-select-helper-label"
                     style={{ color: "var(--text-color)", fontFamily: '"Public Sans", sans-serif !important' }}
@@ -1379,7 +1379,7 @@ const CustomerType = ({ ReactECharts, echarts, newExData, themeMode, selectedRan
                           value={filterOption}
                           style={{ color: "var(--text-color)", fontFamily: '"Public Sans", sans-serif !important' }}
                         >
-                          {filterOption}
+                          {t(filterOption)}
                         </MenuItem>
                       ))}
                   </Select>
@@ -1411,7 +1411,7 @@ const CustomerType = ({ ReactECharts, echarts, newExData, themeMode, selectedRan
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     style={{
-                      padding: '10px 25px 5px 35px',
+                      padding: '10px 25px 5px 15px',
                       fontSize: '16px',
                       borderRadius: '5px',
                       border: '1px solid #ccc',
@@ -1472,7 +1472,7 @@ const CustomerType = ({ ReactECharts, echarts, newExData, themeMode, selectedRan
 
                       if (columnData.accessor === 'Last Visit') {
                         // Format "Last Visit" with "Today" when the value is 0
-                        const lastVisitText = cellValue === 0 ? 'Today' : `${cellValue} days ago`;
+                        const lastVisitText = cellValue === 0 ? 'Today' : `${cellValue} ${t("days ago")}`;
 
                         return (
                           <div
@@ -1706,14 +1706,14 @@ const CustomerType = ({ ReactECharts, echarts, newExData, themeMode, selectedRan
               <div>
                 <span
                   style={{
-                    fontSize: '16px',
+                    fontSize: '12px',
                     marginRight: '10px',
                   }}
                 >
-                  Page <strong>{pageIndex + 1}</strong> of {pageCount}
+                  {t("Page")} <strong>{pageIndex + 1}</strong> of {pageCount}
                 </span>
-                <span>
-                  | Go to page:{' '}
+                <span style={{fontSize:"12px"}}>
+                  | {t("Go to page")}:{' '}
                   <input
                     type="number"
                     value={pageIndex + 1}
@@ -1725,11 +1725,11 @@ const CustomerType = ({ ReactECharts, echarts, newExData, themeMode, selectedRan
                     }}
                     style={{
                       padding: '5px',
-                      fontSize: '16px',
+                      fontSize: '12px',
                       borderRadius: '5px',
                       color: '#272626',
                       border: '1px solid #ccc',
-                      marginRight: '10px',
+                      marginRight: '0px',
                       width: '50px',
                     }}
                   />

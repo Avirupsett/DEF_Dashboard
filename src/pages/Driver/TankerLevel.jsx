@@ -54,7 +54,7 @@ export default function TankerLevelChart({ title, filllevel, emptylevel, fillTit
         const option = {
             // color: ['var(--driver-primary)', 'var(--driver-secondary)'],
             title: {
-                text: `${(filllevel / (filllevel + emptylevel) * 100).toFixed(0)}%`,
+                text: `${(filllevel + emptylevel)>0?(filllevel / (filllevel + emptylevel) * 100).toFixed(0):0}%`,
                 left: 'center',
                 top: 'center'
             },
@@ -89,7 +89,7 @@ export default function TankerLevelChart({ title, filllevel, emptylevel, fillTit
                     },
 
                     data: [
-                        { value: filllevel, name: fillTitle,itemStyle:{color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { value:filllevel>0?filllevel:'', name: fillTitle,itemStyle:{color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                             {
                               offset: 1,
                               color: shadeColor('#4b8587',30)
