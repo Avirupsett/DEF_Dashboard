@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as echarts from 'echarts/core';
 
 import {
+    TitleComponent,
     TooltipComponent,
     LegendComponent,
 } from 'echarts/components';
@@ -11,6 +12,7 @@ import { SVGRenderer } from 'echarts/renderers';
 import { t } from 'i18next';
 
 echarts.use([
+    TitleComponent,
     TooltipComponent,
     LegendComponent,
     PieChart,

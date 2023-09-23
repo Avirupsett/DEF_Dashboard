@@ -23,10 +23,10 @@ export default function DriverDashboard() {
     const [metricsData, setMetricsData] = useState({})
     const [prevJourney, setPrevJourney] = useState([]); // State variable for prevJourney data
     const [myTrip, setmyTrip] = useState([]);
-    const [distanceCovered, setDistanceCovered] = useState(0)
-    const [drivingTime, setDrivingTime] = useState(0)
-    const [idleTime, setIdleTime] = useState(0)
-    const [averageSpeed, setAverageSpeed] = useState(0)
+    const [distanceCovered, setDistanceCovered] = useState(0.0)
+    const [drivingTime, setDrivingTime] = useState(0.0)
+    const [idleTime, setIdleTime] = useState(0.0)
+    const [averageSpeed, setAverageSpeed] = useState(0.0)
     const [profile, setProfile] = useState({ "name": ".........", "licenceNo": "....", "ContactNo": ".........." })
     const [graph1, setGraph1] = useState({
         filllevel: '',
@@ -111,7 +111,7 @@ export default function DriverDashboard() {
 
     return (
         <>
-            {distanceCovered === 0 && drivingTime === 0 && idleTime === 0 && myTrip.length === 0 && prevJourney.length === 0 ? (!isLoading ? <WelcomePage name={profile.name} /> : <></>) :
+            {((distanceCovered === 0.0||distanceCovered === '0.0') && (drivingTime === 0.0||drivingTime === '0.0') && (idleTime === 0.0||idleTime==='0.0') && myTrip.length === 0 && prevJourney.length === 0) ? (!isLoading ? <WelcomePage name={profile.name} /> : <></>) :
                 !isLoading ? <div style={{ fontFamily: "'Poppins', sans-serif", height: "100vh" }}>
                     <div className='py-0 pb-1' style={{ borderBottomRightRadius: "20px", borderBottomLeftRadius: "20px", backgroundColor: "#d0e8f0d4" }}>
                         <div className='px-3 pt-3 pb-1 d-flex justify-content-between align-items-center'>

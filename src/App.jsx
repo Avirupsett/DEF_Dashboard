@@ -1,9 +1,11 @@
 import React from 'react';
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Dashboard from './pages/Dashboard/Dashboard';
+// import Dashboard from './pages/Dashboard/Dashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import DriverDashboard from './pages/Driver/DriverDashboard';
+// import DriverDashboard from './pages/Driver/DriverDashboard';
 import { Routes, Route } from 'react-router-dom';
+const DriverDashboard=React.lazy(()=>import('./pages/Driver/DriverDashboard'))
+const Dashboard=React.lazy(()=>import('./pages/Dashboard/Dashboard'))
 
 const App = () => {
   return (
