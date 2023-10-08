@@ -52,6 +52,7 @@ const Dashboard = () => {
   const [todayExpense, setTodayExpense] = useState(0)
   const [todaySales, setTodaySales] = useState(0)
   const [salesCardData, setSalesCardData] = useState([])
+  const [masterOfficeId, setMasterOfficeId] = useState("")
 
   // Function to update the window width state on window resize
   const handleWindowResize = () => {
@@ -94,6 +95,7 @@ const Dashboard = () => {
           const userDataResponse = await response.data;
           setUserData(userDataResponse);
           setOfficeName(userDataResponse.officeName)
+          setMasterOfficeId(userDataResponse.masterOfficeId)
           if (userDataResponse.roleName === "CompanyAdmin") {
             setAdminStatus(6)
           }
@@ -147,6 +149,7 @@ const Dashboard = () => {
             const userDataResponse = await response.data;
             setUserData(userDataResponse);
             setOfficeName(userDataResponse.officeName)
+            setMasterOfficeId(userDataResponse.masterOfficeId)
             if (userDataResponse.roleName === "CompanyAdmin") {
               setAdminStatus(6)
             }
@@ -232,7 +235,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <Statistics ReactECharts={ReactECharts} themeMode={themeMode} officeId={userData.officeId} adminStatus={adminStatus} userId={userId} userOfficeName={officeName} />
+        <Statistics ReactECharts={ReactECharts} themeMode={themeMode} masterOfficeId={masterOfficeId} officeId={userData.officeId} adminStatus={adminStatus} userId={userId} userOfficeName={officeName} />
 
       </div>
     </div>

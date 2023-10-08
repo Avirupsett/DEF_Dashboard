@@ -10,6 +10,8 @@ import { FaXmark, FaFilter, FaArrowTrendUp } from "react-icons/fa6";
 import { Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import fetchSalesData from './FetchSalesData';
+// import DeliveryTrend from '../DeliveryTrend/deliveryTrend';
+// import MultiHubDelivery from '../MultiHubDelivery/MultiHubDelivery';
 // import CustomerType from '../CustomerType/CustomerType';
 // import CustomerType from '../CustomerType/CustomerType';
 
@@ -20,13 +22,15 @@ const OrdersPieChart = React.lazy(() => import('../OrdersPieChart/OrdersPieChart
 const SalesCustomer = React.lazy(() => import('../SalesCustomer/SalesCustomer'))
 const SalesProductStacked = React.lazy(() => import('../SalesProductStacked/SalesProductStacked'))
 const PaymentMode = React.lazy(() => import('../PaymentMode/PaymentMode'))
-const NewExCustomerPie=React.lazy(()=> import('../NewExCustomerPie/NewExCustomer'))
-const NewExCustomerBar=React.lazy(()=> import('../NewExCustomerBar/NewExCustomerBar'))
-const CustomerType=React.lazy(()=> import('../CustomerType/CustomerType'))
+const NewExCustomerPie = React.lazy(() => import('../NewExCustomerPie/NewExCustomer'))
+const NewExCustomerBar = React.lazy(() => import('../NewExCustomerBar/NewExCustomerBar'))
+const CustomerType = React.lazy(() => import('../CustomerType/CustomerType'))
+const DeliveryTrend = React.lazy(() => import('../DeliveryTrend/deliveryTrend'))
+const MultiHubDelivery = React.lazy(() => import('../MultiHubDelivery/MultiHubDelivery'))
 // const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
 
 
-const Statistics = ({ReactECharts, themeMode, officeId, adminStatus, userId, userOfficeName }) => {
+const Statistics = ({ ReactECharts, themeMode, officeId, adminStatus, userId, userOfficeName, masterOfficeId }) => {
 
   const { t } = useTranslation();
   const predefinedRanges = [
@@ -126,6 +130,8 @@ const Statistics = ({ReactECharts, themeMode, officeId, adminStatus, userId, use
   const [showGraph, setShowGraph] = useState(true)
   const [newExData, setNewExData] = useState([])
   const [isloading2, setIsloading2] = useState(true)
+  const [isloading3, setIsloading3] = useState(true)
+  const [luxus, setLuxus] = useState([])
 
   // const handleResize = () => {
   //   setWindowWidth(window.innerWidth);
@@ -203,8 +209,11 @@ const Statistics = ({ReactECharts, themeMode, officeId, adminStatus, userId, use
   useEffect(() => {
     if (selectedOffice)
       handleSelectedOffice()
-      fetchNewExdData(selectedOffice,isAdmin)
-     
+    fetchNewExdData(selectedOffice, isAdmin)
+    if(masterOfficeId===null){
+      luxusDashboard()
+    }
+
   }, [selectedOffice, selectedRange, isAdmin])
 
   const handleSelectedOffice = async () => {
@@ -269,24 +278,37 @@ const Statistics = ({ReactECharts, themeMode, officeId, adminStatus, userId, use
 
       const response = await axios.get(apiNewEx);
       const data = await response.data;
-      if(data){
+      if (data) {
         setNewExData(data)
         setIsloading2(false)
       }
     }
 
   }
+  async function luxusDashboard() {
+    const startDate = formatDate2(selectedRange[0]);
+    const endDate = formatDate2(selectedRange[1]);
+    setIsloading3(true)
+    const fetchluxus = `${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/luxus/${startDate}/${endDate}`;
+    const response = await axios.get(fetchluxus);
+    const data = await response.data
+    if (data) {
+    setLuxus(data)
+    setIsloading3(false)
+    }
+  }
+
 
   const formatDate2 = (date) => {
     if (!date) {
-        return ""; // Return an empty string or a default date string
+      return ""; // Return an empty string or a default date string
     }
 
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
-};
+  };
 
 
   return (
@@ -470,7 +492,7 @@ const Statistics = ({ReactECharts, themeMode, officeId, adminStatus, userId, use
           </div>
           <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <NewExCustomerBar echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} showGraph={showGraph} />
+              <NewExCustomerBar echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} />
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-12 mt-2' >
@@ -478,6 +500,17 @@ const Statistics = ({ReactECharts, themeMode, officeId, adminStatus, userId, use
               <CustomerType echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} />
             </Suspense>
           </div>
+          {masterOfficeId === null ? <><div className='col-md-12 col-lg-6 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+            <DeliveryTrend deliveryData={luxus?.graph2} echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading3} showGraph={showGraph} />
+            </Suspense>
+          </div>
+            <div className='col-md-12 col-lg-6 mt-2' >
+              <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+              <MultiHubDelivery hubData={luxus?.graph1} echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading3} showGraph={showGraph} />
+              </Suspense>
+            </div></> : <></>}
+
         </div>
         {/* {selectedOffice.length > 0 ? <div className='row'>
           <div className='col-md-12 col-lg-8'><StatisticsChart selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} /></div>
