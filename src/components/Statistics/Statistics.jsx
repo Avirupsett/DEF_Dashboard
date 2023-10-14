@@ -10,6 +10,7 @@ import { FaXmark, FaFilter, FaArrowTrendUp } from "react-icons/fa6";
 import { Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import fetchSalesData from './FetchSalesData';
+// import OfficeWiseSales from '../OfficeWiseSales/OfficeWiseSales';
 // import DeliveryTrend from '../DeliveryTrend/deliveryTrend';
 // import MultiHubDelivery from '../MultiHubDelivery/MultiHubDelivery';
 // import CustomerType from '../CustomerType/CustomerType';
@@ -25,8 +26,9 @@ const PaymentMode = React.lazy(() => import('../PaymentMode/PaymentMode'))
 const NewExCustomerPie = React.lazy(() => import('../NewExCustomerPie/NewExCustomer'))
 const NewExCustomerBar = React.lazy(() => import('../NewExCustomerBar/NewExCustomerBar'))
 const CustomerType = React.lazy(() => import('../CustomerType/CustomerType'))
-const DeliveryTrend = React.lazy(() => import('../DeliveryTrend/deliveryTrend'))
-const MultiHubDelivery = React.lazy(() => import('../MultiHubDelivery/MultiHubDelivery'))
+const OfficeWiseSales=React.lazy(() => import('../OfficeWiseSales/OfficeWiseSales'))
+// const DeliveryTrend = React.lazy(() => import('../DeliveryTrend/deliveryTrend'))
+// const MultiHubDelivery = React.lazy(() => import('../MultiHubDelivery/MultiHubDelivery'))
 // const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
 
 
@@ -210,7 +212,7 @@ const Statistics = ({ ReactECharts, themeMode, officeId, adminStatus, userId, us
     if (selectedOffice)
       handleSelectedOffice()
     fetchNewExdData(selectedOffice, isAdmin)
-    if(masterOfficeId===null){
+    if (masterOfficeId === null) {
       luxusDashboard()
     }
 
@@ -293,8 +295,8 @@ const Statistics = ({ ReactECharts, themeMode, officeId, adminStatus, userId, us
     const response = await axios.get(fetchluxus);
     const data = await response.data
     if (data) {
-    setLuxus(data)
-    setIsloading3(false)
+      setLuxus(data)
+      setIsloading3(false)
     }
   }
 
@@ -500,7 +502,7 @@ const Statistics = ({ ReactECharts, themeMode, officeId, adminStatus, userId, us
               <CustomerType echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} />
             </Suspense>
           </div>
-          {masterOfficeId === null ? <><div className='col-md-12 col-lg-6 mt-2' >
+          {/* {masterOfficeId === null ? <><div className='col-md-12 col-lg-6 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
             <DeliveryTrend deliveryData={luxus?.graph2} echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading3} showGraph={showGraph} />
             </Suspense>
@@ -509,7 +511,12 @@ const Statistics = ({ ReactECharts, themeMode, officeId, adminStatus, userId, us
               <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
               <MultiHubDelivery hubData={luxus?.graph1} echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading3} showGraph={showGraph} />
               </Suspense>
-            </div></> : <></>}
+            </div></> : <></>} */}
+          {masterOfficeId === null ? <div className='col-md-12 col-lg-6 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+              <OfficeWiseSales echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={luxus?.graph3} showGraph={showGraph} isLoading={isloading3} />
+            </Suspense>
+          </div>:<></>}
 
         </div>
         {/* {selectedOffice.length > 0 ? <div className='row'>

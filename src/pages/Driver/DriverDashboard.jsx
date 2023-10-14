@@ -6,7 +6,7 @@ import MetricsCard from './MetricsCard';
 // import TankerLevelChart from './TankerLevel';
 import { useTranslation } from "react-i18next";
 import axios from 'axios';
-import { LinearProgress, Skeleton } from '@mui/material';
+import { LinearProgress, Skeleton, ThemeProvider, ToggleButton, ToggleButtonGroup, createTheme } from '@mui/material';
 // import PrevJourney from './prevJourney';
 import { BiSolidTruck } from 'react-icons/bi';
 import { FaClockRotateLeft } from 'react-icons/fa6';
@@ -38,6 +38,7 @@ export default function DriverDashboard() {
     })
     const [progress, setProgress] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+    const [alignment, setAlignment] = useState("Current")
 
     const startProgress = () => {
         setProgress(true)
@@ -45,6 +46,7 @@ export default function DriverDashboard() {
             setProgress(false)
         }, 2500);
     }
+
 
     const setData = (data) => {
         setIsLoading(false)
@@ -107,11 +109,25 @@ export default function DriverDashboard() {
         return () => clearInterval(intervalId);
     }, [])
 
+    const theme = createTheme({
+        typography: {
+            button: {
+                textTransform: 'none'
+            }
+        }
+    })
+
+    const handleChange = (event, newAlignment) => {
+        if (newAlignment !== null) {
+            setAlignment(newAlignment);
+        }
+    };
+
 
 
     return (
         <>
-            {((distanceCovered === 0.0||distanceCovered === '0.0') && (drivingTime === 0.0||drivingTime === '0.0') && (idleTime === 0.0||idleTime==='0.0') && myTrip.length === 0 && prevJourney.length === 0) ? (!isLoading ? <WelcomePage name={profile.name} /> : <></>) :
+            {((distanceCovered === 0.0 || distanceCovered === '0.0') && (drivingTime === 0.0 || drivingTime === '0.0') && (idleTime === 0.0 || idleTime === '0.0') && myTrip.length === 0 && prevJourney.length === 0) ? (!isLoading ? <WelcomePage name={profile.name} /> : <></>) :
                 !isLoading ? <div style={{ fontFamily: "'Poppins', sans-serif", height: "100vh" }}>
                     <div className='py-0 pb-1' style={{ borderBottomRightRadius: "20px", borderBottomLeftRadius: "20px", backgroundColor: "#d0e8f0d4" }}>
                         <div className='px-3 pt-3 pb-1 d-flex justify-content-between align-items-center'>
@@ -128,13 +144,30 @@ export default function DriverDashboard() {
                         </div>
 
                         <div className='display-6 fw-semibold px-3 pt-3 pb-2' style={{ color: "var(--driver-primary)", letterSpacing: ".5px" }}>
-                            <div style={{ backgroundColor: "#d8ecf2", display: "inline-block", position: "relative", zIndex: 1, paddingRight: "10px" }}>
-                                <BsSpeedometer2 className='' style={{ marginBottom: "3px", verticalAlign: "bottom", marginRight: "10px", color: "var(--driver-primary)" }} />
-                                {t("Metrics")}
+                            <div className='d-flex align-items-center justify-content-between' style={{ backgroundColor: "#d8ecf2", paddingRight: "0px" }}>
+                                <div>
+
+                                    <BsSpeedometer2 className='' style={{ marginBottom: "3px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "var(--driver-primary)" }} />
+                                    {t("Metrics")}
+                                </div>
+                                <ThemeProvider theme={theme}>
+                                    <ToggleButtonGroup
+                                        size="small"
+                                        // color="primary"
+                                        value={alignment}
+                                        exclusive
+                                        onChange={handleChange}
+                                        aria-label="Platform"
+                                        style={{ fontFamily: `"Public Sans", sans-serif !important` }}
+                                    >
+                                        <ToggleButton  style={{padding:"2px 6px",height:"fit-content", color: alignment == 'Current' ? 'white' : `var(--text-color)`,backgroundColor:alignment == 'Current' ? 'var(--driver-primary)' : 'transparent'}} className={`fw-bold`} value="Current">{t("Current")}</ToggleButton>
+                                        <ToggleButton  style={{padding:"2px 6px",height:"fit-content", color: alignment == 'All Time' ? 'white' : `var(--text-color)`,backgroundColor:alignment == 'All Time' ? 'var(--driver-primary)' : 'transparent' }} className={`fw-bold`} value="All Time">{t("All Time")}</ToggleButton>
+                                    </ToggleButtonGroup>
+                                </ThemeProvider>
                             </div>
                             {/* <hr style={{margin:0,borderColor:"var(--driver-primary)",position:"relative",bottom:"15px"}}/> */}
                         </div>
-                        <MetricsCard distanceCovered={distanceCovered} drivingTime={drivingTime} idleTime={idleTime} averageSpeed={averageSpeed} />
+                        <MetricsCard distanceCovered={alignment=="Current"? distanceCovered:metricsData.alltime.distanceCovered.toFixed(1)} drivingTime={alignment=="Current"? drivingTime:metricsData.alltime.drivingTime.toFixed(1)} idleTime={alignment=="Current"? idleTime:metricsData.alltime.idleTime.toFixed(1)} averageSpeed={alignment=="Current"? averageSpeed:metricsData.alltime.averageSpeed.toFixed(1)} />
                     </div>
                     {/* <div className='display-6 text-dark fw-semibold px-3 pt-0 pb-2' style={{}}>
                 <IoMdStats className='display-5' style={{ marginBottom: "4px", verticalAlign: "bottom", marginRight: "8px", color: 'var(--driver-primary)' }} />
