@@ -10,6 +10,7 @@ import { FaXmark, FaFilter, FaArrowTrendUp } from "react-icons/fa6";
 import { Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import fetchSalesData from './FetchSalesData';
+// import CustomerRetention from '../CustomerRetention/CustomerRetention';
 // import OfficeWiseSales from '../OfficeWiseSales/OfficeWiseSales';
 // import DeliveryTrend from '../DeliveryTrend/deliveryTrend';
 // import MultiHubDelivery from '../MultiHubDelivery/MultiHubDelivery';
@@ -27,6 +28,7 @@ const NewExCustomerPie = React.lazy(() => import('../NewExCustomerPie/NewExCusto
 const NewExCustomerBar = React.lazy(() => import('../NewExCustomerBar/NewExCustomerBar'))
 const CustomerType = React.lazy(() => import('../CustomerType/CustomerType'))
 const OfficeWiseSales=React.lazy(() => import('../OfficeWiseSales/OfficeWiseSales'))
+const CustomerRetention=React.lazy(() => import('../CustomerRetention/CustomerRetention'))
 // const DeliveryTrend = React.lazy(() => import('../DeliveryTrend/deliveryTrend'))
 // const MultiHubDelivery = React.lazy(() => import('../MultiHubDelivery/MultiHubDelivery'))
 // const ProductQtyChart = React.lazy(() => import('../ProductQtyChart/ProductQtyChart'))
@@ -494,7 +496,7 @@ const Statistics = ({ ReactECharts, themeMode, officeId, adminStatus, userId, us
           </div>
           <div className='col-md-12 col-lg-8 mt-2' >
             <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
-              <NewExCustomerBar echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} />
+              <NewExCustomerBar echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} newExData={newExData} isLoading={isloading2} showGraph={showGraph} />
             </Suspense>
           </div>
           <div className='col-md-12 col-lg-12 mt-2' >
@@ -517,6 +519,11 @@ const Statistics = ({ ReactECharts, themeMode, officeId, adminStatus, userId, us
               <OfficeWiseSales echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={luxus?.graph3} showGraph={showGraph} isLoading={isloading3} />
             </Suspense>
           </div>:<></>}
+          <div className='col-md-12 col-lg-6 mt-2' >
+            <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "410px", borderRadius: "8px", marginBottom: "5px" }} />}>
+              <CustomerRetention echarts={echarts} ReactECharts={ReactECharts} selectedRange={selectedRange} themeMode={themeMode} selectedOffice={selectedOffice} isAdmin={isAdmin} officeName={selectedOfficeName} alldata={newExData} isLoading={isloading2} showGraph={showGraph} />
+            </Suspense>
+          </div>
 
         </div>
         {/* {selectedOffice.length > 0 ? <div className='row'>

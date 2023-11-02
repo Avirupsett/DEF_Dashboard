@@ -178,7 +178,7 @@ export default function DriverDashboard() {
                             <TankerLevelChart title={"Tanker Fuel Level"} filllevel={graph1.filllevel} emptylevel={graph1.emptylevel} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
                         </Suspense>
                         <Suspense fallback={<Skeleton variant='rounded' style={{ paddingTop: "165px", borderRadius: "8px", width: "45%" }} />}>
-                            <TankerLevelChart title={"Jobs Completed"} filllevel={graph2.filllevel} emptylevel={graph2.emptylevel} fillTitle="Job Done" emptyTitle="Job Left" />
+                            <TankerLevelChart title={"Jobs Completed"} filllevel={graph2.emptylevel} emptylevel={graph2.filllevel} fillTitle="Job Done" emptyTitle="Job Left" />
                         </Suspense>
 
                     </div>
