@@ -4,6 +4,7 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import DriverDashboard from './pages/Driver/DriverDashboard';
 import { Routes, Route } from 'react-router-dom';
+const DriverDashboardWeb=React.lazy(()=>import('./pages/Driver Statistics Web/DriverDashboardWeb'))
 const DriverDashboard=React.lazy(()=>import('./pages/Driver/DriverDashboard'))
 const Dashboard=React.lazy(()=>import('./pages/Dashboard/Dashboard'))
 
@@ -13,7 +14,8 @@ const App = () => {
       <Route path="/" element={<div id="dashboard">
         <Dashboard />
       </div>} />
-      <Route path="/driver" element={<DriverDashboard />} />
+      <Route path="/driver" element={<DriverDashboard/>} />
+      <Route path="/driverstatistic" element={<DriverDashboardWeb  />} />
     </Routes>
   );
 };
