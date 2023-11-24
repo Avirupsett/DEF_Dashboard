@@ -1,5 +1,7 @@
 import { t } from 'i18next';
 import * as React from 'react';
+import { FaRegClock } from 'react-icons/fa6';
+import { MdOutlineLocationOn, MdPropaneTank } from 'react-icons/md';
 
 export default function PrevJourney({ prevJourney }) {
   const getFormattedStartTime = (startTime) => {
@@ -29,6 +31,7 @@ export default function PrevJourney({ prevJourney }) {
     {prevJourney.length>0?prevJourney.map((serialNumber, index) => {
         // Check if prevJourney[index] exists before accessing its properties
         const startTime = prevJourney[index]?.startTime;
+        const planTitle = prevJourney[index]?.planTitle;
         const journeyList = prevJourney[index]?.journey || [];
         const distanceCovered = prevJourney[index]?.distanceCovered || 0; // Get distanceCovered
         const containerSize = prevJourney[index]?.containerSize || 0; // Get containerSize
@@ -43,7 +46,7 @@ export default function PrevJourney({ prevJourney }) {
             className='d-flex flex-column ps-3 pe-3 rounded-3 py-3 mt-1 mx-3'
             style={{ marginBottom: '15px',boxShadow: 'rgba(0, 0, 0, 0.075) 0.1rem 0.1rem 1rem 2px' }}
           >
-            <div className='d-flex justify-content-between align-items-center'>
+            <div className='d-flex justify-content-between align-items-start flex-column mb-2'>
               <div className='fs-5 mb-1'
                 style={{
                   color: 'black',
@@ -71,11 +74,11 @@ export default function PrevJourney({ prevJourney }) {
                 >
                   {index+1}
                 </div>
-                {t("Travel Routes")}
+                {planTitle}
               </div>
-              <div className="fs-6">
+              <div className="fs-6" style={{marginLeft: '40px',fontSize:"12px"}}>
                 {/* Display the formatted start time */}
-                {getFormattedStartTime(startTime)}
+                <FaRegClock className=' p-1 rounded-3' style={{ fontSize: "22px", color: 'rgb(22 101 52)', backgroundColor: 'rgb(22 101 52 / 11%)' }} /> {getFormattedStartTime(startTime)}
               </div>
             </div>
             <div style={{ marginBottom: '10px', marginLeft: '40px',fontSize:"14px",letterSpacing:".5px" }}>
@@ -88,21 +91,21 @@ export default function PrevJourney({ prevJourney }) {
             </div>
             <div style={{ marginLeft: '40px' }} className='d-flex justify-content-between'>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{letterSpacing:".25px" }}>{t("Distance")}</span>
-                <span style={{ fontSize: '16px', color: 'red', fontWeight: 'bold' }}>{details.distance}</span>
+                <span style={{letterSpacing:".25px",fontSize: '16px' }}><MdOutlineLocationOn className=' p-1 rounded-3' style={{ fontSize: "22px", color: '#DC2626', backgroundColor: '#FECACA' }} /> {t("Distance")}</span>
+                <span className="text-center" style={{ fontSize: '18px', color: '#DC2626', fontWeight: 'bold' }}>{details.distance}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{letterSpacing:".25px" }}>{t("Tank Level")}</span>
-                <span style={{ fontSize: '16px', color: 'blue', fontWeight: 'bold' }}>{details.tankLevel}</span>
+                <span style={{letterSpacing:".25px",fontSize: '16px' }}><MdPropaneTank className=' p-1 rounded-3' style={{ fontSize: "22px", color: '#2563EB' , backgroundColor: '#DBEAFE' }}/> {t("Tank Level")}</span>
+                <span className="text-center" style={{ fontSize: '18px', color: '#2563EB' , fontWeight: 'bold' }}>{details.tankLevel}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{letterSpacing:".25px" }}>{t("Duration")}</span>
-                <span style={{ fontSize: '16px', color: 'green', fontWeight: 'bold' }}>{details.duration}</span>
+                <span style={{letterSpacing:".25px",fontSize: '16px' }}><FaRegClock className=' p-1 rounded-3' style={{ fontSize: "22px", color: 'rgb(22 101 52)', backgroundColor: 'rgb(22 101 52 / 11%)' }} /> {t("Duration")}</span>
+                <span className="text-center" style={{ fontSize: '18px', color: 'green', fontWeight: 'bold' }}>{details.duration}</span>
               </div>
             </div>
           </div>
         );
-      }):<div className='text-center my-5'>No Previous Journey Found</div>}
+      }):<div className='text-center my-5'>No Previous Trip Found</div>}
     </div>
   );
 }

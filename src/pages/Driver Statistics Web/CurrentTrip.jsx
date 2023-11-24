@@ -9,8 +9,8 @@ function CurrentTrip(props) {
 
    
 
-    return (
-        <Timeline position="right" className='d-flex align-items-stretch'
+    return (<>
+        {props.currentTrip.length>0?<Timeline position="right" className='d-flex align-items-stretch'
         sx={{
                 [`& .${timelineOppositeContentClasses.root}`]: {
                     flex: 0.1,
@@ -78,7 +78,8 @@ function CurrentTrip(props) {
                 </TimelineContent>
             </TimelineItem>)
 })}
-        </Timeline>
+        </Timeline>:<div className='text-center fs-5 py-3'>No Trips Found</div>}
+        </>
         
     )
 }
