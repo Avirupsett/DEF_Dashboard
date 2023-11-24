@@ -115,7 +115,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: darkgrey;
+  background-color: rgb(210, 217, 224);
   width: 5px;
 }
 .form-select-lg {

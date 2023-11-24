@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Simple Map</title>
+  <meta name="viewport" content="initial-scale=1.0">
+  <meta charset="utf-8">
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+    #map {
+      height: 100%;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script>
+    function radiansToDegrees(radians) {
+      return radians * (180 / Math.PI);
+    }
+
+    var map;
+    async function initMap() {
+
+
+      const directionsService = new google.maps.DirectionsService();
+
+
+      const directionsRenderer = new google.maps.DirectionsRenderer({ map: map, suppressMarkers: true, polylineOptions: { strokeColor: "#4074f8", strokeOpacity: 0.8, strokeWeight: 6 } }); // Planned Route
+
+      const Driver_directionsRenderer = new google.maps.DirectionsRenderer({ map: map, suppressMarkers: true, polylineOptions: { strokeColor: "#ff474c", zIndex: 5 } }); // Driver Route
+
+      const Driver_completed_directionsRenderer = new google.maps.DirectionsRenderer({ map: map, suppressMarkers: true, polylineOptions: { strokeColor: "transparent", zIndex: -1 } }); // Driver Route
+
+      map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 8
+      });
+
+      directionsRenderer.setMap(map);
+      Driver_directionsRenderer.setMap(map);
+      Driver_completed_directionsRenderer.setMap(map);
+
+      let waypt = []
+      let driver_waypt = []
+      let completeted_point = []
+      let intimate_point = []
+
+      let start_Latitude = 0.0
+      let start_Longitude = 0.0
+
+      // This function is to locate the pumps and routes FROM start point to destination
+      await fetch('./route.json',)
+        .then((response) => response.json())
+        .then((json) => {
+          json = json["plannedRoute"]
+          start_Latitude = json[0].startLatitude
+          start_Longitude = json[0].startLongitude
+          for (let index = 0; index < json.length; index++) {
+            const latitude = json[index]["latitude"];
+            const longitude = json[index]["longitude"];
+
+            waypt.push({
+              location: new google.maps.LatLng(latitude, longitude),
+
+            });
+
+            // new google.maps.Marker({
+            //   position: new google.maps.LatLng(latitude, longitude),
+            //   map,
+            //   title: json["Route"][index]["officeName"],
+            //   label: { text: index.toString(), color: "white" },
+            // });
+          }
+        }
+        );
+
+
+      // This function is for driver current location and status from start point
+      await fetch('./route.json',)
+        .then((response) => response.json())
+        .then((json) => {
+          json = json["driverRoute"]
+          for (let index = 0; index < json.length; index++) {
+            const latitude = json[index]["latitude"];
+            const longitude = json[index]["longitude"];
+
+
+            driver_waypt.push({
+              location: new google.maps.LatLng(latitude, longitude),
+              stopover: true,
+            });
+            if (json[index]["deliveryTrackerStatusId"] === 2) {
+              completeted_point.push({
+                location: new google.maps.LatLng(latitude, longitude),
+                lastUpdatetime: json[index]["locationUpdateTime"],
+                officeName: json[index]["officeName"]
+              });
+            }
+            if (json[index]["deliveryTrackerStatusId"] === 3) {
+              completeted_point.push({
+                location: new google.maps.LatLng(latitude, longitude),
+                lastUpdatetime: json[index]["locationUpdateTime"],
+              });
+            }
+
+          }
+        }
+
+        );
+
+      // This function is to add markers on the route -- For pumps
+      directionsService
+        .route({
+          origin: new google.maps.LatLng(start_Latitude, start_Longitude), //Varanasi location
+          destination: new google.maps.LatLng(start_Latitude, start_Longitude),//Varanasi location
+          waypoints: waypt,
+          optimizeWaypoints: false,
+          travelMode: google.maps.TravelMode.DRIVING,
+        })
+        .then((response) => {
+          directionsRenderer.setDirections(response);
+          var my_route = response.routes[0];
+          for (var i = 0; i < my_route.legs.length; i++) {
+            if (i === 0) {
+              var marker = new google.maps.Marker({
+                position: my_route.legs[i].start_location,
+                label: { text: "SP", color: "white" },
+                optimized: false,
+                zIndex: 99,
+                map: map
+              });
+            }
+            else {
+              var marker = new google.maps.Marker({
+                position: my_route.legs[i].start_location,
+                label: { text: i.toString(), color: "white" },
+                optimized: false,
+                zIndex: 99,
+                map: map
+              });
+            }
+
+          }
+
+        })
+
+
+      setTimeout(() => {
+        // This function is to add truck icon on the route -- For the current driver location
+        directionsService
+          .route({
+            origin: new google.maps.LatLng(start_Latitude, start_Longitude), //Varanasi location
+            destination: driver_waypt[driver_waypt.length - 1].location,//Varanasi location
+            waypoints: driver_waypt,
+            optimizeWaypoints: false,
+            travelMode: google.maps.TravelMode.DRIVING,
+          })
+          .then((response) => {
+            Driver_directionsRenderer.setDirections(response);
+            var my_route = response.routes[0];
+
+            for (var i = 0; i < my_route.legs.length; i++) {
+              if (i === my_route.legs.length - 1) {
+                icon = "/truck (right).png"
+
+                if (my_route.legs.length > 1) {
+                  var angle = Math.atan(((my_route.legs[i].start_location).toJSON().lng - (my_route.legs[i - 1].start_location).toJSON().lng) / ((my_route.legs[i].start_location).toJSON().lat - (my_route.legs[i - 1].start_location).toJSON().lat))
+
+                  if (radiansToDegrees(angle) > 90 || radiansToDegrees(angle) < 0) {
+                    print("right")
+                    icon = "/truck (left).png"
+                  }
+                  else {
+                    icon = "/truck (right).png"
+                  }
+                }
+
+                var marker = new google.maps.Marker({
+                  position: my_route.legs[i].start_location,
+                  icon: icon,
+                  zIndex: 10,
+                  map: map
+                });
+                
+              }
+
+            }
+          })
+
+
+
+
+
+
+        // This function is to add markers on the route -- For completed points
+        for (var i = 0; i < completeted_point.length; i++) {
+          const contentString =
+            '<div id="content">' +
+            '<div id="siteNotice">' +
+            "</div>" +
+            '<h2 id="firstHeading" class="firstHeading" style="color: green;">Delivered</h4>' +
+            '<div id="bodyContent">' +
+            '<p><b>Pump: </b> ' + completeted_point[i].officeName +
+            "</p>" +
+            '<p><b>Last updated: </b>' + new Date(completeted_point[i].lastUpdatetime).toDateString() +
+            "</p>" +
+            "</div>" +
+            "</div>";
+          const infowindow = new google.maps.InfoWindow({
+            content: contentString,
+            ariaLabel: "Delivered",
+
+          });
+          const completedMarker = new google.maps.Marker({
+            position: completeted_point[i].location,
+            icon: {
+              url: "/green flag.png",
+              size: new google.maps.Size(30, 32),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(10, 18),
+            },
+            zIndex: 100,
+            map: map
+          });
+
+          completedMarker.addListener("click", () => {
+            infowindow.open({
+              anchor: completedMarker,
+              map,
+              shouldFocus: false,
+            });
+          });
+        }
+
+        // This function is to add markers on the route -- For Intimate points
+        for (var i = 0; i < intimate_point.length; i++) {
+          const contentString =
+            '<div id="content">' +
+            '<div id="siteNotice">' +
+            "</div>" +
+            '<h2 id="firstHeading" class="firstHeading" style="color: blue;">Intimate</h4>' +
+            '<div id="bodyContent">' +
+
+            '<p><b>Last updated: </b>' + new Date(completeted_point[i].lastUpdatetime).toDateString() +
+            "</p>" +
+            "</div>" +
+            "</div>";
+          const infowindow = new google.maps.InfoWindow({
+            content: contentString,
+            ariaLabel: "Intimate",
+
+          });
+          const intimateMarker = new google.maps.Marker({
+            position: intimate_point[i].location,
+            icon: {
+              url: "/blue flag.png",
+              size: new google.maps.Size(30, 32),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(10, 18),
+            },
+            zIndex: 100,
+            map: map
+          });
+          completedMarker.addListener("click", () => {
+          infowindow.open({
+            anchor: completedMarker,
+            map,
+            shouldFocus: false,
+          });
+        });
+
+        }
+
+      }, 1000)
+
+    }
+
+
+  </script>
+  <!-- <script src="mapsJavaScriptAPI.js" async defer></script> -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDN32TA762x19KhBZX91X4uNcmdGAhAlrQ&callback=initMap"
+    async defer></script>
+</body>
+
+</html>
