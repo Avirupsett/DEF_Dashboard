@@ -1,7 +1,7 @@
 import { t } from 'i18next';
 import * as React from 'react';
 import { FaRegClock } from 'react-icons/fa6';
-import { MdOutlineLocationOn, MdPropaneTank } from 'react-icons/md';
+import { MdOutlineLocationOn, MdOutlinePropaneTank, MdPropaneTank } from 'react-icons/md';
 
 export default function PrevJourney({ prevJourney }) {
   const getFormattedStartTime = (startTime) => {
@@ -49,7 +49,7 @@ export default function PrevJourney({ prevJourney }) {
             <div className='d-flex justify-content-between align-items-start flex-column mb-2'>
               <div className='fs-5 mb-1'
                 style={{
-                  color: 'black',
+                  color: '#15283b',
                   display: 'flex',
                   alignItems: 'center',
                   fontWeight: 'bold',
@@ -76,12 +76,12 @@ export default function PrevJourney({ prevJourney }) {
                 </div>
                 {planTitle}
               </div>
-              <div className="fs-6" style={{marginLeft: '40px',fontSize:"12px"}}>
+              <div className="" style={{marginLeft: '40px',fontSize:"14px",color:'#918f97'}}>
                 {/* Display the formatted start time */}
                 <FaRegClock className=' p-1 rounded-3' style={{ fontSize: "22px", color: 'rgb(22 101 52)', backgroundColor: 'rgb(22 101 52 / 11%)' }} /> {getFormattedStartTime(startTime)}
               </div>
             </div>
-            <div style={{ marginBottom: '10px', marginLeft: '40px',fontSize:"14px",letterSpacing:".5px" }}>
+            <div style={{ marginBottom: '10px', marginLeft: '40px',fontSize:"14px",letterSpacing:".5px",color:'#15283b' }}>
               {journeyList.map((stop, journeyIndex) => (
                 <span key={journeyIndex}>
                   {journeyIndex > 0 ? ' -> ' : ''}
@@ -89,13 +89,13 @@ export default function PrevJourney({ prevJourney }) {
                 </span>
               ))}
             </div>
-            <div style={{ marginLeft: '40px' }} className='d-flex justify-content-between'>
+            <div style={{ marginLeft: '40px',color:'#15283b' }} className='d-flex justify-content-between'>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{letterSpacing:".25px",fontSize: '16px' }}><MdOutlineLocationOn className=' p-1 rounded-3' style={{ fontSize: "22px", color: '#DC2626', backgroundColor: '#FECACA' }} /> {t("Distance")}</span>
                 <span className="text-center" style={{ fontSize: '18px', color: '#DC2626', fontWeight: 'bold' }}>{details.distance}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{letterSpacing:".25px",fontSize: '16px' }}><MdPropaneTank className=' p-1 rounded-3' style={{ fontSize: "22px", color: '#2563EB' , backgroundColor: '#DBEAFE' }}/> {t("Tank Level")}</span>
+                <span style={{letterSpacing:".25px",fontSize: '16px' }}><MdOutlinePropaneTank className=' p-1 rounded-3' style={{ fontSize: "22px", color: '#2563EB' , backgroundColor: '#DBEAFE' }}/> {t("Tank Level")}</span>
                 <span className="text-center" style={{ fontSize: '18px', color: '#2563EB' , fontWeight: 'bold' }}>{details.tankLevel}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -105,7 +105,7 @@ export default function PrevJourney({ prevJourney }) {
             </div>
           </div>
         );
-      }):<div className='text-center my-5'>No Previous Trip Found</div>}
+      }):<div className='text-center fs-5 py-3'>No Previous Trip Found</div>}
     </div>
   );
 }
