@@ -10,10 +10,10 @@ function CurrentTrip(props) {
    
 
     return (<>
-        {props.currentTrip.length>0?<Timeline position="right" className='d-flex align-items-stretch'
+        {props.currentTrip.length>0?<Timeline position="right" className='d-flex align-items-stretch px-0 px-sm-2'
         sx={{
                 [`& .${timelineOppositeContentClasses.root}`]: {
-                    flex: 0.1,
+                    flex:  window.innerWidth<500?0:0.1,
                 },
             }}
             >
@@ -22,7 +22,7 @@ function CurrentTrip(props) {
              return (
             <TimelineItem key={index}>
                 <TimelineOppositeContent color="#918f97">
-                    <div className='fw-bolder' style={{ fontSize: "24px", paddingTop: "2px", color: 'rgb(22 101 52)' }}>
+                    <div className='fw-bolder' style={{ fontSize: window.innerWidth<500?"18px":"24px", paddingTop:window.innerWidth<500?"7px":"2px", color: 'rgb(22 101 52)' }}>
                         Delivered
                     </div>
 
@@ -38,7 +38,7 @@ function CurrentTrip(props) {
                         <div className='fw-bolder' style={{ color: '#15283b', fontSize: "20px" }}>
                             {trip.officeName}
                         </div>
-                        <div className='' style={{ color: '#918f97' }}>Address</div>
+                        <div className='' style={{ color: '#918f97', fontSize: "14px" }}>{trip.officeAddress}</div>
                         <div className='d-flex align-items-center justify-content-between flex-wrap'>
                             <div className='mt-1 d-flex align-items-center' style={{ color: '#15283b', fontSize: "14px" }}><FaRegClock className='me-2 ms-1 p-1 rounded-3' style={{ fontSize: "22px", color: 'rgb(22 101 52)', backgroundColor: 'rgb(22 101 52 / 11%)' }} /> {trip.DeliveredTime}</div>
                             <div className='mt-1 d-flex align-items-center' style={{ color: '#15283b', fontSize: "14px" }}><IoColorFillOutline className='me-2 ms-1 p-1 rounded-3' style={{ fontSize: "22px", color: '#4338CA', backgroundColor: '#E0E7FF' }} /> Delivered Qty: <span style={{ color: '#4338CA', fontWeight: 600, marginLeft: "5px", textWrap: "nowrap" }}> {trip.Quantity}</span></div>
@@ -50,7 +50,7 @@ function CurrentTrip(props) {
             return(
             <TimelineItem key={index}>
                 <TimelineOppositeContent color="#918f97">
-                    <div className='fw-bolder' style={{ color: '#CA8A04', fontSize: "22px",width:'112px' }}>
+                    <div className='fw-bolder' style={{ color: '#CA8A04', fontSize: window.innerWidth<500?"18px":"22px", paddingTop:window.innerWidth<500?"7px":"2px",width:window.innerWidth<500?'85px':'112px' }}>
                         Pending
                     </div>
 

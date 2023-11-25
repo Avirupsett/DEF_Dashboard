@@ -4,12 +4,16 @@ import DriverCards from './DriverCards'
 import { MdCall } from "react-icons/md";
 
 import CurrentTrip from './CurrentTrip';
-// import MyMapComponent from './MapComponent';
+import MyMapComponent from './MapComponent';
 import TankerLevelChart from './TankerLevel';
 import { IoMdStats } from 'react-icons/io';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import PrevJourney from './prevJourney';
+import { AppBar, Box, Tab, Tabs } from '@mui/material';
+import { TabContext, TabList, TabPanel } from '@mui/lab';
+import { BsSpeedometer2 } from 'react-icons/bs';
+import MetricsCard from './MetricsCard';
 
 function DriverDashboardWeb() {
 
@@ -38,12 +42,15 @@ function DriverDashboardWeb() {
             "drivingTime": 0,
             "idleTime": 0,
             "averageSpeed": 0
-        }
+        },
+        currentDeliveredPlanId: 0
 
     })
     const [isLoading, setIsLoading] = useState(true)
     const [activeOngoing, setActiveOngoing] = useState(false)
     const [activePrevious, setActivePrevious] = useState(true)
+    const [tabvalue, setTabvalue] = useState('1')
+    const [mapComponentData, setMapComponentData] = useState([])
     const urlParams = new URLSearchParams(window.location.search);
     const { t, i18n } = useTranslation();
 
@@ -104,7 +111,7 @@ function DriverDashboardWeb() {
                             {data.profile.driverName}
                             <div className='px-2 py-1 rounded-2 fs-6 mx-2' style={{ backgroundColor: 'rgb(37, 99, 235,0.1)', color: 'rgb(37, 99, 235)', letterSpacing: '1px' }} >Driver</div>
                             <div className="spinner-border text-primary " role="status" style={{ display: isLoading ? 'block' : 'none' }}>
-                                
+
                             </div>
                         </div>
                         {/* Add an anchor tag for telephone */}
@@ -117,19 +124,37 @@ function DriverDashboardWeb() {
                 </div>
                 <DriverCards distanceCovered={data.alltime.distanceCovered} drivingTime={data.alltime.drivingTime} idleTime={data.alltime.idleTime} averageSpeed={data.alltime.averageSpeed} />
                 <div style={{ display: window.innerWidth <= 950 ? 'block' : "none" }}>
-                    {/* <div className='' style={{ height: '60vh' }}>
-                    <MyMapComponent />
-                </div> */}
-                    <div className='p-2 py-3  rounded-3' style={{ boxShadow: "rgba(0, 0, 0, 0.075) 0.1rem 0.1rem 1rem 2px", backgroundColor: "white", position: "relative", marginTop: "5px" }}>
-                        <div className='fs-2 fw-bold px-2 mb-1' style={{ color: '#15283b' }}>
-                            <IoMdStats className='display-6' style={{ marginBottom: "4px", verticalAlign: "bottom", marginRight: "8px", color: 'rgb(37, 99, 235)' }} />
-                            {t("Stats For Ongoing Trip")}
-                        </div>
-                        <div className='d-flex align-items-center justify-content-around' >
-                            <TankerLevelChart title={"Tanker Fuel Level"} filllevel={data.graph1.totalTankFuel - data.graph1.fuelUnloaded} emptylevel={data.graph1.fuelUnloaded} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
-                            <TankerLevelChart title={"Jobs Completed"} emptylevel={data.graph2.totalJob - data.graph2.jobCompleted} filllevel={data.graph2.jobCompleted} fillTitle="Job Done" emptyTitle="Job Left" />
-                        </div>
-                    </div>
+                    <Box sx={{ width: '100%' }}>
+                        <TabContext value={tabvalue} >
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                <TabList centered onChange={(event, newValue) => setTabvalue(newValue)} aria-label="lab API tabs example">
+                                    <Tab disabled={isLoading ? true : false} className="fw-bold fs-5" label="Stats" value="1" />
+                                    <Tab disabled={isLoading ? true : false} className="fw-bold fs-5" label="Map" value="2" />
+                                </TabList>
+                            </Box>
+                            <TabPanel value="1" className="px-0">
+                                <div className='fs-3 fw-bold px-2 mb-1' style={{ color: '#15283b' }}>
+                                    <IoMdStats className='fs-2' style={{ marginBottom: "4px", verticalAlign: "bottom", marginRight: "8px", color: 'rgb(37, 99, 235)' }} />
+                                    {t("Stats For Ongoing Trip")}
+                                </div>
+                                <div className='d-flex align-items-center justify-content-around' >
+                                    <TankerLevelChart title={"Tanker Fuel Level"} filllevel={data.graph1.totalTankFuel - data.graph1.fuelUnloaded} emptylevel={data.graph1.fuelUnloaded} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
+                                    <TankerLevelChart title={"Jobs Completed"} emptylevel={data.graph2.totalJob - data.graph2.jobCompleted} filllevel={data.graph2.jobCompleted} fillTitle="Job Done" emptyTitle="Job Left" />
+                                </div>
+                                <div className='fs-3 fw-bold px-2 mb-1 mt-3' style={{ color: '#15283b' }}>
+
+                                    <BsSpeedometer2 className='fs-2' style={{marginLeft:"2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
+                                    {t("Metrics")}
+                                </div>
+                                <MetricsCard distanceCovered={data.distanceCovered} drivingTime={data.drivingTime} idleTime={data.idleTime} averageSpeed={data.averageSpeed}/>
+                            </TabPanel>
+                            <TabPanel value="2" className="p-0">
+                                <div className='' style={{ height: window.innerWidth > 950 ? '88vh' : "50vh" }}>
+                                    <MyMapComponent deliveryPlanId={data.currentDeliveredPlanId} mapComponentData={mapComponentData} setMapComponentData={setMapComponentData} />
+                                </div>
+                            </TabPanel>
+                        </TabContext>
+                    </Box>
                 </div>
                 <div className="accordion px-xl-5 px-lg-4 px-md-3 px-2 mt-3">
                     <div className="accordion-item ">
@@ -148,7 +173,7 @@ function DriverDashboardWeb() {
                         </div>
                     </div>
                 </div>
-                <div className="accordion px-xl-5 px-lg-4 px-md-3 px-2 mt-3">
+                <div className="accordion px-xl-5 px-lg-4 px-md-3 px-2 mt-3 mb-3">
                     <div className="accordion-item ">
                         <h2 className="accordion-header" id="headingOne" >
                             <button onClick={() => setActivePrevious(!activePrevious)} className={`accordion-button ${activePrevious ? "collapsed" : ""} fs-4`} type="button" style={{ color: !activePrevious ? 'rgb(37, 99, 235)' : '#15283b' }} data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
@@ -169,19 +194,42 @@ function DriverDashboardWeb() {
 
 
             </div>
-            <div style={{ width: '40%', height: '99vh', display: window.innerWidth > 950 ? 'block' : "none" }}>
-                {/* <div className='' style={{ height: '60vh' }}>
-                    <MyMapComponent />
-                </div> */}
-                <div className='p-2 py-3  rounded-3' style={{ boxShadow: "rgba(0, 0, 0, 0.075) 0.1rem 0.1rem 1rem 2px", backgroundColor: "white", position: "relative", marginTop: "5px" }}>
-                    <div className='fs-2 fw-bold px-2 mb-1' style={{ color: '#15283b' }}>
-                        <IoMdStats className='display-6' style={{ marginBottom: "4px", verticalAlign: "bottom", marginRight: "8px", color: 'rgb(37, 99, 235)' }} />
-                        {t("Stats For Ongoing Trip")}
-                    </div>
-                    <div className='d-flex align-items-center justify-content-around' >
-                        <TankerLevelChart title={"Tanker Fuel Level"} filllevel={data.graph1.totalTankFuel - data.graph1.fuelUnloaded} emptylevel={data.graph1.fuelUnloaded} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
-                        <TankerLevelChart title={"Jobs Completed"} emptylevel={data.graph2.totalJob - data.graph2.jobCompleted} filllevel={data.graph2.jobCompleted} fillTitle="Job Done" emptyTitle="Job Left" />
-                    </div>
+            <div style={{ width: '40%', display: window.innerWidth > 950 ? 'block' : "none" }}>
+
+                <div className='p-2 pt-2 mx-1 my-1  rounded-3' style={{ boxShadow: "rgba(0, 0, 0, 0.075) 0.1rem 0.1rem 1rem 2px", backgroundColor: "white", position: "relative", marginTop: "0px" }}>
+
+                    <Box sx={{ width: '100%' }}>
+                        <TabContext value={tabvalue} >
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                <TabList centered onChange={(event, newValue) => setTabvalue(newValue)} aria-label="lab API tabs example">
+                                    <Tab disabled={isLoading ? true : false} className="fw-bold fs-5" label="Stats" value="1" />
+                                    <Tab disabled={isLoading ? true : false} className="fw-bold fs-5" label="Map" value="2" />
+                                </TabList>
+                            </Box>
+                            <TabPanel value="1" className="px-0">
+                                <div className='fs-3 fw-bold px-2 mb-1' style={{ color: '#15283b' }}>
+                                    <IoMdStats className='fs-2' style={{ marginBottom: "4px", verticalAlign: "bottom", marginRight: "8px", color: 'rgb(37, 99, 235)' }} />
+                                    {t("Stats For Ongoing Trip")}
+                                </div>
+                                <div className='d-flex align-items-center justify-content-around' >
+                                    <TankerLevelChart title={"Tanker Fuel Level"} filllevel={data.graph1.totalTankFuel - data.graph1.fuelUnloaded} emptylevel={data.graph1.fuelUnloaded} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
+                                    <TankerLevelChart title={"Jobs Completed"} emptylevel={data.graph2.totalJob - data.graph2.jobCompleted} filllevel={data.graph2.jobCompleted} fillTitle="Job Done" emptyTitle="Job Left" />
+                                </div>
+                                <div className='fs-3 fw-bold px-2 mb-1 mt-3' style={{ color: '#15283b' }}>
+
+                                    <BsSpeedometer2 className='fs-2' style={{marginLeft:"2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
+                                    {t("Metrics")}
+                                </div>
+                                <MetricsCard distanceCovered={data.distanceCovered} drivingTime={data.drivingTime} idleTime={data.idleTime} averageSpeed={data.averageSpeed}/>
+                            </TabPanel>
+                            <TabPanel value="2" className="p-0">
+                                <div className='' style={{ height: '88vh' }}>
+                                    <MyMapComponent deliveryPlanId={data.currentDeliveredPlanId} mapComponentData={mapComponentData} setMapComponentData={setMapComponentData} />
+                                </div>
+                            </TabPanel>
+                        </TabContext>
+                    </Box>
+
                 </div>
             </div>
 

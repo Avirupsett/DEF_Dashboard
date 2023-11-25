@@ -51,7 +51,7 @@ export default function TankerLevelChart({ title, filllevel, emptylevel, fillTit
     
     useEffect(() => {
         const chartDom = ref.current;
-        const myChart = echarts.init(chartDom, null, { renderer: 'svg' });
+        const myChart = echarts.init(chartDom, null, { renderer: 'svg',width:window.innerWidth>1050?"200px":"150px",height:window.innerWidth>1050?"200px":"150px" });
 
         const option = {
             // color: ['var(--driver-primary)', 'var(--driver-secondary)'],
