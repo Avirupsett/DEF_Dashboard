@@ -144,7 +144,7 @@ function DriverDashboardWeb() {
                                 <div className='fs-3 fw-bold px-2 mb-1 mt-3' style={{ color: '#15283b' }}>
 
                                     <BsSpeedometer2 className='fs-2' style={{marginLeft:"2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
-                                    {t("Metrics")}
+                                    {t("Current Metrics")}
                                 </div>
                                 <MetricsCard distanceCovered={data.distanceCovered} drivingTime={data.drivingTime} idleTime={data.idleTime} averageSpeed={data.averageSpeed}/>
                             </TabPanel>
@@ -218,7 +218,7 @@ function DriverDashboardWeb() {
                                 <div className='fs-3 fw-bold px-2 mb-1 mt-3' style={{ color: '#15283b' }}>
 
                                     <BsSpeedometer2 className='fs-2' style={{marginLeft:"2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
-                                    {t("Metrics")}
+                                    {t("Current Metrics")}
                                 </div>
                                 <MetricsCard distanceCovered={data.distanceCovered} drivingTime={data.drivingTime} idleTime={data.idleTime} averageSpeed={data.averageSpeed}/>
                             </TabPanel>
