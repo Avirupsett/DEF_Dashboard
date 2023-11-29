@@ -36,7 +36,7 @@ function CurrentTrip(props) {
                 <TimelineContent>
                     <div style={{ borderTop: '2px solid #918f9750', paddingTop: '12px', marginTop: '20px', paddingLeft: "5px", borderBottom: '2px solid #918f9750', paddingBottom: "12px" }}>
                         <div className='fw-bolder' style={{ color: '#15283b', fontSize: "20px" }}>
-                            {trip.officeName}
+                          {index+1}.  {trip.officeName}
                         </div>
                         <div className='' style={{ color: '#918f97', fontSize: "14px" }}>{trip.officeAddress}</div>
                         <div className='d-flex align-items-center justify-content-between flex-wrap'>

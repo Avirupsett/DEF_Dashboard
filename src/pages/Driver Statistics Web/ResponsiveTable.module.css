@@ -1,0 +1,21 @@
+table th:first-child{
+    border:0px solid transparent;
+    border-radius:0.4rem 0 0 0;
+  }
+  
+  table th:last-child{
+    border:0px solid transparent;
+    border-radius:0 0.4rem 0 0;
+  }
+
+table tr:nth-child(even) {
+    background-color: #EFF6FF;
+  }
+
+.viewbutton:hover{
+   background-color: #6366F1 !important;
+   color:white !important;
+}
+.assignbutton:hover{
+    background-color: #2563EB !important;
+}

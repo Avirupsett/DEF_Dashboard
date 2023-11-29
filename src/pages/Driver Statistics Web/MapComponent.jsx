@@ -16,27 +16,29 @@ function MyMapComponent(props) {
 
     // Load map
     useEffect(() => {
-        // Street Map
-        const loader = new Loader({
-            apiKey: import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY,
-            version: "weekly"
-        });
-
         const abortController = new AbortController();
+        if (props.deliveryPlanId) {
+            // Street Map
+            const loader = new Loader({
+                apiKey: import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY,
+                version: "weekly"
+            });
 
-        (async () => {
-            try {
-                await loader.load();
-                if (!abortController.signal.aborted && window.google?.maps && !gmapWin) {
-                    setGmapWin(true);
+
+            (async () => {
+                try {
+                    await loader.load();
+                    if (!abortController.signal.aborted && window.google?.maps && !gmapWin) {
+                        setGmapWin(true);
+                    }
+                    if (gmapWin) {
+                        setGmapObj(new window.google.maps.Map(mapBox.current, { zoom: 15 }));
+                    }
+                } catch (error) {
+                    console.error("Error loading Google Maps:", error);
                 }
-                if (gmapWin) {
-                    setGmapObj(new window.google.maps.Map(mapBox.current, { zoom: 15 }));
-                }
-            } catch (error) {
-                console.error("Error loading Google Maps:", error);
-            }
-        })();
+            })();
+        }
 
         return () => abortController.abort();
     }, [gmapWin]);
@@ -46,6 +48,7 @@ function MyMapComponent(props) {
     }
 
     const fetchData = async (fetchActive) => {
+        if(props.deliveryPlanId ){
         const directionsService = new google.maps.DirectionsService();
 
 
@@ -61,6 +64,7 @@ function MyMapComponent(props) {
         Driver_completed_directionsRenderer.setMap(gmapObj);
 
         let waypt = []
+        let pump_status = []
         let driver_waypt = []
         let completeted_point = []
         let intimate_point = []
@@ -83,6 +87,11 @@ function MyMapComponent(props) {
 
                         waypt.push({
                             location: new google.maps.LatLng(latitude, longitude),
+
+                        });
+                        pump_status.push({
+                            location: new google.maps.LatLng(latitude, longitude),
+                            officeName: json1[index]["officeName"],
 
                         });
 
@@ -128,6 +137,10 @@ function MyMapComponent(props) {
                     location: new google.maps.LatLng(latitude, longitude),
 
                 });
+                pump_status.push({
+                    location: new google.maps.LatLng(latitude, longitude),
+                    officeName: json1[index]["officeName"],
+                })
 
             }
 
@@ -205,6 +218,7 @@ function MyMapComponent(props) {
                 directionsRenderer.setDirections(response);
                 var my_route = response.routes[0];
                 for (var i = 0; i < my_route.legs.length; i++) {
+
                     if (i === 0) {
                         var marker = new google.maps.Marker({
                             position: my_route.legs[i].start_location,
@@ -215,13 +229,33 @@ function MyMapComponent(props) {
                         });
                     }
                     else {
-                        var marker = new google.maps.Marker({
+
+                        // const contentString =
+                        //     '<div id="content">' +
+                        //     '<div id="siteNotice">' +
+                        //     "</div>" +
+                        //     '<h4 id="firstHeading" class="firstHeading fs-3 fw-bold" style="color: green;">'+pump_status[i-1].officeName +'</h4>' +
+
+                        //     "</div>";
+                        // const infowindow = new google.maps.InfoWindow({
+                        //     content: contentString,
+                        //     ariaLabel: "Pump",
+
+                        // });
+                        var Pumpmarker = new google.maps.Marker({
                             position: my_route.legs[i].start_location,
                             label: { text: i.toString(), color: "white" },
                             optimized: false,
                             zIndex: 99,
                             map: gmapObj
                         });
+                        // Pumpmarker.addListener("click", () => {
+                        //     infowindow.open({
+                        //         anchor: Pumpmarker,
+                        //         map: gmapObj,
+                        //         shouldFocus: false,
+                        //     });
+                        // });
                     }
 
                 }
@@ -295,8 +329,8 @@ function MyMapComponent(props) {
                 '<div id="content">' +
                 '<div id="siteNotice">' +
                 "</div>" +
-                '<h2 id="firstHeading" class="firstHeading" style="color: green;">Delivered</h4>' +
-                '<div id="bodyContent">' +
+                '<h2 id="firstHeading" class="firstHeading fs-3 fw-bold" style="color: green;">Delivered</h2>' +
+                '<div id="bodyContent" class="fs-6">' +
                 '<p><b>Pump: </b> ' + completeted_point[i].officeName +
                 "</p>" +
                 '<p><b>Last updated: </b>' + new Date(completeted_point[i].lastUpdatetime).toDateString() +
@@ -323,7 +357,7 @@ function MyMapComponent(props) {
             completedMarker.addListener("click", () => {
                 infowindow.open({
                     anchor: completedMarker,
-                    map,
+                    map: gmapObj,
                     shouldFocus: false,
                 });
             });
@@ -374,6 +408,7 @@ function MyMapComponent(props) {
         // gmapObj.panTo(lastlocation)
         // gmapObj.setZoom(20)
         // }, 3000)
+    }
 
     }
 
@@ -382,7 +417,7 @@ function MyMapComponent(props) {
             if (props.deliveryPlanId && props.mapComponentData.length == 0) {
                 fetchData(1)
             }
-            else {
+            else if(props.deliveryPlanId) {
                 fetchData(0)
             }
 

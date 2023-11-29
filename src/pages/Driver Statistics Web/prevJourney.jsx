@@ -54,10 +54,10 @@ export default function PrevJourney({ prevJourney }) {
 
         return (
           <div key={index} className="accordion mt-2 mb-3 mx-2 rounded-3" style={{ marginBottom: '15px', boxShadow: 'rgba(0, 0, 0, 0.075) 0.1rem 0.1rem 1rem 2px', borderColor: "transparent" }}>
-            <div className="accordion-item rounded-3" style={{border:0}}>
-              <h2 className="accordion-header" id="headingOne" >
+            <div className="accordion-item rounded-3 d-flex align-items-start" style={{border:0}}>
+              <h2 className="accordion-header" id="headingOne" ></h2>
               {/* Return the modified list here */}
-                <button onClick={() => setActiveButton(activeButton => [...activeButton.slice(0, index), !activeButton[index], ...activeButton.slice(index + 1)])} className={`accordion-button ${activeButton[index] ? "collapsed" : ""} fs-4`} type="button" style={{ color: !activeButton[index] ? 'rgb(37, 99, 235)' : '#15283b' }} data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <button onClick={() => setActiveButton(activeButton => [...activeButton.slice(0, index), !activeButton[index], ...activeButton.slice(index + 1)])} className={`accordion-button d-flex align-items-baseline ${activeButton[index] ? "collapsed" : ""} fs-4`} type="button" style={{ color: !activeButton[index] ? 'rgb(37, 99, 235)' : '#15283b' }} data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                   <div
                     key={index}
                     className='d-flex flex-column'
@@ -110,22 +110,22 @@ export default function PrevJourney({ prevJourney }) {
                     </div>
                     <div style={{ marginLeft: '40px', color: '#15283b' }} className='d-flex justify-content-between'>
                       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: .8,alignItems:"center" }}>
-                        <span className='d-flex align-items-center' style={{ letterSpacing: ".25px", fontSize: '16px' }}><MdOutlineLocationOn className='me-1 p-1 rounded-3' style={{ fontSize: "22px", color: '#DC2626', backgroundColor: '#FECACA' }} /> {window.innerWidth<500?"":t("Distance")}</span>
+                        <span className='d-flex align-items-center fw-bold' style={{ letterSpacing: ".25px", fontSize: '16px' }}><MdOutlineLocationOn className='me-1 p-1 rounded-3' style={{ fontSize: "22px", color: '#DC2626', backgroundColor: '#FECACA' }} /> {window.innerWidth<500?"":t("Distance")}</span>
                         <span className="text-center" style={{ fontSize: '18px', color: '#DC2626', fontWeight: 'bold', lineHeight: 2 }}>{details.distance}</span>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: .8,alignItems:"center" }}>
-                        <span className='d-flex align-items-center' style={{ letterSpacing: ".25px", fontSize: '16px' }}><MdOutlinePropaneTank className='me-1 p-1 rounded-3' style={{ fontSize: "22px", color: '#2563EB', backgroundColor: '#DBEAFE' }} /> {window.innerWidth<500?"":t("Tank Level")}</span>
+                        <span className='d-flex align-items-center fw-bold' style={{ letterSpacing: ".25px", fontSize: '16px' }}><MdOutlinePropaneTank className='me-1 p-1 rounded-3' style={{ fontSize: "22px", color: '#2563EB', backgroundColor: '#DBEAFE' }} /> {window.innerWidth<500?"":t("Tank Level")}</span>
                         <span className="text-center" style={{ fontSize: '18px', color: '#2563EB', fontWeight: 'bold', lineHeight: 2 }}>{details.tankLevel}</span>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: .8,alignItems:"center" }}>
-                        <span className='d-flex align-items-center' style={{ letterSpacing: ".25px", fontSize: '16px' }}><FaRegClock className='me-1 p-1 rounded-3' style={{ fontSize: "22px", color: 'rgb(22 101 52)', backgroundColor: 'rgb(22 101 52 / 11%)' }} /> {window.innerWidth<500?"":t("Duration")}</span>
+                        <span className='d-flex align-items-center fw-bold' style={{ letterSpacing: ".25px", fontSize: '16px' }}><FaRegClock className='me-1 p-1 rounded-3' style={{ fontSize: "22px", color: 'rgb(22 101 52)', backgroundColor: 'rgb(22 101 52 / 11%)' }} /> {window.innerWidth<500?"":t("Duration")}</span>
                         <span className="text-center" style={{ fontSize: '18px', color: 'green', fontWeight: 'bold', lineHeight: 2 }}>{details.duration}</span>
                       </div>
                     </div>
                   </div>
 
+              
                 </button>
-              </h2>
             </div>
 
             <div id="collapseOne" className={`accordion-collapse collapse ${!activeButton[index] ? "show" : ""}`} aria-labelledby="headingOne" data-bs-parent="#accordionExample">
