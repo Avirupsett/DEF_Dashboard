@@ -19,7 +19,7 @@ function DriverAvailable() {
     const [tableview, setTableview] = useState("false")
     const navigate = useNavigate();
     const { state } = useLocation();
-    const updatedBy=state.updatedBy;
+    const [updatedBy, setUpdatedBy] = useState("")
 
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -44,6 +44,7 @@ function DriverAvailable() {
 
             if (payload) {
                 const deliveryPlanId = payload["deliveryPlanId"];
+                setUpdatedBy(payload["updatedBy"])
                 setDeliveryPlanId(deliveryPlanId)
 
                 if (deliveryPlanId) {
@@ -91,7 +92,7 @@ function DriverAvailable() {
             <>
                 {redirect && (tableview === "false" || tableview === null) ?
                     navigate(`/driverdashboardweb/${driverId}`, { state: { isback: false, status: status, statusId: statusId,token:urlParams.get("token") } })
-                    : <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} updatedBy={updatedBy}/>
+                    : <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} updatedBy={updatedBy} token={urlParams.get("token")}/>
                 }
                 {/* <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} /> */}
             </>

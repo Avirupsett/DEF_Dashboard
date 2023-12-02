@@ -19,3 +19,6 @@ table tr:nth-child(even) {
 .assignbutton:hover{
     background-color: #2563EB !important;
 }
+ul {
+  background-color: rgb(255, 255, 255) !important;
+}

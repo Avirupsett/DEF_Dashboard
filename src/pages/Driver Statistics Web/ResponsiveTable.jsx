@@ -1,14 +1,16 @@
-import React, { useMemo } from 'react';
-import { useTable, useSortBy, useGlobalFilter, usePagination } from 'react-table';
+import React, { useMemo, useState } from 'react';
+import { useTable, useSortBy, useGlobalFilter, usePagination, useFilters } from 'react-table';
 import css from './ResponsiveTable.module.css';
 import { FaRegCircleDot } from 'react-icons/fa6';
 import { MdOutlineQueryStats } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { Box, FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme } from '@mui/material';
+import { t } from 'i18next';
 
-
-const ResponsiveTable = ({ data, deliveryPlanId,updatedBy}) => {
+const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token }) => {
+  const [filterStatus, setFilterStatus] = useState("all")
   const columns = useMemo(
     () => [
       {
@@ -81,10 +83,10 @@ const ResponsiveTable = ({ data, deliveryPlanId,updatedBy}) => {
 
   const handleStatsButtonClick = (driverId, status, statusId, assigned, deliveryId) => {
     if (assigned && deliveryId === deliveryPlanId) {
-      navigate('/driverdashboardweb/' + driverId, { state: { isback: false, status: status, statusId: statusId } });
+      navigate('/driverdashboardweb/' + driverId, { state: { isback: false, status: status, statusId: statusId,token:token } });
     }
     else {
-      navigate('/driverdashboardweb/' + driverId, { state: { isback: true, status: status, statusId: statusId } });
+      navigate('/driverdashboardweb/' + driverId, { state: { isback: true, status: status, statusId: statusId,token:token } });
     }
   };
 
@@ -93,7 +95,7 @@ const ResponsiveTable = ({ data, deliveryPlanId,updatedBy}) => {
     await axios.post(`${import.meta.env.VITE_API_URL_2}/api/DeliveryPlan/AssignDriver`, { deliveryPlanId: deliveryPlanId, driverId: driverId, updatedBy: updatedBy }).then((response) => {
 
       toast.update(id, { render: "Assigned Successfully", type: "success", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
-      navigate('/driverdashboardweb/' + driverId, { state: { isback: false,statusId:3 } });
+      navigate('/driverdashboardweb/' + driverId, { state: { isback: false, statusId: 3 } });
     }).catch((error) => {
       toast.update(id, { render: "Assigned Failed !", type: "error", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
     })
@@ -116,12 +118,14 @@ const ResponsiveTable = ({ data, deliveryPlanId,updatedBy}) => {
     pageOptions,
     pageCount,
     setPageSize,
+    setFilter, // The useFilter Hook provides a way to set the filter
   } = useTable(
     {
       columns,
       data,
       initialState: { pageIndex: 0, pageSize: 10 }, // Initial page index and page size
     },
+    useFilters, // Adding the useFilters Hook to the table
     useGlobalFilter,
     useSortBy,
     usePagination
@@ -129,28 +133,59 @@ const ResponsiveTable = ({ data, deliveryPlanId,updatedBy}) => {
 
   const { globalFilter, pageIndex, pageSize } = state;
 
-  const customFilter = (rows, columnIds, filterValue) => {
-    const filteredRows = rows.filter((row) => {
-      const assigned = row.values['assigned'];
-      return filterValue === 'all' || (filterValue === 'assigned' && assigned) || (filterValue === 'unassigned' && !assigned);
-    });
-    return filteredRows;
+  const customFilter = (rows, filterValue) => {
+    if (filterValue==="all"){
+      setFilter('assigned', "");
+    }
+    else
+    setFilter('assigned', filterValue);
+
   };
+
+  const theme = createTheme({
+
+  })
 
   return (
     <div className='my-2'>
-      <div>
-        <label>
+      <div className='d-flex justify-content-between'>
+        <div className='d-flex'>
+
           {/* <input class="form-control mr-sm-2" type="search" placeholder="Search" > */}
           <input
             type="text"
-            className='form-control mx-2 ms-3 my-2'
+            className='form-control ms-3 my-2'
             placeholder='Search'
             aria-label="Search"
             value={globalFilter || ''}
             onChange={(e) => setGlobalFilter(e.target.value)}
           />
-        </label>
+
+        </div>
+       
+        <div className="d-flex my-2 me-3 ms-2" >
+          <ThemeProvider theme={theme}>
+          <Box sx={{ minWidth: 120 }}>
+            <FormControl sx={{ mx: 1, mt: 1, minWidth: 180 }} size="small" >
+              <InputLabel className="px-1" id="demo-simple-select-helper-label" style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important`,backgroundColor:'white' }}>{t("Status")}</InputLabel>
+              <Select
+                labelId="demo-simple-select-standard-label"
+                id="demo-simple-select-standard"
+                displayEmpty
+                value={filterStatus}
+                onChange={(e) => { setFilterStatus(e.target.value); customFilter(page, e.target.value) }}
+                style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }}
+                selectprops={{MenuProps: {MenuListProps: {className: css.menu}}}}
+              >
+                <MenuItem style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }} value={"all"}>{t("All")}</MenuItem>
+                <MenuItem style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }} value={"true"}>{t("Busy")}</MenuItem>
+                <MenuItem style={{ color: `var(--text-color)`, fontFamily: `"Public Sans", sans-serif !important` }} value={"false"}>{t("Available")}</MenuItem>
+              </Select>
+            </FormControl>
+            </Box>
+          </ThemeProvider >
+        </div>
+        
       </div>
       {/* <div>
         <label>
@@ -162,7 +197,7 @@ const ResponsiveTable = ({ data, deliveryPlanId,updatedBy}) => {
           </select>
         </label>
       </div> */}
-      <div className='rounded-3 mx-3' style={{ border: "2px solid #F4F4F5", boxShadow: "rgba(0, 0, 0, 0.075) 0.1rem 0.1rem 1rem 2px" }}>
+      <div className='rounded-3 mx-3 overflow-x-auto' style={{ border: "2px solid #F4F4F5", boxShadow: "rgba(0, 0, 0, 0.075) 0.1rem 0.1rem 1rem 2px" }}>
         <table {...getTableProps()} style={{ width: '100%' }}>
           <thead className=''>
             {headerGroups.map((headerGroup) => (
