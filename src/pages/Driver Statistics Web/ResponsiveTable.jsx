@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTable, useSortBy, useGlobalFilter, usePagination, useFilters } from 'react-table';
 import css from './ResponsiveTable.module.css';
 import { FaRegCircleDot } from 'react-icons/fa6';
@@ -9,20 +9,21 @@ import axios from 'axios';
 import { Box, FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme } from '@mui/material';
 import { t } from 'i18next';
 
-const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token }) => {
+const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanStatusId }) => {
   const [filterStatus, setFilterStatus] = useState("all")
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const columns = useMemo(
     () => [
-      {
-        Header: 'Sl No',
-        accessor: (row, index) => index + 1,
-        Cell: ({ cell }) => <div className='px-2 fw-bold ' style={{ color: "#3B82F6", border: "1px solid #3B82F6", borderRadius: "50%", width: 'fit-content' }}>{cell.value}</div>,
-      },
+      // {
+      //   Header: 'Sl No',
+      //   accessor: (row, index) => index + 1,
+      //   Cell: ({ cell }) => <div className='px-2 fw-bold ' style={{ color: "#3B82F6", border: "1px solid #3B82F6", borderRadius: "50%", width: 'fit-content' }}>{cell.value}</div>,
+      // },
 
       {
         Header: 'Driver Name',
         accessor: 'driverName',
-        Cell: ({ cell, row }) => <div className='' style={{}}>{cell.value} {row.original.DeliveryPlanStatus ? <span className='p-2 py-1 rounded-3' style={{ backgroundColor: "#EDE9FE", color: "#7C3AED" }}>{row.original.DeliveryPlanStatus}</span> : <></>}</div>,
+        Cell: ({ cell, row }) => <div className='' style={{}}>{cell.value}</div>,
       },
       {
         Header: 'Contact No',
@@ -45,9 +46,9 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token }) => {
           <button
             className={`ps-2 pe-3 py-1 rounded-3 fs-6 btn ${css.viewbutton}`}
             style={{ color: "#6366F1", border: "2px solid #6366F1" }}
-            onClick={() => handleStatsButtonClick(row.original.driverId, row.original.DeliveryPlanStatus, row.original.DeliveryPlanStatusId, row.original.assigned, row.original.deliveryPlanId)}
+            onClick={() => handleStatsButtonClick(row.original.driverId, row.original.assigned, row.original.deliveryPlanId)}
           >
-            <MdOutlineQueryStats className='me-1' /> View
+            <MdOutlineQueryStats className='ms-1' />{windowWidth > 950 ? " View" : ""}
           </button>
 
 
@@ -59,7 +60,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token }) => {
         id: "action",
         Cell: ({ cell, row }) => (
 
-          !cell.value ? (
+          !cell.value && deliveryPlanStatusId===3 ? (
 
 
             <button
@@ -70,7 +71,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token }) => {
               Assign
             </button>
 
-          ) : row.original.deliveryPlanId == deliveryPlanId ? <div className='fs-5 fw-bold' style={{ color: "#3B82F6" }}>Assigned</div> : (
+          ) : row.original.deliveryPlanId == deliveryPlanId  ? <div className='fs-5 fw-bold' style={{ color: "#3B82F6" }}>Assigned</div> : (
             <></>
           )
 
@@ -81,12 +82,12 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token }) => {
   );
   const navigate = useNavigate();
 
-  const handleStatsButtonClick = (driverId, status, statusId, assigned, deliveryId) => {
+  const handleStatsButtonClick = (driverId, assigned, deliveryId) => {
     if (assigned && deliveryId === deliveryPlanId) {
-      navigate('/driverdashboardweb/' + driverId, { state: { isback: false, status: status, statusId: statusId,token:token } });
+      navigate('/driverdashboardweb/' + driverId, { state: { isback: false, statusId: deliveryPlanStatusId,token:token } });
     }
     else {
-      navigate('/driverdashboardweb/' + driverId, { state: { isback: true, status: status, statusId: statusId,token:token } });
+      navigate('/driverdashboardweb/' + driverId, { state: { isback: true, statusId: deliveryPlanStatusId,token:token } });
     }
   };
 
@@ -101,6 +102,18 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token }) => {
     })
 
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+        window.removeEventListener('resize', handleResize);
+    };
+}, []);
 
   const {
     getTableProps,
@@ -154,7 +167,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token }) => {
           {/* <input class="form-control mr-sm-2" type="search" placeholder="Search" > */}
           <input
             type="text"
-            className='form-control ms-3 my-2'
+            className='form-control ms-3 my-2 py-2'
             placeholder='Search'
             aria-label="Search"
             value={globalFilter || ''}
@@ -163,7 +176,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token }) => {
 
         </div>
        
-        <div className="d-flex my-2 me-3 ms-2" >
+        <div className="d-flex me-3 ms-2" >
           <ThemeProvider theme={theme}>
           <Box sx={{ minWidth: 120 }}>
             <FormControl sx={{ mx: 1, mt: 1, minWidth: 180 }} size="small" >

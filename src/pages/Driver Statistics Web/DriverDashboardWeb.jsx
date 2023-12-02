@@ -128,14 +128,14 @@ function DriverDashboardWeb() {
                         <div className='d-flex align-items-center d-flex flex-wrap'>
                             {state.isback ? <IoArrowBackCircleOutline className='fs-1 me-2' style={{ color: 'rgb(37, 99, 235)', cursor: "pointer" }} onClick={() => navigate(-1)} /> : ""}
                             {data.profile.driverName}
-                            {state.status ? <div className='px-2 py-1 rounded-2 fs-6 mx-1 mt-1 mx-sm-2 ' style={{ backgroundColor: 'rgb(37, 99, 235,0.1)', color: 'rgb(37, 99, 235)', letterSpacing: '1px' }} >{state.status}</div> : <></>}
+                            <div className='px-2 py-1 rounded-2 fs-6 mx-2' style={{ backgroundColor: 'rgb(37, 99, 235,0.1)', color: 'rgb(37, 99, 235)', letterSpacing: '1px' }} >Driver</div>
                             <div className="spinner-border text-primary " role="status" style={{ display: isLoading ? 'block' : 'none' }}>
 
                             </div>
                         </div>
                         <div className='d-flex align-items-center'>
 
-                            {!state.isback && state.statusId<=3? <button className='btn fs-6 rounded-3 mx-2 d-flex align-items-center' onClick={() => navigate(`/driverstatistic?token=${state.token}&tableview=true`)} style={{ backgroundColor: 'rgb(37, 99, 235)', color: 'white', letterSpacing: "1px" }}><IoMdShuffle className='me-1 fs-5' />{windowWidth > 950 ? "Change Driver" : ""}</button> : ""}
+                            {!state.isback && state.statusId===3? <button className='btn fs-6 rounded-3 mx-2 d-flex align-items-center' onClick={() => navigate(`/driverassignment?token=${state.token}&tableview=true`)} style={{ backgroundColor: 'rgb(37, 99, 235)', color: 'white', letterSpacing: "1px" }}><IoMdShuffle className='me-1 fs-5' />{windowWidth > 950 ? "Change Driver" : ""}</button> : ""}
                             {/* Add an anchor tag for telephone */}
                             <a href={`tel:${data.profile.driverContactNo}`} style={{ cursor: 'pointer' }}>
                                 <MdCall className='fs-3' style={{ color: 'rgb(37, 99, 235)', cursor: 'pointer' }} />

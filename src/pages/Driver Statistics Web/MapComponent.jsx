@@ -94,7 +94,10 @@ function MyMapComponent(props) {
                             pump_status.push({
                                 location: new google.maps.LatLng(latitude, longitude),
                                 officeName: json1[index]["officeName"],
-
+                                address:json1[index]["officeaddress"],
+                                currentQuantity: json1[index]["currentQuantity"],
+                                availableQuantity: json1[index]["availableQuantity"],
+                                plannedQuantity: json1[index]["plannedQuantity"],
                             });
 
                         }
@@ -229,14 +232,24 @@ function MyMapComponent(props) {
                             '<h4 id="firstHeading" class="firstHeading fs-3 fw-bold" style="color: red">' + 'Starting Point' + '</h4>' +
     
                             "</div>";
-                            var marker = new google.maps.Marker({
+                            var startmarker = new google.maps.Marker({
                                 position: my_route.legs[0].start_location,
                                 label: { text: "SP", color: "white" },
                                 optimized: false,
                                 zIndex: 99,
                                 map: gmapObj
                             });
-                        
+                           const infowindow = new google.maps.InfoWindow({
+                                content: contentString,
+                                ariaLabel: "StartPoint",
+                            });
+                            startmarker.addListener("click", () => {
+                                infowindow.open({
+                                    anchor: startmarker,
+                                    map: gmapObj,
+                                    shouldFocus: false,
+                                });
+                            });
                     
 
                 })
@@ -384,13 +397,27 @@ function MyMapComponent(props) {
 
             for (var i = 0; i < pump_status.length; i++) {
 
+                // <p class="fs-6 mb-2">Address: ${pump_status[i]['address']}</p>
                 const contentString =
-                    '<div id="content">' +
-                    '<div id="siteNotice">' +
-                    "</div>" +
-                    '<h4 id="firstHeading" class="firstHeading fs-3 fw-bold" style="">' + pump_status[i].officeName + '</h4>' +
-
-                    "</div>";
+                `<div class="info-window box-shadow">
+                <h3 class="fs-3 mb-2">${pump_status[i]['officeName']}</h3>
+                <div class="d-flex flex-row justify-content-between flex-wrap">
+                    <div class="info-window-products d-flex flex-column justify-content-between me-2 fs-6">
+                        <div class="border-bottom border-dark font-weight-bold">Current Stock </div>
+                        <div>${(pump_status[i]['currentQuantity'])}</div>
+                    </div>
+                    <div class="info-window-products d-flex flex-column justify-content-between mx-2 fs-6">
+                        <div class="border-bottom border-dark font-weight-bold">Available </div>
+                        <div>${(pump_status[i]['availableQuantity'])}</div>
+                    </div>
+                    <div class="info-window-products d-flex flex-column justify-content-between ms-2 fs-6">
+                        <div class="border-bottom border-dark font-weight-bold">Suggested </div>
+                        <div>${(pump_status[i]['plannedQuantity'])}</div>
+                    </div>
+                </div>
+                <p class="mt-4 text-danger fs-6"><b>Next Stop: </b><u>${ (i==(pump_status.length-1))?'Starting Point':pump_status[i+1]['officeName']}</u>
+                   </p>
+               </div>`
                 const infowindow = new google.maps.InfoWindow({
                     content: contentString,
                     ariaLabel: "Pump Status",
@@ -404,11 +431,13 @@ function MyMapComponent(props) {
                     map: gmapObj
                 });
                 pumpMarker.addListener("click", () => {
+                   
                     infowindow.open({
                         anchor: pumpMarker,
                         gmapObj,
                         shouldFocus: false,
                     });
+                  
                 });
 
 

@@ -20,6 +20,7 @@ function DriverAvailable() {
     const navigate = useNavigate();
     const { state } = useLocation();
     const [updatedBy, setUpdatedBy] = useState("")
+    const [deliveryPlanStatus, setDeliveryPlanStatus] = useState([])
 
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -29,6 +30,8 @@ function DriverAvailable() {
         const decodedString = atob(base64String);
         return decodedString;
     }
+
+
 
     const fetchData = async () => {
         try {
@@ -51,20 +54,9 @@ function DriverAvailable() {
                     let response = await axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/driver_available/${deliveryPlanId}`)
                     const { data } = response;
 
-                    const already_assigned = data["driverAvailable"].filter((item) => item["deliveryPlanId"] === deliveryPlanId && item["assigned"] === true && item["driverId"] === payload["driverId"])
-                    if (already_assigned.length > 0) {
-                        setDriverId(already_assigned[0]["driverId"])
-                        setStatus(already_assigned[0]["DeliveryPlanStatus"])
-                        setStatusId(already_assigned[0]["DeliveryPlanStatusId"])
-                        
-                        if (state && state.redirect === false) {
-                            setRedirect(false)
-                        }
-                        else {
-                            setRedirect(true)
-                        }
-                    }
+                    
                     setDriverAvailable_data(data["driverAvailable"])
+                    setDeliveryPlanStatus(data["deliveryPlanStatus"])
                     setIsLoading(false)
                 }
             }
@@ -91,8 +83,8 @@ function DriverAvailable() {
         {isLoading ? <div className='my-3 d-flex justify-content-center align-items-center'><div className="spinner-border text-primary " role="status" style={{}} /></div> :
             <>
                 {redirect && (tableview === "false" || tableview === null) ?
-                    navigate(`/driverdashboardweb/${driverId}`, { state: { isback: false, status: status, statusId: statusId,token:urlParams.get("token") } })
-                    : <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} updatedBy={updatedBy} token={urlParams.get("token")}/>
+                    navigate(`/driverdashboardweb/${driverId}`, { state: { isback: false, statusId: deliveryPlanStatus['DeliveryPlanStatusId'],token:urlParams.get("token") } })
+                    : <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} updatedBy={updatedBy} token={urlParams.get("token")} deliveryPlanStatusId={deliveryPlanStatus['DeliveryPlanStatusId']}/>
                 }
                 {/* <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} /> */}
             </>
