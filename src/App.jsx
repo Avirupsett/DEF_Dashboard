@@ -1,15 +1,18 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
 // import Dashboard from './pages/Dashboard/Dashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import DriverDashboard from './pages/Driver/DriverDashboard';
 import { Routes, Route } from 'react-router-dom';
+const DriverDashboardWeb2=React.lazy(()=>import('./pages/Driver Statistics Web/DriverDashboardWeb2'));
+const MyMapComponent=React.lazy(()=>import('./pages/Driver Statistics Web/MapComponent'));
 const DriverAvailable=React.lazy(()=>import('./pages/Driver Statistics Web/DriverAvailable'));
 const DriverDashboardWeb=React.lazy(()=>import('./pages/Driver Statistics Web/DriverDashboardWeb'))
 const DriverDashboard=React.lazy(()=>import('./pages/Driver/DriverDashboard'))
 const Dashboard=React.lazy(()=>import('./pages/Dashboard/Dashboard'))
 
 const App = () => {
+  const [mapComponentData, setMapComponentData] = useState([])
   return (
     
     <Routes>
@@ -18,11 +21,15 @@ const App = () => {
       </div>} />
       <Route path="/driver" element={<DriverDashboard/>} />
      
-        <Route path="/driverstatistic" element={<Suspense fallback={<div></div>}><DriverAvailable /></Suspense>} />
+        <Route path="/driverassignment" element={<Suspense fallback={<div></div>}><DriverAvailable /></Suspense>} />
+
+        <Route path="/driverstatistic" element={<Suspense fallback={<div></div>}><DriverDashboardWeb2 /></Suspense>} />
      
       {/* driver dashboard with driverId route */}
      
         <Route path="/driverdashboardweb/:driverId" element={<Suspense fallback={<div></div>}><DriverDashboardWeb /></Suspense>} />
+
+        <Route path="/deliveryPlanMap/:deliveryPlanId" element={<Suspense fallback={<div></div>}><div className='' style={{ height: "100vh" }}><MyMapComponent mapComponentData={mapComponentData} setMapComponentData={setMapComponentData}/></div></Suspense>} />
    
     </Routes>
  

@@ -2,11 +2,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import DriverCards from './DriverCards'
 import { MdCall } from "react-icons/md";
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+
 import CurrentTrip from './CurrentTrip';
 import MyMapComponent from './MapComponent';
 import TankerLevelChart from './TankerLevel';
-import { IoMdShuffle, IoMdStats } from 'react-icons/io';
+import { IoMdStats } from 'react-icons/io';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import PrevJourney from './prevJourney';
@@ -14,10 +14,8 @@ import { AppBar, Box, Tab, Tabs } from '@mui/material';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { BsSpeedometer2 } from 'react-icons/bs';
 import MetricsCard from './MetricsCard';
-import { IoArrowBackCircleOutline } from 'react-icons/io5';
 
-
-function DriverDashboardWeb() {
+function DriverDashboardWeb2() {
 
     const [data, setData] = useState({
         distanceCovered: 0.0,
@@ -48,40 +46,42 @@ function DriverDashboardWeb() {
         currentDeliveredPlanId: 0
 
     })
-
     const [isLoading, setIsLoading] = useState(true)
     const [activeOngoing, setActiveOngoing] = useState(false)
     const [activePrevious, setActivePrevious] = useState(true)
     const [tabvalue, setTabvalue] = useState('1')
-
     const [mapComponentData, setMapComponentData] = useState([])
     const urlParams = new URLSearchParams(window.location.search);
     const { t, i18n } = useTranslation();
-    const { driverId } = useParams();
-    const { state } = useLocation();
-
-    function decodeBase64(base64String) {
-        const decodedString = atob(base64String);
-        return decodedString;
-    }
-
-
-    const navigate = useNavigate();
 
     const fetchData = async () => {
         try {
             i18n.changeLanguage(urlParams.get("lang") || "en");
-
-
-            if (driverId) {
-                let response = await axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/driver/metrics/${driverId}`)
+            let payload = ""
+            const jwtToken = urlParams.get("jwtToken");
+            if (jwtToken) {
+                payload = JSON.parse(atob(jwtToken.split('.')[1]))
+            }
+            const driverIdParams = urlParams.get("driverId");
+            if (driverIdParams) {
+                let response = await axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/driver/metrics/${driverIdParams}`)
                 const { data } = response;
                 if (response.data) {
                     setIsLoading(false)
                 }
                 setData(data)
             }
-
+            else if (payload) {
+                const driverIdParams = payload["sub"];
+                if (driverIdParams) {
+                    let response = await axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/dashboard/driver/metrics/${driverIdParams}`)
+                    const { data } = response;
+                    if (response.data) {
+                        setIsLoading(false)
+                    }
+                    setData(data)
+                }
+            }
 
         }
         catch (error) {
@@ -101,10 +101,7 @@ function DriverDashboardWeb() {
         return () => clearInterval(intervalId);
     }, [])
 
-    //Useeffect and useState for innerwidth change
-
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
     useEffect(() => {
         const handleResize = () => {
             setWindowWidth(window.innerWidth);
@@ -118,29 +115,22 @@ function DriverDashboardWeb() {
     }, []);
 
 
-
-
-    return(
+    return (
         <div className='d-flex align-items-start justify-content-between'>
             <div className=' mx-0 align-items-start ' style={{ width: windowWidth > 950 ? '60%' : "100%", overflowY: 'scroll', height: '99vh' }}>
                 <div className='fs-4 mt-3 fw-bolder px-xl-5 px-lg-4 px-md-3 px-2' style={{ color: '#15283b' }}>
-                    <div className='d-flex align-items-center justify-content-between '>
-                        <div className='d-flex align-items-center d-flex flex-wrap'>
-                            {state.isback ? <IoArrowBackCircleOutline className='fs-1 me-2' style={{ color: 'rgb(37, 99, 235)', cursor: "pointer" }} onClick={() => navigate(-1)} /> : ""}
+                    <div className='d-flex align-items-center justify-content-between'>
+                        <div className='d-flex align-items-center'>
                             {data.profile.driverName}
-                            {state.status ? <div className='px-2 py-1 rounded-2 fs-6 mx-1 mt-1 mx-sm-2 ' style={{ backgroundColor: 'rgb(37, 99, 235,0.1)', color: 'rgb(37, 99, 235)', letterSpacing: '1px' }} >{state.status}</div> : <></>}
+                            <div className='px-2 py-1 rounded-2 fs-6 mx-2' style={{ backgroundColor: 'rgb(37, 99, 235,0.1)', color: 'rgb(37, 99, 235)', letterSpacing: '1px' }} >Driver</div>
                             <div className="spinner-border text-primary " role="status" style={{ display: isLoading ? 'block' : 'none' }}>
 
                             </div>
                         </div>
-                        <div className='d-flex align-items-center'>
-
-                            {!state.isback && state.statusId<=3? <button className='btn fs-6 rounded-3 mx-2 d-flex align-items-center' onClick={() => navigate(`/driverstatistic?token=${state.token}&tableview=true`)} style={{ backgroundColor: 'rgb(37, 99, 235)', color: 'white', letterSpacing: "1px" }}><IoMdShuffle className='me-1 fs-5' />{windowWidth > 950 ? "Change Driver" : ""}</button> : ""}
-                            {/* Add an anchor tag for telephone */}
-                            <a href={`tel:${data.profile.driverContactNo}`} style={{ cursor: 'pointer' }}>
-                                <MdCall className='fs-3' style={{ color: 'rgb(37, 99, 235)', cursor: 'pointer' }} />
-                            </a>
-                        </div>
+                        {/* Add an anchor tag for telephone */}
+                        <a href={`tel:${data.profile.driverContactNo}`} style={{ cursor: 'pointer' }}>
+                            <MdCall className='fs-3' style={{ color: 'rgb(37, 99, 235)', cursor: 'pointer' }} />
+                        </a>
                     </div>
 
                     <hr style={{ borderColor: 'rgb(37, 99, 235)', borderWidth: '2px', marginBottom: '5px', marginTop: '10px' }} />
@@ -166,10 +156,10 @@ function DriverDashboardWeb() {
                                 </div>
                                 <div className='fs-3 fw-bold px-2 mb-1 mt-3' style={{ color: '#15283b' }}>
 
-                                    <BsSpeedometer2 className='fs-2' style={{ marginLeft: "2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
+                                    <BsSpeedometer2 className='fs-2' style={{marginLeft:"2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
                                     {t("Current Metrics")}
                                 </div>
-                                <MetricsCard distanceCovered={data.distanceCovered} drivingTime={data.drivingTime} idleTime={data.idleTime} averageSpeed={data.averageSpeed} />
+                                <MetricsCard distanceCovered={data.distanceCovered} drivingTime={data.drivingTime} idleTime={data.idleTime} averageSpeed={data.averageSpeed}/>
                             </TabPanel>
                             <TabPanel value="2" className="p-0">
                                 <div className='' style={{ height: windowWidth > 950 ? '88vh' : "50vh" }}>
@@ -240,10 +230,10 @@ function DriverDashboardWeb() {
                                 </div>
                                 <div className='fs-3 fw-bold px-2 mb-1 mt-3' style={{ color: '#15283b' }}>
 
-                                    <BsSpeedometer2 className='fs-2' style={{ marginLeft: "2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
+                                    <BsSpeedometer2 className='fs-2' style={{marginLeft:"2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
                                     {t("Current Metrics")}
                                 </div>
-                                <MetricsCard distanceCovered={data.distanceCovered} drivingTime={data.drivingTime} idleTime={data.idleTime} averageSpeed={data.averageSpeed} />
+                                <MetricsCard distanceCovered={data.distanceCovered} drivingTime={data.drivingTime} idleTime={data.idleTime} averageSpeed={data.averageSpeed}/>
                             </TabPanel>
                             <TabPanel value="2" className="p-0">
                                 <div className='' style={{ height: '88vh' }}>
@@ -255,8 +245,10 @@ function DriverDashboardWeb() {
 
                 </div>
             </div>
+
+
         </div>
     )
 }
 
-export default DriverDashboardWeb
+export default DriverDashboardWeb2
