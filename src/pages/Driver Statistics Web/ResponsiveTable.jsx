@@ -23,7 +23,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
       {
         Header: 'Driver Name',
         accessor: 'driverName',
-        Cell: ({ cell, row }) => <div className='' style={{textWrap:'nowrap'}}>{cell.value}</div>,
+        Cell: ({ cell, row }) => <div className='d-flex align-items-center' style={{textWrap:'nowrap'}}>{cell.value} {row.original.recommendation===true && deliveryPlanId===3?<div className='p-2 py-1 d-flex align-items-center ms-1 noselect' style={{ color: "#9333EA", backgroundColor: "transparent", borderRadius: "8px", letterSpacing: ".5px", width: "fit-content" }}> ⭐</div>:<></>}</div>,
       },
       {
         Header: 'Contact No',
