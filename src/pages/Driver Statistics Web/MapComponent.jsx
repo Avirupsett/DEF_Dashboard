@@ -91,6 +91,7 @@ function MyMapComponent(props) {
                                 location: new google.maps.LatLng(latitude, longitude),
 
                             });
+                            print(json1[index]["officeName"],json1[index]["officeName"])
                             pump_status.push({
                                 location: new google.maps.LatLng(latitude, longitude),
                                 officeName: json1[index]["officeName"],
@@ -394,25 +395,25 @@ function MyMapComponent(props) {
                 });
 
             }
-
+             
             for (var i = 0; i < pump_status.length; i++) {
 
                 // <p class="fs-6 mb-2">Address: ${pump_status[i]['address']}</p>
                 const contentString =
                 `<div class="info-window box-shadow">
-                <h3 class="fs-3 mb-2">${pump_status[i]['officeName']}</h3>
-                <div class="d-flex flex-row justify-content-between flex-wrap">
-                    <div class="info-window-products d-flex flex-column justify-content-between me-2 fs-6">
-                        <div class="border-bottom border-dark font-weight-bold">Current Stock </div>
-                        <div>${(pump_status[i]['currentQuantity'])}</div>
+                <h3 class="fs-3 mb-2 fw-bold">${pump_status[i]['officeName']}</h3>
+                <div class="d-flex flex-row justify-content-between flex-wrap" >
+                    <div class="info-window-products d-flex flex-column justify-content-between mx-1 my-1  fs-6">
+                        <div class="border-bottom border-dark font-weight-bold">Current </div>
+                        <div class="mt-1 fw-bold">${(pump_status[i]['currentQuantity'])}</div>
                     </div>
-                    <div class="info-window-products d-flex flex-column justify-content-between mx-2 fs-6">
+                    <div class="info-window-products d-flex flex-column justify-content-between mx-1 my-1 fs-6">
                         <div class="border-bottom border-dark font-weight-bold">Available </div>
-                        <div>${(pump_status[i]['availableQuantity'])}</div>
+                        <div class="mt-1 fw-bold">${(pump_status[i]['availableQuantity'])}</div>
                     </div>
-                    <div class="info-window-products d-flex flex-column justify-content-between ms-2 fs-6">
+                    <div class="info-window-products d-flex flex-column justify-content-between mx-1 my-1 fs-6">
                         <div class="border-bottom border-dark font-weight-bold">Suggested </div>
-                        <div>${(pump_status[i]['plannedQuantity'])}</div>
+                        <div class="mt-1 fw-bold">${(pump_status[i]['plannedQuantity'])}</div>
                     </div>
                 </div>
                 <p class="mt-4 text-danger fs-6"><b>Next Stop: </b><u>${ (i==(pump_status.length-1))?'Starting Point':pump_status[i+1]['officeName']}</u>

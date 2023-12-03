@@ -21,15 +21,15 @@ const App = () => {
       </div>} />
       <Route path="/driver" element={<DriverDashboard/>} />
      
-        <Route path="/driverassignment" element={<Suspense fallback={<div></div>}><DriverAvailable /></Suspense>} />
+        <Route path="/driverassignment" element={<Suspense fallback={<div className='w-100 text-center'><div className="spinner-border text-primary my-3 " role="status" ></div></div>}><DriverAvailable /></Suspense>} />
 
-        <Route path="/driverstatistic" element={<Suspense fallback={<div></div>}><DriverDashboardWeb2 /></Suspense>} />
+        <Route path="/driverstatistic" element={<Suspense fallback={<div className='w-100 text-center'><div className="spinner-border text-primary my-3 " role="status" ></div></div>}><DriverDashboardWeb2 /></Suspense>} />
      
       {/* driver dashboard with driverId route */}
      
-        <Route path="/driverdashboardweb/:driverId" element={<Suspense fallback={<div></div>}><DriverDashboardWeb /></Suspense>} />
+        <Route path="/driverdashboardweb/:driverId" element={<Suspense fallback={ <div className='w-100 text-center'><div className="spinner-border text-primary my-3 " role="status" ></div></div>}><DriverDashboardWeb /></Suspense>} />
 
-        <Route path="/deliveryPlanMap/:deliveryPlanId" element={<Suspense fallback={<div></div>}><div className='' style={{ height: "100vh" }}><MyMapComponent mapComponentData={mapComponentData} setMapComponentData={setMapComponentData}/></div></Suspense>} />
+        <Route path="/deliveryPlanMap/:deliveryPlanId" element={<Suspense fallback={<div className='w-100 text-center'><div className="spinner-border text-primary my-3 " role="status" ></div></div>}><div className='' style={{ height: "100vh" }}><MyMapComponent mapComponentData={mapComponentData} setMapComponentData={setMapComponentData}/></div></Suspense>} />
    
     </Routes>
  

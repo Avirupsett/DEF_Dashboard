@@ -51,7 +51,7 @@ export default function TankerLevelChart({ title, filllevel, emptylevel, fillTit
     
     useEffect(() => {
         const chartDom = ref.current;
-        const myChart = echarts.init(chartDom, null, { renderer: 'svg',width:window.innerWidth>1050?"200px":"150px",height:window.innerWidth>1050?"200px":"150px" });
+        const myChart = echarts.init(chartDom, null, { renderer: 'svg',width:window.innerWidth>1050?"200px":window.innerWidth>500?"150px":"125px",height:window.innerWidth>1050?"200px":window.innerWidth>500?"150px":"125px" });
 
         const option = {
             // color: ['var(--driver-primary)', 'var(--driver-secondary)'],
@@ -77,7 +77,8 @@ export default function TankerLevelChart({ title, filllevel, emptylevel, fillTit
                     name: 'Radius Mode',
                     // silent: true,
                     type: 'pie',
-                    radius: window.innerWidth>1050?[60, 80]:[50,65],
+                    radius: window.innerWidth>1050?[60, 80]:window.innerWidth>500?[50,65]:[45, 58],
+                    center: ['50%', '50%'],
                     // color: ['#4b8587','#EAECF1'],
                     itemStyle: {
                         borderRadius: 5,
@@ -117,10 +118,10 @@ export default function TankerLevelChart({ title, filllevel, emptylevel, fillTit
     }, [filllevel, emptylevel]);
 
     return (
-        <div className='text-center' style={{width:window.innerWidth>1050?"200px":"150px"}}>
-            <div ref={ref} style={{ minWidth: '100%', height: window.innerWidth>1050?"200px":"150px",width: '0px !important' }}>
+        <div className='text-center' style={{width:window.innerWidth>1050?"200px":window.innerWidth>500?"150px":"125px"}}>
+            <div ref={ref} style={{ minWidth: '100%', height: window.innerWidth>1050?"200px":window.innerWidth>500?"150px":"125px",width: '0px !important' }}>
             </div>
-            <div className='text-dark fw-semibold fs-6' style={{  marginTop: "5px" }}>
+            <div className=' fw-semibold fs-6' style={{  marginTop: "5px",color:"#626d77" }}>
                 {t(title)}
             </div>
         </div>)

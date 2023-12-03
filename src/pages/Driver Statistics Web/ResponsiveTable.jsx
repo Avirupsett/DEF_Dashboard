@@ -23,7 +23,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
       {
         Header: 'Driver Name',
         accessor: 'driverName',
-        Cell: ({ cell, row }) => <div className='' style={{}}>{cell.value}</div>,
+        Cell: ({ cell, row }) => <div className='' style={{textWrap:'nowrap'}}>{cell.value}</div>,
       },
       {
         Header: 'Contact No',
@@ -84,7 +84,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
 
   const handleStatsButtonClick = (driverId, assigned, deliveryId) => {
     if (assigned && deliveryId === deliveryPlanId) {
-      navigate('/driverdashboardweb/' + driverId, { state: { isback: false, statusId: deliveryPlanStatusId,token:token } });
+      navigate('/driverdashboardweb/' + driverId, { state: { isback: true, statusId: deliveryPlanStatusId,token:token } });
     }
     else {
       navigate('/driverdashboardweb/' + driverId, { state: { isback: true, statusId: deliveryPlanStatusId,token:token } });
@@ -96,7 +96,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
     await axios.post(`${import.meta.env.VITE_API_URL_2}/api/DeliveryPlan/AssignDriver`, { deliveryPlanId: deliveryPlanId, driverId: driverId, updatedBy: updatedBy }).then((response) => {
 
       toast.update(id, { render: "Assigned Successfully", type: "success", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
-      navigate('/driverdashboardweb/' + driverId, { state: { isback: false, statusId: 3 } });
+      navigate('/driverdashboardweb/' + driverId, { state: { isback: true, statusId: 3 } });
     }).catch((error) => {
       toast.update(id, { render: "Assigned Failed !", type: "error", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
     })
@@ -136,7 +136,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
     {
       columns,
       data,
-      initialState: { pageIndex: 0, pageSize: 10 }, // Initial page index and page size
+      initialState: { pageIndex: 0, pageSize: 5 }, // Initial page index and page size
     },
     useFilters, // Adding the useFilters Hook to the table
     useGlobalFilter,
@@ -214,9 +214,9 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
         <table {...getTableProps()} style={{ width: '100%' }}>
           <thead className=''>
             {headerGroups.map((headerGroup) => (
-              <tr style={{ backgroundColor: '#3B82F6' }} {...headerGroup.getHeaderGroupProps()}>
+              <tr style={{ backgroundColor: '#239dab',textWrap:"nowrap",fontSize:windowWidth>500?"22px":"14px" }} {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th className="fs-5 text-white px-2 py-2" {...column.getHeaderProps(column.getSortByToggleProps())}>
+                  <th className="text-white px-2 py-2" style={{textWrap:"nowrap",fontSize:windowWidth>500?"22px":"14px"}} {...column.getHeaderProps(column.getSortByToggleProps())}>
                     {column.render('Header')}
                     <span>{column.isSorted ? (column.isSortedDesc ? ' ↑' : ' ↓') : ''}</span>
                   </th>
@@ -243,8 +243,8 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
           </div>
         )}
       </div>
-      <div className='d-flex justify-content-center align-items-center flex-column'>
-        <span className='py-2 fs-6'>
+      <div className={windowWidth>500?`mt-1 d-flex justify-content-between align-items-center flex-row`:`mt-1 d-flex justify-content-center align-items-center flex-column`}>
+        <span className='py-2 fs-6 mx-2 ms-3'>
           Page{' '}
           <strong>
             {pageIndex + 1} of {pageOptions.length}
@@ -278,17 +278,17 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
         </select>
         </div> */}
         </div>
-        <div className='d-flex justify-content-center fs-5'>
-          <button className='mx-1 px-2 py-1 text-white rounded-3' style={{ backgroundColor: !canPreviousPage ? "#60A5FA" : "#3B82F6" }} onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
+        <div className='py-2 d-flex justify-content-center fs-5 mx-2 me-3'>
+          <button className='mx-1 px-2 py-1 text-white rounded-3' style={{ backgroundColor: !canPreviousPage ? "rgb(193 201 211)" : "#239dab" }} onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
             {'<<'}
           </button>{' '}
-          <button className='mx-1 px-2 py-1 pe-3 text-white rounded-3' style={{ backgroundColor: !canPreviousPage ? "#60A5FA" : "#3B82F6" }} onClick={() => previousPage()} disabled={!canPreviousPage}>
+          <button className='mx-1 px-2 py-1 pe-3 text-white rounded-3' style={{ backgroundColor: !canPreviousPage ? "rgb(193 201 211)" : "#239dab" }} onClick={() => previousPage()} disabled={!canPreviousPage}>
             {'<'} Prev
           </button>{' '}
-          <button className='mx-1 px-2 py-1 ps-3 text-white rounded-3' style={{ backgroundColor: !canNextPage ? "#60A5FA" : "#3B82F6" }} onClick={() => nextPage()} disabled={!canNextPage}>
+          <button className='mx-1 px-2 py-1 ps-3 text-white rounded-3' style={{ backgroundColor: !canNextPage ? "rgb(193 201 211)" : "#239dab" }} onClick={() => nextPage()} disabled={!canNextPage}>
             Next {'>'}
           </button>{' '}
-          <button className='mx-1 px-2 py-1 text-white rounded-3' style={{ backgroundColor: !canNextPage ? "#60A5FA" : "#3B82F6" }} onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+          <button className='mx-1 px-2 py-1 text-white rounded-3' style={{ backgroundColor: !canNextPage ? "rgb(193 201 211)" : "#239dab" }} onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
             {'>>'}
           </button>{' '}
         </div>

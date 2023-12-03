@@ -22,7 +22,7 @@ function DriverCards(props) {
                         </div>
                     </div>
 
-                    <div className='fs-5 mt-2 fw-bold px-1 text-center' style={{ color: '#15283b' }}>{FormatNumber(props.drivingTime)} <span className='' style={{ fontSize: "14px" }}>hrs</span>
+                    <div className='fs-5 mt-2 fw-bold px-1 text-center' style={{ color: '#626d77' }}>{FormatNumber(props.drivingTime)} <span className='' style={{ fontSize: "14px" }}>hrs</span>
                     </div>
                     <div className='text-center' style={{ color: '#918f97', fontSize: '14px' }}>
                         {t("Driving Time")}
@@ -40,7 +40,7 @@ function DriverCards(props) {
                         </div>
                     </div>
 
-                    <div className='fs-5 mt-2 fw-bold px-1 text-center' style={{ color: '#15283b' }}>{FormatNumber(props.distanceCovered)} <span className='' style={{ fontSize: "14px" }}>km</span>
+                    <div className='fs-5 mt-2 fw-bold px-1 text-center' style={{ color: '#626d77' }}>{FormatNumber(props.distanceCovered)} <span className='' style={{ fontSize: "14px" }}>km</span>
                     </div>
                     <div className='text-center' style={{ color: '#918f97', fontSize: '14px' }}>
                         {t("Distance")}
@@ -59,7 +59,7 @@ function DriverCards(props) {
                         </div>
                     </div>
 
-                    <div className='fs-5 mt-2 fw-bold px-1 text-center' style={{ color: '#15283b' }}>{FormatNumber(props.idleTime)} <span className='' style={{ fontSize: "14px" }}>hrs</span>
+                    <div className='fs-5 mt-2 fw-bold px-1 text-center' style={{ color: '#626d77' }}>{FormatNumber(props.idleTime)} <span className='' style={{ fontSize: "14px" }}>hrs</span>
                     </div>
                     <div className='text-center' style={{ color: '#918f97', fontSize: '14px' }}>
                         {t("Idle Time")}
@@ -77,7 +77,7 @@ function DriverCards(props) {
                         </div>
                     </div>
 
-                    <div className='fs-5 mt-2 fw-bold px-1 text-center' style={{ color: '#15283b' }}>{FormatNumber(props.averageSpeed)} <span className='' style={{ fontSize: "14px" }}>km/hr</span>
+                    <div className='fs-5 mt-2 fw-bold px-1 text-center' style={{ color: '#626d77' }}>{FormatNumber(props.averageSpeed)} <span className='' style={{ fontSize: "14px" }}>km/hr</span>
                     </div>
                     <div className='text-center' style={{ color: '#918f97', fontSize: '14px' }}>
                         {t("Avg. Speed")}

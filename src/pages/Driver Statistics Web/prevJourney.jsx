@@ -57,14 +57,14 @@ export default function PrevJourney({ prevJourney }) {
             <div className="accordion-item rounded-3 d-flex align-items-start" style={{border:0}}>
               <h2 className="accordion-header" id="headingOne" ></h2>
               {/* Return the modified list here */}
-                <button onClick={() => setActiveButton(activeButton => [...activeButton.slice(0, index), !activeButton[index], ...activeButton.slice(index + 1)])} className={`accordion-button d-flex align-items-baseline ${activeButton[index] ? "collapsed" : ""} fs-4`} type="button" style={{ color: !activeButton[index] ? 'rgb(37, 99, 235)' : '#15283b' }} data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <button onClick={() => setActiveButton(activeButton => [...activeButton.slice(0, index), !activeButton[index], ...activeButton.slice(index + 1)])} className={`accordion-button d-flex align-items-baseline ${activeButton[index] ? "collapsed" : ""} fs-4`} type="button" style={{ color: !activeButton[index] ? 'rgb(37, 99, 235)' : '#626d77' }} data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                   <div
                     key={index}
                     className='d-flex flex-column'
                     style={{ width: "inherit" }}
                   >
                     <div className='d-flex justify-content-between align-items-start flex-column mb-2'>
-                      <div className='fs-5 mb-1'
+                      <div className=' mb-2'
                         style={{
                           
                           display: 'flex',
@@ -72,13 +72,14 @@ export default function PrevJourney({ prevJourney }) {
                           fontWeight: 'bold',
                           lineBreak: 'anywhere',
                           letterSpacing: ".8px",
-                          lineHeight: 1.5
+                          lineHeight: 1.5,
+                          fontSize: window.innerWidth>500?"20px":"16px"
                         }}
                       >
-                        <div className='fs-6'
+                        <div className=''
                           style={{
-                            minWidth: '40px',
-                            minHeight: '40px',
+                            minWidth: window.innerWidth>500?'40px':'35px',
+                            minHeight: window.innerWidth>500?'40px':'35px',
                             borderRadius: '50%',
                             border: '2px solid rgb(37, 99, 235)',
                             color: 'rgb(37, 99, 235)',
@@ -87,7 +88,8 @@ export default function PrevJourney({ prevJourney }) {
                             alignItems: 'center',
                             fontWeight: 'bold',
                             marginRight: '8px',
-                            lineHeight: ".8px"
+                            lineHeight: ".8px",
+                            fontSize: window.innerWidth>500?"20px":"16px"
 
                           }}
                         >
@@ -95,31 +97,31 @@ export default function PrevJourney({ prevJourney }) {
                         </div>
                         {planTitle}
                       </div>
-                      <div className="" style={{ marginLeft: '40px', fontSize: "14px", color: '#918f97', lineHeight: .7, fontWeight: 100 }}>
+                      <div className="" style={{ marginLeft: window.innerWidth>500?'40px':'0px', fontSize: "14px", color: '#626d77', lineHeight: .7, fontWeight: 100 }}>
                         {/* Display the formatted start time */}
                         <FaRegClock className=' p-1 rounded-3' style={{ fontSize: "22px", color: 'rgb(22 101 52)', backgroundColor: 'rgb(22 101 52 / 11%)' }} /> {getFormattedStartTime(startTime)}
                       </div>
                     </div>
-                    <div style={{ marginBottom: '12px', marginLeft: '40px', fontSize: "14px", letterSpacing: ".5px", color: '#15283b', lineHeight: 1.75, fontWeight: 200 }}>
+                    <div style={{ marginBottom: '12px', marginLeft: window.innerWidth>500?'40px':'0px', fontSize: window.innerWidth>500?"14px":"12px", letterSpacing: ".5px", color: '#626d77', lineHeight: 1.75, fontWeight: 200 }}>
                       {journeyList.map((stop, journeyIndex) => (
-                        <span key={journeyIndex}>
+                        <span style={{color: '#626d77'}} key={journeyIndex}>
                           {journeyIndex > 0 ? ' -> ' : ''}
                           {stop}
                         </span>
                       ))}
                     </div>
-                    <div style={{ marginLeft: '40px', color: '#15283b' }} className='d-flex justify-content-between'>
+                    <div style={{ marginLeft: window.innerWidth>500?'40px':'0px', color: '#626d77' }} className='d-flex justify-content-between'>
                       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: .8,alignItems:"center" }}>
                         <span className='d-flex align-items-center fw-bold' style={{ letterSpacing: ".25px", fontSize: '16px' }}><MdOutlineLocationOn className='me-1 p-1 rounded-3' style={{ fontSize: "22px", color: '#DC2626', backgroundColor: '#FECACA' }} /> {window.innerWidth<500?"":t("Distance")}</span>
-                        <span className="text-center" style={{ fontSize: '18px', color: '#DC2626', fontWeight: 'bold', lineHeight: 2 }}>{details.distance}</span>
+                        <span className="text-center" style={{ fontSize: window.innerWidth>500?"18px":"15px", color: '#DC2626', fontWeight: 'bold', lineHeight: 2 }}>{details.distance}</span>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: .8,alignItems:"center" }}>
                         <span className='d-flex align-items-center fw-bold' style={{ letterSpacing: ".25px", fontSize: '16px' }}><MdOutlinePropaneTank className='me-1 p-1 rounded-3' style={{ fontSize: "22px", color: '#2563EB', backgroundColor: '#DBEAFE' }} /> {window.innerWidth<500?"":t("Tank Level")}</span>
-                        <span className="text-center" style={{ fontSize: '18px', color: '#2563EB', fontWeight: 'bold', lineHeight: 2 }}>{details.tankLevel}</span>
+                        <span className="text-center" style={{ fontSize: window.innerWidth>500?"18px":"15px", color: '#2563EB', fontWeight: 'bold', lineHeight: 2 }}>{details.tankLevel}</span>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: .8,alignItems:"center" }}>
                         <span className='d-flex align-items-center fw-bold' style={{ letterSpacing: ".25px", fontSize: '16px' }}><FaRegClock className='me-1 p-1 rounded-3' style={{ fontSize: "22px", color: 'rgb(22 101 52)', backgroundColor: 'rgb(22 101 52 / 11%)' }} /> {window.innerWidth<500?"":t("Duration")}</span>
-                        <span className="text-center" style={{ fontSize: '18px', color: 'green', fontWeight: 'bold', lineHeight: 2 }}>{details.duration}</span>
+                        <span className="text-center" style={{ fontSize: window.innerWidth>500?"18px":"15px", color: 'green', fontWeight: 'bold', lineHeight: 2 }}>{details.duration}</span>
                       </div>
                     </div>
                   </div>
@@ -129,7 +131,7 @@ export default function PrevJourney({ prevJourney }) {
             </div>
 
             <div id="collapseOne" className={`accordion-collapse collapse ${!activeButton[index] ? "show" : ""}`} aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-              <div className="accordion-body p-0 py-2">
+              <div className="accordion-body p-0 py-2" style={{borderLeft:"8px solid #cfe2ff"}}>
                 <div className=''>
                   <CurrentTrip currentTrip={prevJourney[index]?.tripMap} />
 

@@ -116,9 +116,9 @@ function DriverDashboardWeb2() {
 
 
     return (
-        <div className='d-flex align-items-start justify-content-between'>
+        <div className='d-flex align-items-start justify-content-between' style={{ height: '100vh' }}>
             <div className=' mx-0 align-items-start ' style={{ width: windowWidth > 950 ? '60%' : "100%", overflowY: 'scroll', height: '99vh' }}>
-                <div className='fs-4 mt-3 fw-bolder px-xl-5 px-lg-4 px-md-3 px-2' style={{ color: '#15283b' }}>
+                <div className='fs-4 mt-3 fw-bolder px-xl-5 px-lg-4 px-md-3 px-2' style={{ color: '#626d77' }}>
                     <div className='d-flex align-items-center justify-content-between'>
                         <div className='d-flex align-items-center'>
                             {data.profile.driverName}
@@ -134,6 +134,10 @@ function DriverDashboardWeb2() {
                     </div>
 
                     <hr style={{ borderColor: 'rgb(37, 99, 235)', borderWidth: '2px', marginBottom: '5px', marginTop: '10px' }} />
+                <div className={`fs-3 fw-bold px-1 mb-1 mt-2 ${windowWidth > 950 ? 'ms-0' : 'ms-1'}`} style={{ color: '#626d77' }}>
+                    <BsSpeedometer2 className='fs-2' style={{ marginLeft: "2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
+                    {t("Overall Metrics")}
+                </div>
                 </div>
                 <DriverCards distanceCovered={data.alltime.distanceCovered} drivingTime={data.alltime.drivingTime} idleTime={data.alltime.idleTime} averageSpeed={data.alltime.averageSpeed} />
                 <div style={{ display: windowWidth <= 950 ? 'block' : "none" }}>
@@ -146,7 +150,7 @@ function DriverDashboardWeb2() {
                                 </TabList>
                             </Box>
                             <TabPanel value="1" className="px-0">
-                                <div className='fs-3 fw-bold px-2 mb-1' style={{ color: '#15283b' }}>
+                                <div className='fs-3 fw-bold px-2 mb-2 ms-1' style={{ color: '#626d77' }}>
                                     <IoMdStats className='fs-2' style={{ marginBottom: "4px", verticalAlign: "bottom", marginRight: "8px", color: 'rgb(37, 99, 235)' }} />
                                     {t("Stats For Ongoing Trip")}
                                 </div>
@@ -154,7 +158,7 @@ function DriverDashboardWeb2() {
                                     <TankerLevelChart title={"Tanker Fuel Level"} filllevel={data.graph1.totalTankFuel - data.graph1.fuelUnloaded} emptylevel={data.graph1.fuelUnloaded} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
                                     <TankerLevelChart title={"Jobs Completed"} emptylevel={data.graph2.totalJob - data.graph2.jobCompleted} filllevel={data.graph2.jobCompleted} fillTitle="Job Done" emptyTitle="Job Left" />
                                 </div>
-                                <div className='fs-3 fw-bold px-2 mb-1 mt-3' style={{ color: '#15283b' }}>
+                                <div className='fs-3 fw-bold px-2 mb-1 mt-4 ms-1' style={{ color: '#626d77' }}>
 
                                     <BsSpeedometer2 className='fs-2' style={{marginLeft:"2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
                                     {t("Current Metrics")}
@@ -172,7 +176,7 @@ function DriverDashboardWeb2() {
                 <div className="accordion px-xl-5 px-lg-4 px-md-3 px-2 mt-3">
                     <div className="accordion-item ">
                         <h2 className="accordion-header" id="headingOne" >
-                            <button onClick={() => setActiveOngoing(!activeOngoing)} className={`accordion-button ${activeOngoing ? "collapsed" : ""} fs-4`} type="button" style={{ color: !activeOngoing ? 'rgb(37, 99, 235)' : '#15283b' }} data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            <button onClick={() => setActiveOngoing(!activeOngoing)} className={`accordion-button ${activeOngoing ? "collapsed" : ""} fs-4`} type="button" style={{ color: !activeOngoing ? 'rgb(37, 99, 235)' : '#626d77' }} data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                                 {t("Ongoing Trip")}
                             </button>
                         </h2>
@@ -189,7 +193,7 @@ function DriverDashboardWeb2() {
                 <div className="accordion px-xl-5 px-lg-4 px-md-3 px-2 mt-3 mb-3">
                     <div className="accordion-item ">
                         <h2 className="accordion-header" id="headingOne" >
-                            <button onClick={() => setActivePrevious(!activePrevious)} className={`accordion-button ${activePrevious ? "collapsed" : ""} fs-4`} type="button" style={{ color: !activePrevious ? 'rgb(37, 99, 235)' : '#15283b' }} data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            <button onClick={() => setActivePrevious(!activePrevious)} className={`accordion-button ${activePrevious ? "collapsed" : ""} fs-4`} type="button" style={{ color: !activePrevious ? 'rgb(37, 99, 235)' : '#626d77' }} data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                                 {t("Previous Trip")}
                             </button>
                         </h2>
@@ -220,7 +224,7 @@ function DriverDashboardWeb2() {
                                 </TabList>
                             </Box>
                             <TabPanel value="1" className="px-0">
-                                <div className='fs-3 fw-bold px-2 mb-1' style={{ color: '#15283b' }}>
+                                <div className='fs-3 fw-bold px-2 mb-1' style={{ color: '#626d77' }}>
                                     <IoMdStats className='fs-2' style={{ marginBottom: "4px", verticalAlign: "bottom", marginRight: "8px", color: 'rgb(37, 99, 235)' }} />
                                     {t("Stats For Ongoing Trip")}
                                 </div>
@@ -228,7 +232,7 @@ function DriverDashboardWeb2() {
                                     <TankerLevelChart title={"Tanker Fuel Level"} filllevel={data.graph1.totalTankFuel - data.graph1.fuelUnloaded} emptylevel={data.graph1.fuelUnloaded} fillTitle="Fuel Left" emptyTitle="Fuel Unloaded" />
                                     <TankerLevelChart title={"Jobs Completed"} emptylevel={data.graph2.totalJob - data.graph2.jobCompleted} filllevel={data.graph2.jobCompleted} fillTitle="Job Done" emptyTitle="Job Left" />
                                 </div>
-                                <div className='fs-3 fw-bold px-2 mb-1 mt-3' style={{ color: '#15283b' }}>
+                                <div className='fs-3 fw-bold px-2 mb-1 mt-3' style={{ color: '#626d77' }}>
 
                                     <BsSpeedometer2 className='fs-2' style={{marginLeft:"2px", marginBottom: "4px", display: "inline-block", verticalAlign: "bottom", marginRight: "10px", color: "rgb(37, 99, 235)" }} />
                                     {t("Current Metrics")}
