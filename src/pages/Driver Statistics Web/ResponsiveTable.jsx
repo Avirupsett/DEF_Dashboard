@@ -9,7 +9,7 @@ import axios from 'axios';
 import { Box, FormControl, InputLabel, MenuItem, Select, ThemeProvider, createTheme } from '@mui/material';
 import { t } from 'i18next';
 
-const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanStatusId }) => {
+const ResponsiveTable = ({ data,setData, deliveryPlanId, updatedBy,token,deliveryPlanStatusId }) => {
   const [filterStatus, setFilterStatus] = useState("all")
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const columns = useMemo(
@@ -93,12 +93,29 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
 
   const handleAssignButtonClick = async (driverId) => {
     const id = toast.loading("Assigning...")
-    await axios.post(`${import.meta.env.VITE_API_URL_2}/api/DeliveryPlan/AssignDriver`, { deliveryPlanId: deliveryPlanId, driverId: driverId, updatedBy: updatedBy }).then((response) => {
+  
+    
+    await axios.post(`${import.meta.env.VITE_API_URL_2}/api/DeliveryPlan/AssignDriver`, { deliveryPlanId: deliveryPlanId, driverId: driverId, updatedBy: updatedBy }).then(async (response) => {
+      let modifieddataDelivery=await data.map((item)=>{
+  
 
-      toast.update(id, { render: "Assigned Successfully", type: "success", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
-      navigate('/driverdashboardweb/' + driverId, { state: { isback: true, statusId: 3 } });
+        if(item.deliveryPlanId==deliveryPlanId){
+          return {...item,assigned:false,deliveryPlanId:null}
+        }
+        return item
+      })
+      let modifieddata=await modifieddataDelivery.map((item)=>{
+        if(item.driverId===driverId){
+          return {...item,assigned:true,deliveryPlanId:deliveryPlanId}
+        }
+        return item
+      })
+      setData(modifieddata)
+
+      toast.update(id, { render: "Assigned Successfully", type: "success", isLoading: false, autoClose: 3500, closeOnClick: true, pauseOnFocusLoss: false });
+      
     }).catch((error) => {
-      toast.update(id, { render: "Assigned Failed !", type: "error", isLoading: false, autoClose: 5000, closeOnClick: true, pauseOnFocusLoss: false });
+      toast.update(id, { render: "Assigned Failed !", type: "error", isLoading: false, autoClose: 4000, closeOnClick: true, pauseOnFocusLoss: false });
     })
 
   };

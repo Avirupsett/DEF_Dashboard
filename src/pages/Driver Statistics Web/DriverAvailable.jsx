@@ -31,12 +31,6 @@ function DriverAvailable() {
         return decodedString;
     }
 
-    const [items, setItems] = useState([]);
-
-    useEffect(() => {
-       console.log(localStorage.getItem("webtoken")) ;
-       
-    }, []);
 
 
 
@@ -93,7 +87,7 @@ function DriverAvailable() {
                     />
                     {redirect && (tableview === "false" || tableview === null) ?
                         navigate(`/driverdashboardweb/${driverId}`, { state: { isback: false, statusId: deliveryPlanStatus[0]['DeliveryPlanStatusId'], token: urlParams.get("token") } })
-                        : <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} updatedBy={updatedBy} token={urlParams.get("token")} deliveryPlanStatusId={deliveryPlanStatus[0]['DeliveryPlanStatusId']} />
+                        : <ResponsiveTable data={driverAvailable_data} setData={setDriverAvailable_data} deliveryPlanId={deliveryPlanId} updatedBy={updatedBy} token={urlParams.get("token")} deliveryPlanStatusId={deliveryPlanStatus[0]['DeliveryPlanStatusId']} />
                     }
                     {/* <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} /> */}
                 </>
