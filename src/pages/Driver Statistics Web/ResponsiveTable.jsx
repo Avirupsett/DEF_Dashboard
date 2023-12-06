@@ -60,7 +60,7 @@ const ResponsiveTable = ({ data, deliveryPlanId, updatedBy,token,deliveryPlanSta
         id: "action",
         Cell: ({ cell, row }) => (
 
-          !cell.value && deliveryPlanStatusId===3 ? (
+          (!cell.value && deliveryPlanStatusId===3) ? (
 
 
             <button

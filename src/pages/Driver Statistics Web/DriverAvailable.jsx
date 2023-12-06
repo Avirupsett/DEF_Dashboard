@@ -31,6 +31,13 @@ function DriverAvailable() {
         return decodedString;
     }
 
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+       console.log(localStorage.getItem("webtoken")) ;
+       
+    }, []);
+
 
 
     const fetchData = async () => {
@@ -54,9 +61,10 @@ function DriverAvailable() {
                     let response = await axios.get(`${import.meta.env.VITE_API_URL_1}/api/v1/driver_available/${deliveryPlanId}`)
                     const { data } = response;
 
-                    
+
                     setDriverAvailable_data(data["driverAvailable"])
                     setDeliveryPlanStatus(data["deliveryPlanStatus"])
+
                     setIsLoading(false)
                 }
             }
@@ -69,7 +77,7 @@ function DriverAvailable() {
     }
 
     useEffect(() => {
-       
+
         fetchData();
     }, [])
 
@@ -77,18 +85,19 @@ function DriverAvailable() {
 
 
     return (
-        <><ToastContainer
-        position="top-center"
-        />
-        {isLoading ? <div className='my-3 d-flex justify-content-center align-items-center'><div className="spinner-border text-primary " role="status" style={{}} /></div> :
-            <>
-                {redirect && (tableview === "false" || tableview === null) ?
-                    navigate(`/driverdashboardweb/${driverId}`, { state: { isback: false, statusId: deliveryPlanStatus['DeliveryPlanStatusId'],token:urlParams.get("token") } })
-                    : <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} updatedBy={updatedBy} token={urlParams.get("token")} deliveryPlanStatusId={deliveryPlanStatus['DeliveryPlanStatusId']}/>
-                }
-                {/* <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} /> */}
-            </>
-        }
+        <>
+            {isLoading ? <div className='my-3 d-flex justify-content-center align-items-center'><div className="spinner-border text-primary " role="status" style={{}} /></div> :
+                <>
+                    <ToastContainer
+                        position="top-center"
+                    />
+                    {redirect && (tableview === "false" || tableview === null) ?
+                        navigate(`/driverdashboardweb/${driverId}`, { state: { isback: false, statusId: deliveryPlanStatus[0]['DeliveryPlanStatusId'], token: urlParams.get("token") } })
+                        : <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} updatedBy={updatedBy} token={urlParams.get("token")} deliveryPlanStatusId={deliveryPlanStatus[0]['DeliveryPlanStatusId']} />
+                    }
+                    {/* <ResponsiveTable data={driverAvailable_data} deliveryPlanId={deliveryPlanId} /> */}
+                </>
+            }
         </>
     )
 }
